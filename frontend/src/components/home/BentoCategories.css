@@ -1,9 +1,16 @@
-.bento-card {
-  min-height: 200px;
+/* Main bento card (Consolas) */
+.bento-card-main {
+  min-height: 260px;
+}
+
+/* Smaller bento cards (Juegos, Accesorios) */
+.bento-card-sm {
+  min-height: 140px;
 }
 
 @media (min-width: 768px) {
-  .bento-card {
+  .bento-card-main,
+  .bento-card-sm {
     min-height: unset;
   }
 }

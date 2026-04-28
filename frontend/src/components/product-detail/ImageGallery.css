@@ -1,18 +1,18 @@
-/* Main gallery container */
+/* Main gallery container — square for product photos */
 .gallery-main {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 1;
   background-color: #07080d;
+  min-height: 360px;
 }
 
 /* Radial gradient bg behind the product */
 .gallery-bg {
-  background: radial-gradient(ellipse 70% 60% at 50% 55%, rgba(60, 0, 130, 0.35) 0%, rgba(0, 30, 60, 0.2) 50%, transparent 100%);
+  background: radial-gradient(ellipse 80% 70% at 50% 55%, rgba(60, 0, 130, 0.4) 0%, rgba(0, 30, 60, 0.25) 50%, transparent 100%);
 }
 
-/* Product image inside gallery */
+/* Product image — fills the container, larger than before */
 .gallery-img {
-  max-height: 420px;
-  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.8));
+  filter: drop-shadow(0 24px 48px rgba(0, 0, 0, 0.85));
 }
 
 /* Pre-owned badge */

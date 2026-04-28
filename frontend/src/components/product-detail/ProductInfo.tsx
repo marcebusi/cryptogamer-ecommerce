@@ -8,39 +8,27 @@ interface ProductInfoProps {
   product: Product
 }
 
-const conditionLabels: Record<ProductCondition, string> = {
-  'new': 'Nuevo',
-  'like-new': 'Como Nuevo',
-  'excellent': 'Excelente',
-  'good': 'Bueno',
-  'fair': 'Aceptable',
-}
-
-const conditionColors: Record<ProductCondition, { bar: string; text: string; glow: string }> = {
-  'new':       { bar: 'bg-primary-container',  text: 'text-primary-container',  glow: 'shadow-[0_0_8px_rgba(57,255,20,0.5)]' },
-  'like-new':  { bar: 'bg-tertiary-container', text: 'text-tertiary-container', glow: 'shadow-[0_0_8px_rgba(58,244,255,0.5)]' },
-  'excellent': { bar: 'bg-tertiary-container', text: 'text-tertiary-container', glow: 'shadow-[0_0_8px_rgba(58,244,255,0.5)]' },
-  'good':      { bar: 'bg-yellow-400',         text: 'text-yellow-400',         glow: 'shadow-[0_0_8px_rgba(250,204,21,0.5)]' },
-  'fair':      { bar: 'bg-secondary-container',text: 'text-secondary-container',glow: 'shadow-[0_0_8px_rgba(255,74,141,0.5)]' },
+const conditionMeta: Record<ProductCondition, { label: string; bar: string; text: string; glow: string; icon: string }> = {
+  'new':       { label: 'Nuevo',      bar: 'bg-primary-container',   text: 'text-primary-container',  glow: 'shadow-[0_0_8px_rgba(57,255,20,0.5)]',  icon: 'new_releases' },
+  'like-new':  { label: 'Como Nuevo', bar: 'bg-tertiary-container',  text: 'text-tertiary-container', glow: 'shadow-[0_0_8px_rgba(58,244,255,0.5)]', icon: 'grade' },
+  'excellent': { label: 'Excelente',  bar: 'bg-tertiary-container',  text: 'text-tertiary-container', glow: 'shadow-[0_0_8px_rgba(58,244,255,0.5)]', icon: 'verified' },
+  'good':      { label: 'Bueno',      bar: 'bg-yellow-400',          text: 'text-yellow-400',         glow: 'shadow-[0_0_8px_rgba(250,204,21,0.5)]', icon: 'thumb_up' },
+  'fair':      { label: 'Aceptable',  bar: 'bg-secondary-container', text: 'text-secondary-container',glow: 'shadow-[0_0_8px_rgba(255,74,141,0.5)]', icon: 'info' },
 }
 
 export default function ProductInfo({ product }: ProductInfoProps) {
   const { addToCart, openCart } = useCart()
 
-  const cond = product.condition
-  const condColors = cond ? conditionColors[cond] : null
-  const condLabel  = cond ? conditionLabels[cond] : null
-  const score      = product.conditionScore ?? 100
+  const cond  = product.condition
+  const meta  = cond ? conditionMeta[cond] : null
+  const score = product.conditionScore ?? 100
 
-  const handleAddToCart = () => {
-    addToCart(product)
-    openCart()
-  }
+  const handleAddToCart = () => { addToCart(product); openCart() }
 
   return (
     <div className="lg:col-span-5 flex flex-col gap-md">
 
-      {/* Badge + title */}
+      {/* ── Badge + title ───────────────────── */}
       <div>
         {cond && cond !== 'new' && (
           <span className="inline-block mb-sm px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest bg-purple-600/20 text-purple-300 border border-purple-500/30">
@@ -48,89 +36,95 @@ export default function ProductInfo({ product }: ProductInfoProps) {
           </span>
         )}
 
-        <h1 className="text-h1-display font-h1-display text-on-background leading-tight">
-          {product.name.split(' ').slice(0, -1).join(' ')}
-          <br />
-          <span className="text-purple-400 italic">
+        <h1 className="text-3xl md:text-4xl font-black text-on-background leading-tight font-['Plus_Jakarta_Sans']">
+          {product.name.split(' ').slice(0, -1).join(' ')}{' '}
+          <span className="text-purple-400 italic block md:inline">
             {product.name.split(' ').slice(-1)[0]}
           </span>
         </h1>
 
-        {/* Rating */}
-        <div className="flex items-center gap-xs mt-sm">
+        <div className="flex items-center gap-xs mt-sm flex-wrap">
           <StarRating rating={product.rating} />
           {product.reviewCount && (
-            <span className="text-sm text-on-surface-variant">
-              ({product.reviewCount} Reviews)
-            </span>
+            <span className="text-sm text-on-surface-variant">({product.reviewCount} Reseñas)</span>
           )}
         </div>
       </div>
 
-      {/* Price block */}
+      {/* ── Price ───────────────────────────── */}
       <div className="flex items-center gap-sm flex-wrap">
         <span className="text-4xl font-black text-primary-container drop-shadow-[0_0_8px_rgba(57,255,20,0.5)]">
           ${product.price.toFixed(2)}
         </span>
         {product.originalPrice && (
           <>
-            <span className="text-on-surface-variant line-through text-lg">
-              ${product.originalPrice.toFixed(2)}
-            </span>
-            <span className="px-2 py-0.5 bg-tertiary-container text-on-tertiary-container text-xs font-bold rounded-full">
-              AHORRAR ${(product.originalPrice - product.price).toFixed(0)}
+            <span className="text-on-surface-variant line-through text-lg">${product.originalPrice.toFixed(2)}</span>
+            <span className="px-2 py-0.5 bg-secondary-container text-on-secondary text-xs font-bold rounded-full shadow-[0_0_10px_rgba(255,74,141,0.4)]">
+              AHORRÁS ${(product.originalPrice - product.price).toFixed(0)}
             </span>
           </>
         )}
       </div>
 
-      {/* Condition card — main feature */}
+      {/* ── Description ─────────────────────── */}
+      <p className="text-on-surface-variant text-sm leading-relaxed border-l-2 border-purple-500/30 pl-sm">
+        {product.description}
+      </p>
+
+      {/* ── Condition card ──────────────────── */}
       {cond && (
-        <div className="condition-card rounded-xl border border-white/10 p-md space-y-sm">
-          {/* Header row */}
-          <div className="flex items-center justify-between">
-            <h4 className="font-semibold text-on-surface text-sm">
-              Condición: <span className={condColors?.text}>{condLabel}</span>
-            </h4>
-          </div>
-
-          {/* Description */}
-          <p className="text-sm text-on-surface-variant leading-relaxed">
-            {product.conditionDescription ??
-              'Esta unidad ha sido inspeccionada y certificada por nuestros técnicos. Desgaste cosmético mínimo. Incluye todos los accesorios originales.'}
-          </p>
-
-          {/* Progress bar */}
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-xs text-on-surface-variant">Estado</span>
-              <span className={`text-xs font-bold ${condColors?.text}`}>{score}% Condición</span>
+        <div className="condition-card rounded-2xl border border-white/10 overflow-hidden">
+          {/* Header */}
+          <div className="flex items-center justify-between px-md py-sm bg-white/[0.03] border-b border-white/8">
+            <div className="flex items-center gap-xs">
+              <span className={`material-symbols-outlined text-lg ${meta?.text}`}>{meta?.icon}</span>
+              <span className={`font-bold text-sm font-['Plus_Jakarta_Sans'] ${meta?.text}`}>
+                {meta?.label} Condition
+              </span>
             </div>
-            <div className="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-700 ${condColors?.bar} ${condColors?.glow}`}
-                style={{ width: `${score}%` }}
-              />
+            <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full border text-xs font-bold ${meta?.text}`} style={{ borderColor: 'currentColor', opacity: 0.9 }}>
+              <span className="material-symbols-outlined text-xs">check_circle</span>
+              Verificado
             </div>
           </div>
 
-          {/* Tags */}
-          {product.conditionTags && product.conditionTags.length > 0 && (
-            <div className="flex gap-xs flex-wrap">
-              {product.conditionTags.map(tag => (
-                <span
-                  key={tag}
-                  className="px-sm py-1 bg-surface-container-high text-on-surface-variant text-xs rounded-full border border-white/10"
-                >
-                  {tag}
-                </span>
-              ))}
+          <div className="p-md space-y-sm">
+            <p className="text-sm text-on-surface-variant leading-relaxed">
+              {product.conditionDescription ??
+                'Esta unidad ha sido inspeccionada y certificada por nuestros técnicos. Desgaste cosmético mínimo. Incluye todos los accesorios originales.'}
+            </p>
+
+            <div>
+              <div className="flex justify-between items-center mb-1.5">
+                <span className="text-[11px] text-on-surface-variant uppercase tracking-widest font-semibold">Calidad de superficie</span>
+                <span className={`text-xs font-black ${meta?.text}`}>{score}% MINT</span>
+              </div>
+              <div className="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-700 ${meta?.bar} ${meta?.glow}`}
+                  style={{ width: `${score}%` }}
+                />
+              </div>
             </div>
-          )}
+
+            {product.conditionTags && product.conditionTags.length > 0 && (
+              <div className="flex gap-xs flex-wrap">
+                {product.conditionTags.map(tag => (
+                  <span
+                    key={tag}
+                    className="flex items-center gap-1 px-sm py-1 bg-surface-container-high text-on-surface-variant text-xs rounded-full border border-white/10"
+                  >
+                    <span className="material-symbols-outlined text-xs text-primary-container">check</span>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      {/* CTA buttons */}
+      {/* ── CTA buttons ─────────────────────── */}
       <div className="space-y-sm">
         <button
           onClick={handleAddToCart}
@@ -146,7 +140,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         </button>
       </div>
 
-      {/* Shipping guarantees */}
+      {/* ── Guarantees ──────────────────────── */}
       <div className="grid grid-cols-2 gap-sm">
         <div className="flex items-start gap-xs p-sm bg-surface-container rounded-xl border border-white/5">
           <span className="material-symbols-outlined text-tertiary-container text-2xl flex-shrink-0">local_shipping</span>
@@ -159,12 +153,12 @@ export default function ProductInfo({ product }: ProductInfoProps) {
           <span className="material-symbols-outlined text-tertiary-container text-2xl flex-shrink-0">workspace_premium</span>
           <div>
             <p className="text-xs font-bold text-on-surface">Garantía 90 días</p>
-            <p className="text-[11px] text-on-surface-variant">Protección total de la tienda</p>
+            <p className="text-[11px] text-on-surface-variant">Protección total</p>
           </div>
         </div>
       </div>
 
-      {/* Specs */}
+      {/* ── Specs ───────────────────────────── */}
       {product.specs && <SpecsGrid specs={product.specs} />}
     </div>
   )

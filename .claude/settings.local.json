@@ -4,7 +4,10 @@
       "Bash(python3 \"C:\\\\Users\\\\marce\\\\OneDrive\\\\Escritorio\\\\cryptogamer-ecommerce\\\\.claude\\\\skills\\\\ui-ux-pro-max\\\\scripts\\\\search.py\" \"gaming ecommerce cyberpunk dark neon\" --design-system -p \"Neon Night\")",
       "Bash(python \"C:\\\\Users\\\\marce\\\\OneDrive\\\\Escritorio\\\\cryptogamer-ecommerce\\\\.claude\\\\skills\\\\ui-ux-pro-max\\\\scripts\\\\search.py\" \"gaming ecommerce cyberpunk dark neon\" --design-system -p \"Neon Night\")",
       "Bash(npx tsc *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\marce\\\\OneDrive\\\\Escritorio\\\\cryptogamer-ecommerce\\\\frontend\\\\src\\\\components\\\\common\\\\ContactModal.tsx\" -Force)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\marce\\\\OneDrive\\\\Escritorio\\\\cryptogamer-ecommerce\\\\frontend\\\\src\\\\components\\\\common\\\\ContactModal.css\" -Force)",
+      "Bash(Write-Output \"Deleted\")"
     ]
   }
 }

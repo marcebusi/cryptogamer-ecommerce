@@ -12,15 +12,15 @@ const shopLinks = [
 
 const infoLinks = [
   { label: 'Sobre nosotros', to: '/' },
-  { label: 'Ofertas', to: '/products' },
+  { label: 'Ofertas', to: '/ofertas' },
   { label: 'Soporte', to: '/' },
   { label: 'Privacidad', to: '/' },
 ]
 
 export default function Footer() {
   return (
-    <footer id="footer" className="bg-slate-50 dark:bg-slate-950 w-full border-t border-purple-500/20">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-8 px-6 py-12 max-w-7xl mx-auto divide-y md:divide-y-0 divide-slate-200 dark:divide-slate-800">
+    <footer id="footer" className="bg-slate-950 w-full border-t border-purple-500/20">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 px-4 sm:px-6 py-10 md:py-12 max-w-7xl mx-auto divide-y md:divide-y-0 divide-slate-800">
 
         {/* Brand */}
         <div className="col-span-2 md:col-span-1 space-y-md border-none">
@@ -113,8 +113,8 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="px-6 py-6 border-t border-purple-500/10 text-center text-slate-500 dark:text-slate-400 text-xs font-['Plus_Jakarta_Sans']">
-        © 2024 Cryptogamer. Todos los derechos reservados.
+      <div className="px-4 sm:px-6 py-5 border-t border-purple-500/10 text-center text-slate-500 text-xs font-['Plus_Jakarta_Sans']">
+        © 2025 Cryptogamer. Todos los derechos reservados.
       </div>
     </footer>
   )
