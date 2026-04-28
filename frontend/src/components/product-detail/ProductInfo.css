@@ -1,0 +1,22 @@
+.condition-card {
+  background: rgba(26, 28, 32, 0.8);
+  backdrop-filter: blur(8px);
+  position: relative;
+  overflow: hidden;
+}
+
+.condition-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(58, 244, 255, 0.4) 40%,
+    rgba(138, 43, 226, 0.4) 70%,
+    transparent
+  );
+}

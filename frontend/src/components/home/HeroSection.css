@@ -1,0 +1,13 @@
+.hero-section {
+  background-color: #060709;
+}
+
+.hero-glass-card {
+  backdrop-filter: blur(20px);
+  background: rgba(18, 20, 29, 0.7);
+}
+
+/* Scanline on hero glass card */
+.hero-glass-card.scanline::after {
+  z-index: 2;
+}

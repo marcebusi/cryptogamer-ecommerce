@@ -1,0 +1,30 @@
+.navbar-header {
+  width: 100%;
+}
+
+.navbar-header .material-symbols-outlined {
+  font-size: 22px;
+}
+
+/* ── Mega dropdown panel ───────────────────────────── */
+.productos-dropdown {
+  background: rgba(10, 11, 16, 0.97);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  /* 3 columns: 185 + 185 + 160 = 530px */
+  width: 530px;
+}
+
+.productos-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 12px;
+  background: rgba(10, 11, 16, 0.97);
+  border-left: 1px solid rgba(138, 43, 226, 0.2);
+  border-top: 1px solid rgba(138, 43, 226, 0.2);
+  rotate: 45deg;
+}

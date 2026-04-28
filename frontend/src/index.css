@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Google Fonts ─────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,700;0,800;1,800&display=swap');
+
+/* ── Base ─────────────────────────────────────────── */
+body {
+  background-color: #060709;
+  color: #e2e2e8;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow-x: hidden;
+}
+
+/* ── Material Symbols ────────────────────────────── */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Neon Glow Effects ───────────────────────────── */
+.neon-glow-primary {
+  box-shadow: 0 0 20px rgba(57, 255, 20, 0.3);
+}
+
+.neon-glow-secondary {
+  box-shadow: 0 0 20px rgba(255, 74, 141, 0.3);
+}
+
+.neon-glow-tertiary {
+  box-shadow: 0 0 20px rgba(58, 244, 255, 0.3);
+}
+
+/* ── Glass Panel ─────────────────────────────────── */
+.glass-panel {
+  backdrop-filter: blur(20px);
+  background: rgba(18, 20, 29, 0.7);
+}
+
+/* ── Scanline Effect ─────────────────────────────── */
+.scanline {
+  position: relative;
+}
+
+.scanline::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+      rgba(18, 16, 16, 0) 50%,
+      rgba(0, 0, 0, 0.1) 50%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 0, 0, 0.03),
+      rgba(0, 255, 0, 0.01),
+      rgba(0, 0, 255, 0.03)
+    );
+  background-size: 100% 3px, 3px 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Scanline Overlay ────────────────────────────── */
+.scanline-overlay {
+  background: linear-gradient(
+      rgba(18, 16, 16, 0) 50%,
+      rgba(0, 0, 0, 0.1) 50%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 0, 0, 0.03),
+      rgba(0, 255, 0, 0.01),
+      rgba(0, 0, 255, 0.03)
+    );
+  background-size: 100% 4px, 3px 100%;
+  pointer-events: none;
+}
+
+/* ── Selection Color ────────────────────────────── */
+::selection {
+  background-color: #39ff14;
+  color: #107100;
+}

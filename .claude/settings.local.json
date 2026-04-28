@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 \"C:\\\\Users\\\\marce\\\\OneDrive\\\\Escritorio\\\\cryptogamer-ecommerce\\\\.claude\\\\skills\\\\ui-ux-pro-max\\\\scripts\\\\search.py\" \"gaming ecommerce cyberpunk dark neon\" --design-system -p \"Neon Night\")",
+      "Bash(python \"C:\\\\Users\\\\marce\\\\OneDrive\\\\Escritorio\\\\cryptogamer-ecommerce\\\\.claude\\\\skills\\\\ui-ux-pro-max\\\\scripts\\\\search.py\" \"gaming ecommerce cyberpunk dark neon\" --design-system -p \"Neon Night\")",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)"
+    ]
+  }
+}

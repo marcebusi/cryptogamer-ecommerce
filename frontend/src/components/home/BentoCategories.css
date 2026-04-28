@@ -1,0 +1,9 @@
+.bento-card {
+  min-height: 200px;
+}
+
+@media (min-width: 768px) {
+  .bento-card {
+    min-height: unset;
+  }
+}
