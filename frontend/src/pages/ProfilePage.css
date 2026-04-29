@@ -1,0 +1,18 @@
+.profile-hero {
+  background: linear-gradient(135deg, #111318 0%, #1a0d2e 50%, #111318 100%);
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+}
+
+.profile-grid {
+  background-image:
+    linear-gradient(rgba(138,43,226,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(138,43,226,0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.profile-card {
+  background: rgba(14, 15, 22, 0.80);
+  backdrop-filter: blur(20px);
+}

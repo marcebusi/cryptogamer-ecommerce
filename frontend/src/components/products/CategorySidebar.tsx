@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { navCategories } from '../../data/categories'
+import { useCategories, parseCategoryChildren } from '../../context/CategoriesContext'
 import './CategorySidebar.css'
 
 interface Props {
-  /** On mobile the parent controls visibility */
   mobileOpen?: boolean
   onMobileClose?: () => void
 }
@@ -12,6 +11,8 @@ interface Props {
 export default function CategorySidebar({ mobileOpen, onMobileClose }: Props) {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
+  const { categories } = useCategories()
+
   const activeCat = searchParams.get('cat') ?? ''
   const activeSub = searchParams.get('sub') ?? ''
 
@@ -19,22 +20,21 @@ export default function CategorySidebar({ mobileOpen, onMobileClose }: Props) {
     activeCat ? new Set([activeCat]) : new Set()
   )
 
-  // Auto-expand when URL changes (e.g. from navbar)
   useEffect(() => {
     if (activeCat) setExpanded(prev => new Set([...prev, activeCat]))
   }, [activeCat])
 
-  const goTo = (cat: string, sub?: string) => {
-    const p = new URLSearchParams({ cat })
+  const goTo = (catSlug: string, sub?: string) => {
+    const p = new URLSearchParams({ cat: catSlug })
     if (sub) p.set('sub', sub)
     navigate(`/products?${p.toString()}`)
     onMobileClose?.()
   }
 
-  const toggleExpand = (catId: string) => {
+  const toggleExpand = (slug: string) => {
     setExpanded(prev => {
       const next = new Set(prev)
-      next.has(catId) ? next.delete(catId) : next.add(catId)
+      next.has(slug) ? next.delete(slug) : next.add(slug)
       return next
     })
   }
@@ -54,40 +54,38 @@ export default function CategorySidebar({ mobileOpen, onMobileClose }: Props) {
                 !activeCat
                   ? 'bg-surface-container-high text-on-surface border-l-4 border-primary-container shadow-[0_0_12px_rgba(57,255,20,0.08)]'
                   : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface'
-              }`}
-            >
+              }`}>
               <span className={`material-symbols-outlined text-sm ${!activeCat ? 'text-primary-container' : ''}`}>apps</span>
               <span className="flex-1 text-left font-medium">Todos los productos</span>
             </button>
           </li>
 
-          {navCategories.map(cat => {
-            const isActive   = activeCat === cat.id
-            const isExpanded = expanded.has(cat.id)
+          {categories.map(cat => {
+            const children  = parseCategoryChildren(cat.children)
+            const isActive  = activeCat === cat.slug
+            const isExpanded = expanded.has(cat.slug)
 
             return (
               <li key={cat.id}>
                 <div className="flex items-center gap-0.5">
                   <button
-                    onClick={() => goTo(cat.id)}
+                    onClick={() => goTo(cat.slug)}
                     className={`flex-1 flex items-center gap-xs px-sm py-xs rounded-lg text-sm transition-all duration-150 cursor-pointer ${
                       isActive
                         ? 'bg-surface-container-high text-on-surface border-l-4 border-primary-container shadow-[0_0_12px_rgba(57,255,20,0.08)]'
                         : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface'
-                    }`}
-                  >
+                    }`}>
                     <span className={`material-symbols-outlined text-sm flex-shrink-0 ${isActive ? 'text-primary-container' : ''}`}>
                       {cat.icon}
                     </span>
-                    <span className="flex-1 text-left font-medium">{cat.label}</span>
+                    <span className="flex-1 text-left font-medium">{cat.name}</span>
                   </button>
 
-                  {cat.children && (
+                  {children.length > 0 && (
                     <button
-                      onClick={() => toggleExpand(cat.id)}
+                      onClick={() => toggleExpand(cat.slug)}
                       className="p-1.5 rounded-md text-on-surface-variant hover:text-cyan-400 hover:bg-white/5 transition-all cursor-pointer flex-shrink-0"
-                      aria-label={isExpanded ? 'Colapsar' : 'Expandir'}
-                    >
+                      aria-label={isExpanded ? 'Colapsar' : 'Expandir'}>
                       <span className={`material-symbols-outlined text-xs transition-transform duration-200 block ${isExpanded ? 'rotate-90' : ''}`}>
                         chevron_right
                       </span>
@@ -95,53 +93,48 @@ export default function CategorySidebar({ mobileOpen, onMobileClose }: Props) {
                   )}
                 </div>
 
-                {cat.children && isExpanded && (
+                {children.length > 0 && isExpanded && (
                   <ul className="mt-0.5 ml-sm border-l border-white/10 pl-sm space-y-0.5">
-                    {cat.children.map(sub => {
-                      // Keep sub highlighted if it's the active sub OR any of its children are active
+                    {children.map(sub => {
+                      const subChildren = sub.children ?? []
                       const isSubHighlighted =
                         activeSub === sub.id ||
-                        (sub.children?.some(ss => ss.id === activeSub) ?? false)
-
-                      // Show sub-sub items if this sub's children include the active sub
-                      const showSubSub = sub.children && (
-                        activeSub === sub.id || sub.children.some(ss => ss.id === activeSub)
+                        subChildren.some(ss => ss.id === activeSub)
+                      const showSubSub = subChildren.length > 0 && (
+                        activeSub === sub.id || subChildren.some(ss => ss.id === activeSub)
                       )
 
                       return (
                         <li key={sub.id}>
                           <button
-                            onClick={() => goTo(cat.id, sub.id)}
+                            onClick={() => goTo(cat.slug, sub.id)}
                             className={`w-full flex items-center gap-xs px-xs py-1.5 rounded-lg text-sm transition-colors duration-150 cursor-pointer ${
                               isSubHighlighted
                                 ? 'text-cyan-400 font-semibold bg-cyan-400/5'
                                 : 'text-on-surface-variant hover:text-cyan-400 hover:bg-white/5'
-                            }`}
-                          >
+                            }`}>
                             <span className={`material-symbols-outlined text-xs flex-shrink-0 ${isSubHighlighted ? 'text-cyan-400 opacity-100' : 'opacity-40'}`}>
                               chevron_right
                             </span>
                             <span className="flex-1 text-left">{sub.label}</span>
-                            {sub.children && (
-                              <span className={`material-symbols-outlined text-xs flex-shrink-0 transition-colors ${showSubSub ? 'text-cyan-400/70' : 'text-on-surface-variant/30'}`}>
+                            {subChildren.length > 0 && (
+                              <span className={`material-symbols-outlined text-xs flex-shrink-0 ${showSubSub ? 'text-cyan-400/70' : 'text-on-surface-variant/30'}`}>
                                 {showSubSub ? 'expand_less' : 'expand_more'}
                               </span>
                             )}
                           </button>
 
-                          {/* Sub-sub items — persists while any child is active */}
-                          {showSubSub && sub.children && (
+                          {showSubSub && (
                             <ul className="mt-0.5 ml-sm border-l border-cyan-400/15 pl-xs space-y-0.5 pb-1">
-                              {sub.children.map(ssub => (
+                              {subChildren.map(ssub => (
                                 <li key={ssub.id}>
                                   <button
-                                    onClick={() => goTo(cat.id, ssub.id)}
+                                    onClick={() => goTo(cat.slug, ssub.id)}
                                     className={`w-full flex items-center gap-xs px-xs py-1 rounded-md text-xs transition-colors cursor-pointer ${
                                       activeSub === ssub.id
                                         ? 'text-cyan-400 font-semibold bg-cyan-400/8'
                                         : 'text-on-surface-variant hover:text-cyan-400 hover:bg-white/5'
-                                    }`}
-                                  >
+                                    }`}>
                                     <span className={`material-symbols-outlined text-xs flex-shrink-0 ${activeSub === ssub.id ? 'text-cyan-400' : 'opacity-30'}`}>
                                       arrow_right
                                     </span>

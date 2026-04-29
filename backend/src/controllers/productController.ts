@@ -5,18 +5,20 @@ const prisma = new PrismaClient()
 
 export async function getAllProducts(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { category, search, minPrice, maxPrice } = req.query
+    const { category, search, minPrice, maxPrice, isOffer, isFeatured, limit } = req.query
 
     const products = await prisma.product.findMany({
       where: {
-        ...(category && { category: { slug: String(category) } }),
+        ...(category  && { category: { slug: String(category) } }),
+        ...(isOffer === 'true'    && { isOffer:    true }),
+        ...(isFeatured === 'true' && { isFeatured: true }),
         ...(search && {
           OR: [
-            { name: { contains: String(search), mode: 'insensitive' } },
-            { description: { contains: String(search), mode: 'insensitive' } },
+            { name:        { contains: String(search) } },
+            { description: { contains: String(search) } },
           ],
         }),
-        ...(minPrice || maxPrice
+        ...((minPrice || maxPrice)
           ? {
               price: {
                 ...(minPrice && { gte: Number(minPrice) }),
@@ -26,7 +28,8 @@ export async function getAllProducts(req: Request, res: Response, next: NextFunc
           : {}),
       },
       include: { category: true, specs: true },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
+      ...(limit ? { take: Number(limit) } : {}),
     })
 
     res.json({ success: true, data: products, count: products.length })
@@ -37,13 +40,15 @@ export async function getAllProducts(req: Request, res: Response, next: NextFunc
 
 export async function getProductById(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const product = await prisma.product.findUnique({
-      where: { id: req.params.id },
+    // Support lookup by id or slug
+    const { id } = req.params
+    const product = await prisma.product.findFirst({
+      where: { OR: [{ id }, { slug: id }] },
       include: { category: true, specs: true },
     })
 
     if (!product) {
-      res.status(404).json({ success: false, error: 'Product not found' })
+      res.status(404).json({ success: false, error: 'Producto no encontrado' })
       return
     }
 
@@ -81,7 +86,7 @@ export async function updateProduct(req: Request, res: Response, next: NextFunct
 export async function deleteProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     await prisma.product.delete({ where: { id: req.params.id } })
-    res.json({ success: true, message: 'Product deleted' })
+    res.json({ success: true, message: 'Producto eliminado' })
   } catch (err) {
     next(err)
   }

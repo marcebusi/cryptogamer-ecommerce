@@ -1,22 +1,21 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import ProductCard from '../components/products/ProductCard'
-import { catalogProducts } from '../data/products'
+import { useDynamicProducts } from '../hooks/useDynamicProducts'
 
 type Sort = 'discount' | 'price-asc' | 'price-desc' | 'rating'
 
 export default function OffersPage() {
   const [sort, setSort] = useState<Sort>('discount')
+  const { products: rawOffers, isLoading } = useDynamicProducts({ isOffer: true })
 
-  const offers = catalogProducts.filter(p => p.originalPrice || p.badge)
-
-  const sorted = [...offers].sort((a, b) => {
+  const sorted = [...rawOffers].sort((a, b) => {
     if (sort === 'discount') {
       const da = a.originalPrice ? a.originalPrice - a.price : 0
       const db = b.originalPrice ? b.originalPrice - b.price : 0
       return db - da
     }
-    if (sort === 'price-asc') return a.price - b.price
+    if (sort === 'price-asc')  return a.price - b.price
     if (sort === 'price-desc') return b.price - a.price
     return b.rating - a.rating
   })
@@ -48,7 +47,7 @@ export default function OffersPage() {
 
           <div className="flex flex-col items-center gap-xs bg-surface-container rounded-2xl border border-white/10 p-md text-center min-w-[160px]">
             <span className="material-symbols-outlined text-secondary-container text-3xl">bolt</span>
-            <p className="text-3xl font-black text-on-surface">{sorted.length}</p>
+            <p className="text-3xl font-black text-on-surface">{isLoading ? '—' : sorted.length}</p>
             <p className="text-xs text-on-surface-variant uppercase tracking-widest">Ofertas activas</p>
           </div>
         </div>
@@ -59,15 +58,15 @@ export default function OffersPage() {
         {/* Sort bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-sm mb-lg">
           <p className="text-on-surface-variant text-sm">
-            Mostrando <span className="text-on-surface font-semibold">{sorted.length}</span> ofertas
+            Mostrando <span className="text-on-surface font-semibold">{isLoading ? '…' : sorted.length}</span> ofertas
           </p>
           <div className="flex items-center gap-xs overflow-x-auto pb-1 -mb-1">
             <span className="text-xs text-on-surface-variant uppercase tracking-wider flex-shrink-0">Ordenar:</span>
             {([
-              ['discount', 'Mayor descuento'],
-              ['price-asc', 'Menor precio'],
+              ['discount',   'Mayor descuento'],
+              ['price-asc',  'Menor precio'],
               ['price-desc', 'Mayor precio'],
-              ['rating', 'Mejor puntuados'],
+              ['rating',     'Mejor puntuados'],
             ] as [Sort, string][]).map(([val, label]) => (
               <button
                 key={val}
@@ -76,21 +75,36 @@ export default function OffersPage() {
                   sort === val
                     ? 'bg-secondary-container text-on-secondary'
                     : 'bg-surface-container text-on-surface-variant border border-white/10 hover:border-secondary-container/40'
-                }`}
-              >
+                }`}>
                 {label}
               </button>
             ))}
           </div>
         </div>
 
-        {sorted.length === 0 ? (
+        {/* Loading skeleton */}
+        {isLoading && (
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-md">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="aspect-square rounded-xl bg-white/5 mb-sm" />
+                <div className="h-4 bg-white/5 rounded mb-2" />
+                <div className="h-3 bg-white/5 rounded w-1/2" />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!isLoading && sorted.length === 0 && (
           <div className="flex flex-col items-center justify-center py-xl text-on-surface-variant">
             <span className="material-symbols-outlined text-5xl mb-md opacity-30">local_offer</span>
             <p className="text-lg font-semibold">Sin ofertas disponibles</p>
-            <Link to="/products" className="mt-sm text-sm text-primary-container hover:underline">Ver todos los productos</Link>
+            <p className="text-sm mt-1 mb-md">El admin puede marcar productos como oferta desde el panel.</p>
+            <Link to="/products" className="text-sm text-primary-container hover:underline">Ver todos los productos</Link>
           </div>
-        ) : (
+        )}
+
+        {!isLoading && sorted.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-md">
             {sorted.map(p => <ProductCard key={p.id} product={p} />)}
           </div>
@@ -101,8 +115,7 @@ export default function OffersPage() {
           <p className="text-on-surface-variant text-sm mb-sm">¿No encontrás lo que buscás?</p>
           <Link
             to="/products"
-            className="inline-flex items-center gap-xs px-lg py-sm bg-surface-container border border-white/10 hover:border-primary-container/40 text-on-surface rounded-xl font-semibold text-sm transition-all hover:bg-surface-container-high cursor-pointer"
-          >
+            className="inline-flex items-center gap-xs px-lg py-sm bg-surface-container border border-white/10 hover:border-primary-container/40 text-on-surface rounded-xl font-semibold text-sm transition-all hover:bg-surface-container-high cursor-pointer">
             <span className="material-symbols-outlined text-sm">apps</span>
             Ver catálogo completo
           </Link>

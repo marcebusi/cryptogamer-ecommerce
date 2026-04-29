@@ -1,0 +1,21 @@
+.auth-modal {
+  background: rgba(14, 15, 22, 0.97);
+  backdrop-filter: blur(24px);
+  animation: auth-slide-up 0.22s ease-out;
+}
+
+@keyframes auth-slide-up {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+.auth-input {
+  /* Override browser autofill background */
+}
+.auth-input:-webkit-autofill,
+.auth-input:-webkit-autofill:hover,
+.auth-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #1e2024 inset !important;
+  -webkit-text-fill-color: #e2e2e8 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}

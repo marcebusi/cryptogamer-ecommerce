@@ -1,0 +1,16 @@
+.admin-card {
+  background: rgba(14, 15, 22, 0.85);
+  backdrop-filter: blur(20px);
+}
+
+.admin-tips-card {
+  background: linear-gradient(135deg, rgba(57, 255, 20, 0.04) 0%, rgba(14, 15, 22, 0.9) 100%);
+  backdrop-filter: blur(20px);
+}
+
+.admin-input:-webkit-autofill,
+.admin-input:-webkit-autofill:hover,
+.admin-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #1e2024 inset !important;
+  -webkit-text-fill-color: #e2e2e8 !important;
+}

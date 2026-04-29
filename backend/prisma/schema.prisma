@@ -3,15 +3,22 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  password  String
+  id       String  @id @default(cuid())
+  email    String  @unique
+  name     String?
+  password String
+  role     String  @default("CUSTOMER")
+  phone    String?
+  address  String?
+
+  resetPasswordToken  String?
+  resetPasswordExpiry DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -22,34 +29,52 @@ model User {
 }
 
 model Category {
-  id       String    @id @default(cuid())
-  name     String    @unique
-  slug     String    @unique
+  id        String @id @default(cuid())
+  name      String
+  slug      String @unique
+  icon      String @default("category")
+  // JSON string: [{id, label, children?: [{id, label}]}]
+  children  String @default("[]")
+  sortOrder Int    @default(0)
+
   products Product[]
 
   @@map("categories")
 }
 
 model Product {
-  id            String   @id @default(cuid())
+  id            String  @id @default(cuid())
   name          String
-  slug          String   @unique
-  description   String
+  slug          String  @unique
+  description   String  @default("")
   price         Float
   originalPrice Float?
-  image         String
-  images        String[]
+  image         String  @default("")
+  images        String  @default("[]")
   badge         String?
-  badgeColor    String?
-  rating        Float    @default(0)
-  reviewCount   Int      @default(0)
-  inStock       Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  badgeColor    String  @default("primary")
+  rating        Float   @default(4.5)
+  reviewCount   Int     @default(0)
+  inStock       Boolean @default(true)
+
+  // Position in grid (lower = appears first)
+  sortOrder     Int     @default(0)
+  // Appears in Ofertas page
+  isOffer       Boolean @default(false)
+  // Appears in Latest Arrivals / Home
+  isFeatured    Boolean @default(false)
+
+  subcategory          String?
+  condition            String?
+  conditionScore       Int?
+  conditionDescription String?
+  conditionTags        String  @default("[]")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   categoryId String
-  category   Category @relation(fields: [categoryId], references: [id])
-
+  category   Category      @relation(fields: [categoryId], references: [id])
   orderItems OrderItem[]
   cartItems  CartItem[]
   specs      ProductSpec[]
@@ -58,11 +83,11 @@ model Product {
 }
 
 model ProductSpec {
-  id        String @id @default(cuid())
-  icon      String
-  label     String
-  value     String
-  color     String?
+  id    String  @id @default(cuid())
+  icon  String
+  label String
+  value String
+  color String?
 
   productId String
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -71,16 +96,15 @@ model ProductSpec {
 }
 
 model Order {
-  id          String      @id @default(cuid())
-  status      OrderStatus @default(PENDING)
+  id          String   @id @default(cuid())
+  status      String   @default("PENDING")
   totalAmount Float
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  items OrderItem[]
+  user   User        @relation(fields: [userId], references: [id])
+  items  OrderItem[]
 
   @@map("orders")
 }
@@ -99,14 +123,13 @@ model OrderItem {
 }
 
 model Cart {
-  id        String     @id @default(cuid())
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
-
-  items CartItem[]
+  userId String    @unique
+  user   User      @relation(fields: [userId], references: [id])
+  items  CartItem[]
 
   @@map("carts")
 }
@@ -121,12 +144,4 @@ model CartItem {
   product   Product @relation(fields: [productId], references: [id])
 
   @@map("cart_items")
-}
-
-enum OrderStatus {
-  PENDING
-  PROCESSING
-  SHIPPED
-  DELIVERED
-  CANCELLED
 }

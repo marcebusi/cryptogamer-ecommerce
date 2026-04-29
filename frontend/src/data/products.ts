@@ -1,12 +1,13 @@
-import type { Product, Category } from '../types'
+import type { Product } from '../types'
 
-export const categories: Category[] = [
-  { id: 'consoles',    name: 'Consolas' },
-  { id: 'games',       name: 'Juegos' },
-  { id: 'accessories', name: 'Accesorios' },
-  { id: 'mobile',      name: 'Móviles' },
-  { id: 'audio',       name: 'Audio' },
-  { id: 'perfumes',    name: 'Perfumes' },
+/** Simple static categories for fallback (no backend required) */
+export const categories = [
+  { id: 'consoles',    name: 'Consolas',   slug: 'consoles'    },
+  { id: 'games',       name: 'Juegos',     slug: 'games'       },
+  { id: 'accessories', name: 'Accesorios', slug: 'accessories' },
+  { id: 'mobile',      name: 'Móviles',    slug: 'mobile'      },
+  { id: 'audio',       name: 'Audio',      slug: 'audio'       },
+  { id: 'perfumes',    name: 'Perfumes',   slug: 'perfumes'    },
 ]
 
 /* ─── Latest arrivals (home page highlight) ─────────────────────────── */

@@ -1,3 +1,17 @@
+/* ── Auth ──────────────────────────────────────────── */
+export type UserRole = 'CUSTOMER' | 'ADMIN'
+
+export interface User {
+  id: string
+  name: string | null
+  email: string
+  role: UserRole
+  phone?: string | null
+  address?: string | null
+  createdAt?: string
+}
+
+/* ── Products ──────────────────────────────────────── */
 export type ProductCondition = 'new' | 'like-new' | 'excellent' | 'good' | 'fair'
 
 export interface Product {
@@ -21,6 +35,12 @@ export interface Product {
   conditionScore?: number
   conditionDescription?: string
   conditionTags?: string[]
+  // CMS fields
+  sortOrder?: number
+  isOffer?: boolean
+  isFeatured?: boolean
+  slug?: string
+  createdAt?: string
 }
 
 export interface ProductSpec {
@@ -45,7 +65,17 @@ export interface CartItem {
 export interface Category {
   id: string
   name: string
-  icon?: string
+  slug: string
+  icon: string
+  children: string   // JSON string: [{id, label, children?: [{id, label}]}]
+  sortOrder: number
+  _count?: { products: number }
+}
+
+export interface CategoryChild {
+  id: string
+  label: string
+  children?: { id: string; label: string }[]
 }
 
 export type BadgeColor = 'primary' | 'secondary' | 'tertiary'
