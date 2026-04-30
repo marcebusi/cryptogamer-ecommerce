@@ -5,34 +5,54 @@ const prisma = new PrismaClient()
 
 export async function getAllProducts(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { category, search, minPrice, maxPrice, isOffer, isFeatured, limit } = req.query
+    const { category, search, minPrice, maxPrice, isOffer, isFeatured, limit, inStock,
+            page = '1', pageSize = '24' } = req.query
 
-    const products = await prisma.product.findMany({
-      where: {
-        ...(category  && { category: { slug: String(category) } }),
-        ...(isOffer === 'true'    && { isOffer:    true }),
-        ...(isFeatured === 'true' && { isFeatured: true }),
-        ...(search && {
-          OR: [
-            { name:        { contains: String(search) } },
-            { description: { contains: String(search) } },
-          ],
-        }),
-        ...((minPrice || maxPrice)
-          ? {
-              price: {
-                ...(minPrice && { gte: Number(minPrice) }),
-                ...(maxPrice && { lte: Number(maxPrice) }),
-              },
-            }
-          : {}),
-      },
-      include: { category: true, specs: true },
-      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
-      ...(limit ? { take: Number(limit) } : {}),
+    const take = limit ? Number(limit) : Number(pageSize)
+    const skip = limit ? 0 : (Number(page) - 1) * take
+
+    const where = {
+      ...(category  && { category: { slug: String(category) } }),
+      ...(isOffer === 'true'    && { isOffer:    true }),
+      ...(isFeatured === 'true' && { isFeatured: true }),
+      ...(inStock === 'true'    && { inStock:     true }),
+      ...(inStock === 'false'   && { inStock:     false }),
+      ...(search && {
+        OR: [
+          { name:        { contains: String(search) } },
+          { description: { contains: String(search) } },
+        ],
+      }),
+      ...((minPrice || maxPrice)
+        ? {
+            price: {
+              ...(minPrice && { gte: Number(minPrice) }),
+              ...(maxPrice && { lte: Number(maxPrice) }),
+            },
+          }
+        : {}),
+    }
+
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        include: { category: true, specs: true },
+        orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
+        take,
+        skip,
+      }),
+      prisma.product.count({ where }),
+    ])
+
+    res.json({
+      success: true,
+      data: products,
+      count: products.length,
+      total,
+      page: Number(page),
+      pageSize: take,
+      totalPages: Math.ceil(total / take),
     })
-
-    res.json({ success: true, data: products, count: products.length })
   } catch (err) {
     next(err)
   }

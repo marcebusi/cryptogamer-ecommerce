@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import './ContactPage.css'
+import { api } from '../lib/api'
 
-type Status = 'idle' | 'sending' | 'success'
+type Status = 'idle' | 'sending' | 'success' | 'error'
 
 const SUBJECTS = [
   'Consulta sobre un producto',
@@ -60,13 +61,18 @@ export default function ContactPage() {
     return e
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
     setErrors({})
     setStatus('sending')
-    setTimeout(() => setStatus('success'), 1400)
+    try {
+      await api.post('/api/contact', { name: form.name, email: form.email, message: `[${form.subject}] ${form.message}` })
+      setStatus('success')
+    } catch {
+      setStatus('error')
+    }
   }
 
   const inp = (key: keyof typeof form, label: string, type = 'text', placeholder = '') => (

@@ -8,6 +8,8 @@ import AuthModal from './AuthModal'
 import UserMenu from './UserMenu'
 import './Navbar.css'
 
+const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3001'
+
 export default function Navbar() {
   const { totalItems, openCart } = useCart()
   const { isAuthenticated, user } = useAuth()
@@ -24,15 +26,49 @@ export default function Navbar() {
   const userBtnRef = useRef<HTMLDivElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
+  // Live search
+  const [searchQuery, setSearchQuery]       = useState('')
+  const [searchResults, setSearchResults]   = useState<any[]>([])
+  const [searchLoading, setSearchLoading]   = useState(false)
+  const [searchOpen, setSearchOpen]         = useState(false)
+  const searchRef   = useRef<HTMLDivElement>(null)
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setProductosOpen(false)
       }
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setSearchOpen(false)
+      }
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [])
+
+  const handleSearch = (q: string) => {
+    setSearchQuery(q)
+    if (searchTimer.current) clearTimeout(searchTimer.current)
+    if (!q.trim()) { setSearchResults([]); setSearchOpen(false); return }
+    setSearchLoading(true)
+    searchTimer.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`${BASE}/api/products?search=${encodeURIComponent(q)}&pageSize=6`)
+        const data = await res.json()
+        setSearchResults(data.data ?? [])
+        setSearchOpen(true)
+      } catch { setSearchResults([]) }
+      finally { setSearchLoading(false) }
+    }, 300)
+  }
+
+  const goToSearch = () => {
+    if (!searchQuery.trim()) return
+    navigate(`/products?search=${encodeURIComponent(searchQuery)}`)
+    setSearchOpen(false)
+    setSearchQuery('')
+  }
 
   const openDropdown = () => {
     setProductosOpen(true)
@@ -201,6 +237,59 @@ export default function Navbar() {
 
           {/* Actions */}
           <div className="flex items-center gap-sm">
+
+            {/* Live Search */}
+            <div ref={searchRef} className="relative hidden md:block">
+              <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 focus-within:border-purple-500/50 focus-within:bg-white/8 transition-all">
+                <span className="material-symbols-outlined text-on-surface-variant text-sm">search</span>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => handleSearch(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && goToSearch()}
+                  placeholder="Buscar productos..."
+                  className="bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant/40 outline-none w-40 lg:w-52"
+                />
+                {searchLoading && <span className="material-symbols-outlined text-on-surface-variant text-sm animate-spin">progress_activity</span>}
+              </div>
+
+              {/* Dropdown results */}
+              {searchOpen && searchResults.length > 0 && (
+                <div className="absolute top-full mt-2 left-0 w-80 bg-[#12131c] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
+                  {searchResults.map((p: any) => (
+                    <Link
+                      key={p.id}
+                      to={`/products/${p.id}`}
+                      onClick={() => { setSearchOpen(false); setSearchQuery('') }}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors"
+                    >
+                      <img
+                        src={p.image}
+                        alt={p.name}
+                        className="w-10 h-10 object-contain rounded-lg bg-[#0b0c12] flex-shrink-0"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-on-surface font-medium truncate">{p.name}</p>
+                        <p className="text-xs text-primary-container font-bold">${p.price?.toFixed(0)}</p>
+                      </div>
+                    </Link>
+                  ))}
+                  <button
+                    onClick={goToSearch}
+                    className="w-full px-4 py-3 text-xs text-center text-purple-400 hover:bg-white/5 border-t border-white/5 transition-colors font-semibold"
+                  >
+                    Ver todos los resultados para "{searchQuery}"
+                  </button>
+                </div>
+              )}
+
+              {searchOpen && !searchLoading && searchResults.length === 0 && searchQuery.trim() && (
+                <div className="absolute top-full mt-2 left-0 w-72 bg-[#12131c] border border-white/10 rounded-xl shadow-2xl p-4 text-sm text-on-surface-variant text-center z-50">
+                  Sin resultados para "{searchQuery}"
+                </div>
+              )}
+            </div>
             <button
               onClick={openCart}
               className="relative text-slate-300 p-2 hover:text-primary-container transition-colors active:scale-95 cursor-pointer"

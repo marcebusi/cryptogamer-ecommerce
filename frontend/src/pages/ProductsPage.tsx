@@ -1,32 +1,50 @@
 import { useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import CategorySidebar from '../components/products/CategorySidebar'
 import ProductCard from '../components/products/ProductCard'
 import { useDynamicProducts } from '../hooks/useDynamicProducts'
 import { useCategories, parseCategoryChildren } from '../context/CategoriesContext'
 
 type ViewMode = 'grid' | 'list'
+type StockFilter = 'all' | 'inStock' | 'outOfStock'
+type ConditionFilter = 'all' | 'new' | 'used'
 
 export default function ProductsPage() {
   const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   const [viewMode, setViewMode]       = useState<ViewMode>('grid')
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
+  // Advanced filters (client-side after fetch)
+  const [minPrice, setMinPrice] = useState('')
+  const [maxPrice, setMaxPrice] = useState('')
+  const [stockFilter, setStockFilter] = useState<StockFilter>('all')
+  const [conditionFilter, setConditionFilter] = useState<ConditionFilter>('all')
+  const [filtersOpen, setFiltersOpen] = useState(false)
+
   const { categories } = useCategories()
 
-  const cat = searchParams.get('cat') ?? ''
-  const sub = searchParams.get('sub') ?? ''
+  const cat    = searchParams.get('cat') ?? ''
+  const sub    = searchParams.get('sub') ?? ''
+  const search = searchParams.get('search') ?? ''
 
   const { products: allProducts, isLoading } = useDynamicProducts({ category: cat || undefined })
 
   const filtered = allProducts.filter(p => {
     if (sub && p.subcategory !== sub) return false
+    if (minPrice && p.price < Number(minPrice)) return false
+    if (maxPrice && p.price > Number(maxPrice)) return false
+    if (stockFilter === 'inStock' && !p.inStock) return false
+    if (stockFilter === 'outOfStock' && p.inStock) return false
+    if (conditionFilter === 'new' && p.condition && p.condition !== 'new') return false
+    if (conditionFilter === 'used' && (!p.condition || p.condition === 'new')) return false
+    if (search && !p.name.toLowerCase().includes(search.toLowerCase()) &&
+        !p.description.toLowerCase().includes(search.toLowerCase())) return false
     return true
   })
 
-  // Resolve labels from dynamic categories
   const catDef   = categories.find(c => c.slug === cat)
-  const catLabel = catDef?.name ?? 'Todos los productos'
+  const catLabel = catDef?.name ?? (search ? `Resultados para "${search}"` : 'Todos los productos')
   const subLabel = (() => {
     if (!sub || !catDef) return ''
     const children = parseCategoryChildren(catDef.children)
@@ -34,7 +52,10 @@ export default function ProductsPage() {
     return found?.label ?? sub
   })()
   const title    = sub ? subLabel : catLabel
-  const subtitle = sub ? catDef?.name : cat ? 'Explorá nuestra selección.' : 'Todo el catálogo de Cryptogamer.'
+  const subtitle = sub ? catDef?.name : cat ? 'Explorá nuestra selección.' : search ? '' : 'Todo el catálogo de Cryptogamer\'s.'
+
+  const hasActiveFilters = minPrice || maxPrice || stockFilter !== 'all' || conditionFilter !== 'all'
+  const clearFilters = () => { setMinPrice(''); setMaxPrice(''); setStockFilter('all'); setConditionFilter('all') }
 
   return (
     <main className="max-w-screen-2xl mx-auto px-4 md:px-8 py-lg">
@@ -63,7 +84,7 @@ export default function ProductsPage() {
 
         <section className="flex-1 min-w-0">
           {/* Desktop header */}
-          <div className="hidden md:flex justify-between items-end mb-lg">
+          <div className="hidden md:flex justify-between items-end mb-md">
             <div>
               {sub && catDef && (
                 <p className="text-xs text-on-surface-variant uppercase tracking-widest mb-1 font-['Plus_Jakarta_Sans']">{catDef.name}</p>
@@ -78,7 +99,15 @@ export default function ProductsPage() {
                 )}
               </p>
             </div>
-            <div className="flex gap-xs flex-shrink-0">
+            <div className="flex items-center gap-sm flex-shrink-0">
+              {/* Filtros avanzados toggle */}
+              <button
+                onClick={() => setFiltersOpen(p => !p)}
+                className={`flex items-center gap-1 px-3 py-2 border rounded-xl text-sm font-semibold cursor-pointer transition-all ${hasActiveFilters ? 'border-purple-500/60 text-purple-300 bg-purple-600/10' : 'border-outline-variant text-on-surface-variant hover:border-purple-500/30'}`}>
+                <span className="material-symbols-outlined text-sm">filter_list</span>
+                Filtros
+                {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-purple-400 inline-block" />}
+              </button>
               <button onClick={() => setViewMode('grid')} className={`p-2 border rounded-lg cursor-pointer transition-colors ${viewMode === 'grid' ? 'border-tertiary-container text-tertiary-container' : 'border-outline-variant text-on-surface-variant hover:border-tertiary-container'}`}>
                 <span className="material-symbols-outlined">grid_view</span>
               </button>
@@ -87,6 +116,66 @@ export default function ProductsPage() {
               </button>
             </div>
           </div>
+
+          {/* Advanced Filters Panel */}
+          {filtersOpen && (
+            <div className="bg-surface-container border border-white/10 rounded-xl p-md mb-md flex flex-wrap gap-md items-end">
+              {/* Price range */}
+              <div className="flex flex-col gap-1">
+                <p className="text-xs text-on-surface-variant uppercase tracking-wider font-semibold">Precio</p>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    value={minPrice}
+                    onChange={e => setMinPrice(e.target.value)}
+                    placeholder="Mín"
+                    className="w-24 bg-surface-container-high border border-outline-variant rounded-lg px-2 py-1.5 text-sm text-on-surface outline-none focus:border-purple-500"
+                  />
+                  <span className="text-on-surface-variant text-xs">—</span>
+                  <input
+                    type="number"
+                    value={maxPrice}
+                    onChange={e => setMaxPrice(e.target.value)}
+                    placeholder="Máx"
+                    className="w-24 bg-surface-container-high border border-outline-variant rounded-lg px-2 py-1.5 text-sm text-on-surface outline-none focus:border-purple-500"
+                  />
+                </div>
+              </div>
+
+              {/* Stock */}
+              <div className="flex flex-col gap-1">
+                <p className="text-xs text-on-surface-variant uppercase tracking-wider font-semibold">Stock</p>
+                <div className="flex gap-1">
+                  {(['all', 'inStock', 'outOfStock'] as StockFilter[]).map(v => (
+                    <button key={v} onClick={() => setStockFilter(v)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all ${stockFilter === v ? 'bg-purple-600 text-white' : 'bg-surface-container-high text-on-surface-variant hover:bg-white/5'}`}>
+                      {v === 'all' ? 'Todos' : v === 'inStock' ? 'Con stock' : 'Sin stock'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Condition */}
+              <div className="flex flex-col gap-1">
+                <p className="text-xs text-on-surface-variant uppercase tracking-wider font-semibold">Condición</p>
+                <div className="flex gap-1">
+                  {(['all', 'new', 'used'] as ConditionFilter[]).map(v => (
+                    <button key={v} onClick={() => setConditionFilter(v)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all ${conditionFilter === v ? 'bg-purple-600 text-white' : 'bg-surface-container-high text-on-surface-variant hover:bg-white/5'}`}>
+                      {v === 'all' ? 'Todos' : v === 'new' ? 'Nuevo' : 'Usado'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {hasActiveFilters && (
+                <button onClick={clearFilters} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer text-error hover:bg-error/10 transition-colors border border-error/20">
+                  <span className="material-symbols-outlined text-sm">close</span>
+                  Limpiar
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Mobile title */}
           <div className="md:hidden mb-md">
@@ -114,8 +203,13 @@ export default function ProductsPage() {
           {!isLoading && filtered.length === 0 && (
             <div className="flex flex-col items-center justify-center py-xl text-on-surface-variant">
               <span className="material-symbols-outlined text-5xl mb-md opacity-30">inventory_2</span>
-              <p className="text-lg font-semibold text-on-surface mb-xs">Sin productos en esta categoría</p>
-              <p className="text-sm">Pronto agregaremos más stock.</p>
+              <p className="text-lg font-semibold text-on-surface mb-xs">Sin productos</p>
+              <p className="text-sm">Probá cambiando los filtros o explorá otra categoría.</p>
+              {hasActiveFilters && (
+                <button onClick={clearFilters} className="mt-md px-4 py-2 bg-purple-600/20 text-purple-300 rounded-xl text-sm font-semibold hover:bg-purple-600/30 transition-colors cursor-pointer">
+                  Limpiar filtros
+                </button>
+              )}
             </div>
           )}
 

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
+import { sendEmail, emailTemplates } from '../services/emailService'
 
 const prisma = new PrismaClient()
 
@@ -14,6 +15,10 @@ export const submitContact = async (req: Request, res: Response): Promise<void> 
     const newContact = await prisma.contactMessage.create({
       data: { name, email, message }
     })
+
+    // Send confirmation email (non-blocking)
+    const { subject, html } = emailTemplates.contactConfirmation(name)
+    sendEmail(email, subject, html).catch(console.error)
 
     res.status(201).json({ message: 'Mensaje enviado correctamente', contact: newContact })
   } catch (error) {

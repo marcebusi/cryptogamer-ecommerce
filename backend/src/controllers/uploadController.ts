@@ -1,19 +1,45 @@
-import { Request, Response } from 'express'
+import { v2 as cloudinary } from 'cloudinary'
+import { CloudinaryStorage } from 'multer-storage-cloudinary'
 import multer from 'multer'
-import path from 'path'
+import { Request, Response } from 'express'
 import fs from 'fs'
+import path from 'path'
 
-/* ── Storage config ─────────────────────────────── */
-const uploadDir = path.join(__dirname, '../../uploads')
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true })
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadDir),
-  filename:    (_req, file, cb) => {
-    const unique = `${Date.now()}-${Math.round(Math.random() * 1e6)}`
-    cb(null, `${unique}${path.extname(file.originalname)}`)
-  },
+/* ── Cloudinary config ───────────────────────────── */
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key:    process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 })
+
+const useCloudinary = !!(
+  process.env.CLOUDINARY_CLOUD_NAME &&
+  process.env.CLOUDINARY_CLOUD_NAME !== 'tu-cloud-name'
+)
+
+/* ── Storage: Cloudinary in prod, local in dev ───── */
+let storage: multer.StorageEngine
+
+if (useCloudinary) {
+  storage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+      folder: 'cryptogamers',
+      allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'],
+      transformation: [{ quality: 'auto', fetch_format: 'auto' }],
+    } as any,
+  })
+} else {
+  const uploadDir = path.join(__dirname, '../../uploads')
+  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true })
+  storage = multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, uploadDir),
+    filename: (_req, file, cb) => {
+      const unique = `${Date.now()}-${Math.round(Math.random() * 1e6)}`
+      cb(null, `${unique}${path.extname(file.originalname)}`)
+    },
+  })
+}
 
 const fileFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const allowed = /jpeg|jpg|png|gif|webp|avif/
@@ -24,32 +50,21 @@ const fileFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFil
   }
 }
 
-export const upload = multer({
-  storage,
-  fileFilter,
-  limits: { fileSize: 8 * 1024 * 1024 }, // 8 MB
-})
+export const upload = multer({ storage, fileFilter, limits: { fileSize: 8 * 1024 * 1024 } })
 
-// Validación real con Magic Bytes
+/* ── Magic bytes validator (local only) ──────────── */
 const checkMagicBytes = (filePath: string): boolean => {
+  if (!fs.existsSync(filePath)) return true // Cloudinary already validated
   const buffer = Buffer.alloc(4)
   const fd = fs.openSync(filePath, 'r')
   fs.readSync(fd, buffer, 0, 4, 0)
   fs.closeSync(fd)
-
   const hex = buffer.toString('hex').toUpperCase()
-  // Magic bytes típicos:
-  // JPEG: FFD8FFE0, FFD8FFE1, FFD8FFEE, FFD8DB
-  // PNG: 89504E47
-  // GIF: 47494638
-  // WEBP empieza con RIFF (52494646)
-  
   if (hex.startsWith('FFD8FF')) return true
   if (hex.startsWith('89504E47')) return true
   if (hex.startsWith('47494638')) return true
-  if (hex.startsWith('52494646')) return true // WEBP o AVIF/RIFF-based
-  // AVIF puede ser un poco más complejo pero suele empezar por cajas FTYP
-  if (hex === '0000001C' || hex === '00000020' || hex.includes('66747970')) return true
+  if (hex.startsWith('52494646')) return true
+  if (hex === '0000001C' || hex === '00000020') return true
   return false
 }
 
@@ -59,15 +74,21 @@ export const uploadImage = (req: Request, res: Response): void => {
     res.status(400).json({ message: 'No se recibió ningún archivo.' })
     return
   }
-  
-  // Validar magic bytes post-upload
-  const isValid = checkMagicBytes(req.file.path)
-  if (!isValid) {
-    fs.unlinkSync(req.file.path) // Eliminar archivo malicioso
-    res.status(400).json({ message: 'El archivo no es una imagen válida.' })
+
+  if (!useCloudinary) {
+    // Local: validate magic bytes
+    const isValid = checkMagicBytes(req.file.path)
+    if (!isValid) {
+      fs.unlinkSync(req.file.path)
+      res.status(400).json({ message: 'El archivo no es una imagen válida.' })
+      return
+    }
+    const host = `${req.protocol}://${req.get('host')}`
+    res.json({ url: `${host}/uploads/${req.file.filename}` })
     return
   }
 
-  const host = `${req.protocol}://${req.get('host')}`
-  res.json({ url: `${host}/uploads/${req.file.filename}` })
+  // Cloudinary: path is the secure URL
+  const url = (req.file as any).path
+  res.json({ url })
 }
