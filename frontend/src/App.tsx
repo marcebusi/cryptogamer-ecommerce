@@ -17,6 +17,7 @@ import AdminDashboard         from './pages/AdminDashboard'
 import AdminProductPage       from './pages/AdminProductPage'
 import AdminCategoryPage      from './pages/AdminCategoryPage'
 import AdminEditorPage        from './pages/AdminEditorPage'
+import AdminSellersPage       from './pages/admin/AdminSellersPage'
 import ResetPasswordPage      from './pages/ResetPasswordPage'
 import NotFoundPage           from './pages/NotFoundPage'
 import WhatsAppButton         from './components/common/WhatsAppButton'
@@ -43,6 +44,7 @@ function App() {
                 <Route path="/admin/productos"      element={<AdminProductPage />} />
                 <Route path="/admin/categorias"     element={<AdminCategoryPage />} />
                 <Route path="/admin/editor"         element={<AdminEditorPage />} />
+                <Route path="/admin/vendedores"     element={<AdminSellersPage />} />
                 <Route path="/reset-password"       element={<ResetPasswordPage />} />
                 <Route path="*"                     element={<NotFoundPage />} />
               </Routes>
