@@ -37,7 +37,8 @@ export const createSeller = async (req: Request, res: Response): Promise<void> =
     })
     res.status(201).json(seller)
   } catch (err) {
-    res.status(500).json({ message: 'Error al crear vendedor' })
+    console.error('[createSeller]', err)
+    res.status(500).json({ message: 'Error al crear vendedor', detail: String(err) })
   }
 }
 

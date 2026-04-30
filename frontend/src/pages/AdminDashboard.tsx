@@ -45,6 +45,13 @@ const CARDS = [
     desc:  'Mirá el catálogo como lo ven los clientes.',
     color: 'primary',
   },
+  {
+    to:    '/admin/analytics',
+    icon:  'bar_chart',
+    title: 'Analytics',
+    desc:  'Productos más vendidos, ranking de vendedores, ingresos y más.',
+    color: 'tertiary',
+  },
 ]
 
 const colorMap = {

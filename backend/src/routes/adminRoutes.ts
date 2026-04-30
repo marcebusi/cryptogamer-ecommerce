@@ -11,6 +11,7 @@ import {
   createSeller, updateSeller, deleteSeller, getSellerOrders,
 } from '../controllers/sellerController'
 import { getContactMessages } from '../controllers/contactController'
+import { getAnalytics } from '../controllers/analyticsController'
 
 const router = Router()
 
@@ -39,5 +40,8 @@ router.get('/sellers/:id/orders',    getSellerOrders)
 
 /* ── Contact Messages ─────────────────────────────── */
 router.get('/contact-messages',   getContactMessages)
+
+/* ── Analytics ────────────────────────────────────── */
+router.get('/analytics',          getAnalytics)
 
 export default router
