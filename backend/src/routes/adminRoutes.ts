@@ -6,6 +6,7 @@ import {
 import {
   createCategory, updateCategory, deleteCategory,
 } from '../controllers/categoryController'
+import { getOrders } from '../controllers/adminOrderController'
 
 const router = Router()
 
@@ -22,5 +23,12 @@ router.delete('/products/:id',  deleteProduct)
 router.post('/categories',        createCategory)
 router.put('/categories/:id',     updateCategory)
 router.delete('/categories/:id',  deleteCategory)
+
+/* ── Orders ───────────────────────────────────────── */
+router.get('/orders',             getOrders)
+
+/* ── Contact Messages ─────────────────────────────── */
+import { getContactMessages } from '../controllers/contactController'
+router.get('/contact-messages',   getContactMessages)
 
 export default router

@@ -128,10 +128,15 @@ export default function ProductInfo({ product }: ProductInfoProps) {
       <div className="space-y-sm">
         <button
           onClick={handleAddToCart}
-          className="w-full bg-primary-container text-on-primary py-4 px-6 rounded-xl font-bold text-sm flex items-center justify-center gap-xs hover:shadow-[0_0_24px_rgba(57,255,20,0.6)] hover:brightness-110 transition-all active:scale-95 cursor-pointer"
+          disabled={!product.inStock}
+          className={`w-full py-4 px-6 rounded-xl font-bold text-sm flex items-center justify-center gap-xs transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
+            product.inStock
+              ? 'bg-primary-container text-on-primary hover:shadow-[0_0_24px_rgba(57,255,20,0.6)] hover:brightness-110 cursor-pointer'
+              : 'bg-surface-container-high text-on-surface-variant'
+          }`}
         >
-          <span className="material-symbols-outlined">shopping_bag</span>
-          Agregar al Carrito
+          <span className="material-symbols-outlined">{product.inStock ? 'shopping_bag' : 'remove_shopping_cart'}</span>
+          {product.inStock ? 'Agregar al Carrito' : 'Sin Stock'}
         </button>
 
         <button className="w-full bg-transparent border border-secondary text-secondary py-4 px-6 rounded-xl font-bold text-sm flex items-center justify-center gap-xs hover:bg-secondary/10 transition-all active:scale-95 cursor-pointer">

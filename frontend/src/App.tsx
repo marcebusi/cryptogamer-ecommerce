@@ -18,7 +18,9 @@ import AdminProductPage       from './pages/AdminProductPage'
 import AdminCategoryPage      from './pages/AdminCategoryPage'
 import AdminEditorPage        from './pages/AdminEditorPage'
 import ResetPasswordPage      from './pages/ResetPasswordPage'
-
+import NotFoundPage           from './pages/NotFoundPage'
+import WhatsAppButton         from './components/common/WhatsAppButton'
+import { Toaster }            from 'react-hot-toast'
 function App() {
   return (
     <Router>
@@ -42,8 +44,11 @@ function App() {
                 <Route path="/admin/categorias"     element={<AdminCategoryPage />} />
                 <Route path="/admin/editor"         element={<AdminEditorPage />} />
                 <Route path="/reset-password"       element={<ResetPasswordPage />} />
+                <Route path="*"                     element={<NotFoundPage />} />
               </Routes>
               <Footer />
+              <Toaster position="bottom-right" />
+              <WhatsAppButton />
             </div>
           </CartProvider>
         </CategoriesProvider>

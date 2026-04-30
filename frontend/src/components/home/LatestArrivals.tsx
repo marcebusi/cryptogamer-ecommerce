@@ -53,6 +53,9 @@ export default function LatestArrivals() {
                     src={product.image}
                     alt={product.name}
                     loading="lazy"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIHZpZXdCb3g9IjAgMCAyNTAgMjUwIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0Ij48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWYyMTI4Ii8+PHBhdGggZD0iTTEyNSAxMDZhMTkgMTkgMCAxIDAgMCAzOGExOSAxOSAwIDAgMCAwLTM4em0tMjIgNTFhNDEgNDEgMCAwIDEgNDQtMTNsMjEgMjFWMTE2YTc1IDc1 0IDAgMC0xNTAtMHY1N2wyNi0yNmMxNS0xNSAzOS0xNSA1NCAweiIgZmlsbD0iIzM4M2I0ZCIvPjwvc3ZnPg=='
+                    }}
                   />
                   {product.badge && (
                     <div className={`absolute top-xs right-xs px-xs py-1 rounded font-label-caps text-[10px] ${badgeClasses[product.badgeColor ?? 'primary']}`}>
@@ -62,7 +65,8 @@ export default function LatestArrivals() {
                   <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-sm">
                     <button
                       onClick={e => { e.preventDefault(); addToCart(product) }}
-                      className="p-3 bg-primary-container text-on-primary rounded-full hover:scale-110 transition-transform cursor-pointer"
+                      disabled={!product.inStock}
+                      className="p-3 bg-primary-container text-on-primary rounded-full hover:scale-110 transition-transform cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       aria-label="Agregar al carrito">
                       <span className="material-symbols-outlined">add_shopping_cart</span>
                     </button>
@@ -79,7 +83,9 @@ export default function LatestArrivals() {
                 {product.name}
               </h4>
               <div className="flex justify-between items-center mt-1">
-                <span className="text-primary-container font-bold text-sm">${product.price.toFixed(0)}</span>
+                <span className={`font-bold text-sm ${product.inStock ? 'text-primary-container' : 'text-on-surface-variant'}`}>
+                  {product.inStock ? `$${product.price.toFixed(0)}` : 'Sin stock'}
+                </span>
                 <StarRating rating={product.rating} />
               </div>
             </div>

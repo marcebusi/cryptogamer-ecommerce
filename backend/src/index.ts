@@ -2,11 +2,14 @@ import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import path from 'path'
+import helmet from 'helmet'
+import rateLimit from 'express-rate-limit'
 import productRoutes  from './routes/productRoutes'
 import categoryRoutes from './routes/categoryRoutes'
 import authRoutes     from './routes/authRoutes'
 import adminRoutes    from './routes/adminRoutes'
 import uploadRoutes   from './routes/uploadRoutes'
+import contactRoutes  from './routes/contactRoutes'
 import { errorHandler, notFound } from './middleware/errorHandler'
 
 dotenv.config()
@@ -19,9 +22,12 @@ const allowedOrigins = [
   process.env.FRONTEND_URL,
 ].filter(Boolean) as string[]
 
+app.use(helmet())
+app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" })) // Allow loading images from same origin
+
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.some(o => origin.startsWith(o))) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true)
     } else {
       callback(new Error('Not allowed by CORS'))
@@ -32,6 +38,13 @@ app.use(cors({
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
+// Rate limiting para /api/auth
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 20, // 20 intentos por IP
+  message: { message: 'Demasiados intentos de inicio de sesión. Por favor, intenta de nuevo después de 15 minutos.' }
+})
+
 /* ── Static uploads ──────────────────────────────── */
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')))
 
@@ -40,11 +53,12 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
-app.use('/api/auth',       authRoutes)
+app.use('/api/auth',       authLimiter, authRoutes)
 app.use('/api/products',   productRoutes)
 app.use('/api/categories', categoryRoutes)
 app.use('/api/admin',      adminRoutes)
 app.use('/api/upload',     uploadRoutes)
+app.use('/api/contact',    contactRoutes)
 
 /* ── Error handling ──────────────────────────────── */
 app.use(notFound)

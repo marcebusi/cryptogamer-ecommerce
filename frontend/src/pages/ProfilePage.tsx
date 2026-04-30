@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import './ProfilePage.css'
 
-type Tab = 'profile' | 'password'
+import { api } from '../lib/api'
+
+type Tab = 'profile' | 'orders' | 'password'
 
 export default function ProfilePage() {
   const { user, isAuthenticated, isLoading, updateProfile, changePassword, logout } = useAuth()
@@ -25,6 +27,10 @@ export default function ProfilePage() {
   const [confirmPwd, setConfirmPwd] = useState('')
   const [showPwd,    setShowPwd]    = useState(false)
 
+  /* Orders */
+  const [orders, setOrders] = useState<any[]>([])
+  const [loadingOrders, setLoadingOrders] = useState(false)
+
   useEffect(() => {
     if (!isLoading && !isAuthenticated) navigate('/')
   }, [isLoading, isAuthenticated, navigate])
@@ -36,6 +42,16 @@ export default function ProfilePage() {
       setAddress(user.address ?? '')
     }
   }, [user])
+
+  useEffect(() => {
+    if (tab === 'orders' && orders.length === 0) {
+      setLoadingOrders(true)
+      api.get('/auth/me/orders')
+        .then(res => setOrders(res.data))
+        .catch(err => console.error(err))
+        .finally(() => setLoadingOrders(false))
+    }
+  }, [tab])
 
   const feedback = (err: unknown, ok: string) => {
     if (err) setError((err as Error).message)
@@ -115,6 +131,7 @@ export default function ProfilePage() {
             <div className="space-y-1">
               {([
                 { key: 'profile',  icon: 'manage_accounts', label: 'Mis datos'         },
+                { key: 'orders',   icon: 'shopping_bag',    label: 'Mis pedidos'        },
                 { key: 'password', icon: 'lock',            label: 'Cambiar contraseña' },
               ] as { key: Tab; icon: string; label: string }[]).map(item => (
                 <button
@@ -197,6 +214,56 @@ export default function ProfilePage() {
                       : <><span className="material-symbols-outlined text-sm">save</span>Guardar cambios</>}
                   </button>
                 </form>
+              </div>
+            )}
+
+            {/* ── Orders tab ───────────────────────── */}
+            {tab === 'orders' && (
+              <div className="profile-card rounded-2xl border border-purple-500/20 p-lg relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/40 to-transparent" />
+                <h2 className="text-lg font-black text-on-surface font-['Plus_Jakarta_Sans'] mb-lg flex items-center gap-xs">
+                  <span className="material-symbols-outlined text-purple-400">shopping_bag</span>
+                  Mis pedidos
+                </h2>
+
+                {loadingOrders ? (
+                  <div className="flex justify-center py-xl">
+                    <span className="material-symbols-outlined animate-spin text-purple-500 text-3xl">progress_activity</span>
+                  </div>
+                ) : orders.length === 0 ? (
+                  <div className="text-center py-xl text-on-surface-variant">
+                    <span className="material-symbols-outlined text-5xl opacity-20 block mb-sm">receipt_long</span>
+                    <p>Aún no realizaste ningún pedido.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {orders.map((order: any) => (
+                      <div key={order.id} className="bg-surface-container border border-white/5 rounded-xl p-4 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xs font-mono text-on-surface-variant">#{order.id.slice(-6).toUpperCase()}</span>
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                              order.status === 'PENDING' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
+                              order.status === 'COMPLETED' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                              'bg-surface-container-high text-on-surface-variant border border-white/10'
+                            }`}>
+                              {order.status}
+                            </span>
+                          </div>
+                          <p className="text-sm text-on-surface font-semibold">
+                            {new Date(order.createdAt).toLocaleDateString('es-AR', { year: 'numeric', month: 'short', day: 'numeric' })}
+                          </p>
+                          <p className="text-xs text-on-surface-variant mt-1">
+                            {order.items.length} {order.items.length === 1 ? 'producto' : 'productos'}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-black text-primary-container">${order.totalAmount.toFixed(0)}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 

@@ -145,3 +145,13 @@ model CartItem {
 
   @@map("cart_items")
 }
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+
+  @@map("contact_messages")
+}

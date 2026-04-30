@@ -39,20 +39,25 @@ export default function RelatedProducts() {
                 alt={product.name}
                 className="w-full h-full object-contain group-hover:scale-105 transition-transform"
                 src={product.image}
+                loading="lazy"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIHZpZXdCb3g9IjAgMCAyNTAgMjUwIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0Ij48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWYyMTI4Ii8+PHBhdGggZD0iTTEyNSAxMDZhMTkgMTkgMCAxIDAgMCAzOGExOSAxOSAwIDAgMCAwLTM4em0tMjIgNTFhNDEgNDEgMCAwIDEgNDQtMTNsMjEgMjFWMTE2YTc1IDc1 0IDAgMC0xNTAtMHY1N2wyNi0yNmMxNS0xNSAzOS0xNSA1NCAweiIgZmlsbD0iIzM4M2I0ZCIvPjwvc3ZnPg=='
+                }}
               />
             </div>
             <div className="p-md">
               <p className="text-[10px] text-label-caps text-on-surface-variant mb-1">
-                {categoryLabels[product.category] ?? product.category.toUpperCase()}
+                {product.categoryId ? 'PRODUCT' : 'ACCESSORY'}
               </p>
               <h4 className="font-bold text-lg mb-2 text-on-surface">{product.name}</h4>
               <div className="flex items-center justify-between">
-                <span className="text-xl font-black text-primary-container">
-                  ${product.price.toFixed(2)}
+                <span className={`text-xl font-black ${product.inStock ? 'text-primary-container' : 'text-on-surface-variant'}`}>
+                  {product.inStock ? `$${product.price.toFixed(2)}` : 'Sin stock'}
                 </span>
                 <button
                   onClick={() => addToCart(product)}
-                  className="material-symbols-outlined text-on-surface-variant hover:text-cyan-400 transition-colors cursor-pointer"
+                  disabled={!product.inStock}
+                  className="material-symbols-outlined text-on-surface-variant hover:text-cyan-400 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   aria-label="Add to cart"
                 >
                   add_shopping_cart

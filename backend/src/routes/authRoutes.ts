@@ -14,9 +14,12 @@ router.post('/login',          login)
 router.post('/forgot-password', forgotPassword)
 router.post('/reset-password',  resetPassword)
 
+import { getMyOrders } from '../controllers/orderController'
+
 /* Protected */
 router.get('/me',              authenticate, getMe)
 router.put('/me',              authenticate, updateProfile)
 router.put('/me/password',     authenticate, changePassword)
+router.get('/me/orders',       authenticate, getMyOrders)
 
 export default router

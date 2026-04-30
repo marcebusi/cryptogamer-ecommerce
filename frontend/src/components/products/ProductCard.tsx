@@ -27,6 +27,9 @@ export default function ProductCard({ product }: ProductCardProps) {
           src={product.image}
           alt={product.name}
           loading="lazy"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIHZpZXdCb3g9IjAgMCAyNTAgMjUwIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0Ij48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWYyMTI4Ii8+PHBhdGggZD0iTTEyNSAxMDZhMTkgMTkgMCAxIDAgMCAzOGExOSAxOSAwIDAgMCAwLTM4em0tMjIgNTFhNDEgNDEgMCAwIDEgNDQtMTNsMjEgMjFWMTE2YTc1IDc1 0IDAgMC0xNTAtMHY1N2wyNi0yNmMxNS0xNSAzOS0xNSA1NCAweiIgZmlsbD0iIzM4M2I0ZCIvPjwvc3ZnPg=='
+          }}
         />
         <div className="scanline-overlay absolute inset-0 opacity-15 pointer-events-none" />
 
@@ -47,7 +50,8 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="absolute inset-0 bg-background/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-xs">
           <button
             onClick={e => { e.preventDefault(); addToCart(product) }}
-            className={`flex items-center gap-xs px-sm py-xs rounded-full text-xs font-bold transition-all active:scale-95 cursor-pointer ${accent.btn}`}
+            disabled={!product.inStock}
+            className={`flex items-center gap-xs px-sm py-xs rounded-full text-xs font-bold transition-all active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${accent.btn}`}
             aria-label="Agregar al carrito"
           >
             <span className="material-symbols-outlined text-sm">add_shopping_cart</span>
@@ -70,8 +74,10 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         <div className="flex items-center justify-between mt-1 pt-1 border-t border-white/5">
           <div>
-            <span className={`font-black text-base ${accent.price}`}>${product.price.toFixed(0)}</span>
-            {product.originalPrice && (
+            <span className={`font-black text-base ${product.inStock ? accent.price : 'text-on-surface-variant'}`}>
+              {product.inStock ? `$${product.price.toFixed(0)}` : 'Sin stock'}
+            </span>
+            {product.originalPrice && product.inStock && (
               <span className="text-on-surface-variant line-through text-xs ml-1">
                 ${product.originalPrice.toFixed(0)}
               </span>
@@ -79,7 +85,8 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
           <button
             onClick={() => addToCart(product)}
-            className={`p-1.5 rounded-full transition-all active:scale-90 cursor-pointer ${accent.btn}`}
+            disabled={!product.inStock}
+            className={`p-1.5 rounded-full transition-all active:scale-90 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${accent.btn}`}
             aria-label="Agregar al carrito"
           >
             <span className="material-symbols-outlined text-sm">add_shopping_cart</span>
