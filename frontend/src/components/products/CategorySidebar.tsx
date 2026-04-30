@@ -3,12 +3,23 @@ import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useCategories, parseCategoryChildren } from '../../context/CategoriesContext'
 import './CategorySidebar.css'
 
+const CONDITIONS = [
+  { value: 'new',       label: 'Nuevo' },
+  { value: 'like-new',  label: 'Como Nuevo' },
+  { value: 'excellent', label: 'Excelente' },
+  { value: 'good',      label: 'Bueno' },
+]
+
 interface Props {
   mobileOpen?: boolean
   onMobileClose?: () => void
+  sliderMax?: number
+  onSliderMaxChange?: (v: number) => void
+  selectedConditions?: string[]
+  onConditionToggle?: (c: string) => void
 }
 
-export default function CategorySidebar({ mobileOpen, onMobileClose }: Props) {
+export default function CategorySidebar({ mobileOpen, onMobileClose, sliderMax = 2000, onSliderMaxChange, selectedConditions = [], onConditionToggle }: Props) {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { categories } = useCategories()
@@ -160,20 +171,45 @@ export default function CategorySidebar({ mobileOpen, onMobileClose }: Props) {
         <h3 className="text-xs font-bold uppercase tracking-widest text-purple-400 mb-sm font-['Plus_Jakarta_Sans']">Filtros</h3>
         <div className="space-y-md">
           <div>
-            <label className="block text-xs text-on-surface-variant mb-xs uppercase tracking-wider">Rango de precio</label>
-            <input type="range" className="w-full h-1 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary-container" />
-            <div className="flex justify-between mt-1.5 text-xs text-on-surface-variant"><span>$0</span><span>$2000+</span></div>
+            <label className="block text-xs text-on-surface-variant mb-xs uppercase tracking-wider">Precio máximo</label>
+            <input
+              type="range"
+              min={0}
+              max={2000}
+              step={50}
+              value={sliderMax}
+              onChange={e => onSliderMaxChange?.(Number(e.target.value))}
+              className="w-full h-1 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary-container"
+            />
+            <div className="flex justify-between mt-1.5 text-xs text-on-surface-variant">
+              <span>$0</span>
+              <span className={sliderMax < 2000 ? 'text-primary-container font-semibold' : ''}>
+                {sliderMax < 2000 ? `$${sliderMax}` : '$2000+'}
+              </span>
+            </div>
           </div>
           <div>
             <label className="block text-xs text-on-surface-variant mb-sm uppercase tracking-wider">Condición</label>
             <div className="space-y-xs">
-              {['Nuevo', 'Como Nuevo', 'Excelente', 'Bueno'].map(label => (
-                <label key={label} className="flex items-center gap-xs cursor-pointer group">
-                  <div className="w-4 h-4 border border-outline rounded flex items-center justify-center group-hover:border-tertiary-container transition-colors flex-shrink-0" />
-                  <span className="text-sm text-on-surface">{label}</span>
-                </label>
-              ))}
+              {CONDITIONS.map(({ value, label }) => {
+                const checked = selectedConditions.includes(value)
+                return (
+                  <label key={value} className="flex items-center gap-xs cursor-pointer group" onClick={() => onConditionToggle?.(value)}>
+                    <div className={`w-4 h-4 border rounded flex items-center justify-center transition-colors flex-shrink-0 ${checked ? 'bg-primary-container border-primary-container' : 'border-outline group-hover:border-tertiary-container'}`}>
+                      {checked && <span className="material-symbols-outlined text-[10px] text-black font-bold leading-none">check</span>}
+                    </div>
+                    <span className={`text-sm transition-colors ${checked ? 'text-on-surface font-medium' : 'text-on-surface-variant group-hover:text-on-surface'}`}>{label}</span>
+                  </label>
+                )
+              })}
             </div>
+            {selectedConditions.length > 0 && (
+              <button
+                onClick={() => CONDITIONS.forEach(c => selectedConditions.includes(c.value) && onConditionToggle?.(c.value))}
+                className="mt-xs text-xs text-error hover:text-error/80 transition-colors cursor-pointer">
+                Limpiar condición
+              </button>
+            )}
           </div>
         </div>
       </div>

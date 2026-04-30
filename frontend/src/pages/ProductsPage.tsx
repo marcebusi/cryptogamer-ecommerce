@@ -7,7 +7,6 @@ import { useCategories, parseCategoryChildren } from '../context/CategoriesConte
 
 type ViewMode = 'grid' | 'list'
 type StockFilter = 'all' | 'inStock' | 'outOfStock'
-type ConditionFilter = 'all' | 'new' | 'used'
 
 export default function ProductsPage() {
   const [searchParams] = useSearchParams()
@@ -18,8 +17,9 @@ export default function ProductsPage() {
   // Advanced filters (client-side after fetch)
   const [minPrice, setMinPrice] = useState('')
   const [maxPrice, setMaxPrice] = useState('')
+  const [sliderMax, setSliderMax] = useState(2000)
   const [stockFilter, setStockFilter] = useState<StockFilter>('all')
-  const [conditionFilter, setConditionFilter] = useState<ConditionFilter>('all')
+  const [selectedConditions, setSelectedConditions] = useState<string[]>([])
   const [filtersOpen, setFiltersOpen] = useState(false)
 
   const { categories } = useCategories()
@@ -30,14 +30,19 @@ export default function ProductsPage() {
 
   const { products: allProducts, isLoading } = useDynamicProducts({ category: cat || undefined })
 
+  const toggleCondition = (c: string) =>
+    setSelectedConditions(prev =>
+      prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c]
+    )
+
   const filtered = allProducts.filter(p => {
     if (sub && p.subcategory !== sub) return false
     if (minPrice && p.price < Number(minPrice)) return false
     if (maxPrice && p.price > Number(maxPrice)) return false
+    if (sliderMax < 2000 && p.price > sliderMax) return false
     if (stockFilter === 'inStock' && !p.inStock) return false
     if (stockFilter === 'outOfStock' && p.inStock) return false
-    if (conditionFilter === 'new' && p.condition && p.condition !== 'new') return false
-    if (conditionFilter === 'used' && (!p.condition || p.condition === 'new')) return false
+    if (selectedConditions.length > 0 && !selectedConditions.includes(p.condition ?? 'new')) return false
     if (search && !p.name.toLowerCase().includes(search.toLowerCase()) &&
         !p.description.toLowerCase().includes(search.toLowerCase())) return false
     return true
@@ -54,8 +59,8 @@ export default function ProductsPage() {
   const title    = sub ? subLabel : catLabel
   const subtitle = sub ? catDef?.name : cat ? 'Explorá nuestra selección.' : search ? '' : 'Todo el catálogo de Cryptogamer\'s.'
 
-  const hasActiveFilters = minPrice || maxPrice || stockFilter !== 'all' || conditionFilter !== 'all'
-  const clearFilters = () => { setMinPrice(''); setMaxPrice(''); setStockFilter('all'); setConditionFilter('all') }
+  const hasActiveFilters = minPrice || maxPrice || sliderMax < 2000 || stockFilter !== 'all' || selectedConditions.length > 0
+  const clearFilters = () => { setMinPrice(''); setMaxPrice(''); setSliderMax(2000); setStockFilter('all'); setSelectedConditions([]) }
 
   return (
     <main className="max-w-screen-2xl mx-auto px-4 md:px-8 py-lg">
@@ -80,7 +85,14 @@ export default function ProductsPage() {
       </div>
 
       <div className="flex flex-col md:flex-row gap-lg">
-        <CategorySidebar mobileOpen={sidebarOpen} onMobileClose={() => setSidebarOpen(false)} />
+        <CategorySidebar
+          mobileOpen={sidebarOpen}
+          onMobileClose={() => setSidebarOpen(false)}
+          sliderMax={sliderMax}
+          onSliderMaxChange={setSliderMax}
+          selectedConditions={selectedConditions}
+          onConditionToggle={toggleCondition}
+        />
 
         <section className="flex-1 min-w-0">
           {/* Desktop header */}
@@ -158,11 +170,11 @@ export default function ProductsPage() {
               {/* Condition */}
               <div className="flex flex-col gap-1">
                 <p className="text-xs text-on-surface-variant uppercase tracking-wider font-semibold">Condición</p>
-                <div className="flex gap-1">
-                  {(['all', 'new', 'used'] as ConditionFilter[]).map(v => (
-                    <button key={v} onClick={() => setConditionFilter(v)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all ${conditionFilter === v ? 'bg-purple-600 text-white' : 'bg-surface-container-high text-on-surface-variant hover:bg-white/5'}`}>
-                      {v === 'all' ? 'Todos' : v === 'new' ? 'Nuevo' : 'Usado'}
+                <div className="flex flex-wrap gap-1">
+                  {[{ value: 'new', label: 'Nuevo' }, { value: 'like-new', label: 'Como Nuevo' }, { value: 'excellent', label: 'Excelente' }, { value: 'good', label: 'Bueno' }].map(({ value, label }) => (
+                    <button key={value} onClick={() => toggleCondition(value)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all ${selectedConditions.includes(value) ? 'bg-purple-600 text-white' : 'bg-surface-container-high text-on-surface-variant hover:bg-white/5'}`}>
+                      {label}
                     </button>
                   ))}
                 </div>
