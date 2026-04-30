@@ -25,73 +25,136 @@ export default function UserMenu({ onClose }: Props) {
     .join('')
     .toUpperCase()
 
-  const itemCls = 'flex items-center gap-sm px-sm py-2.5 rounded-lg text-sm text-on-surface-variant hover:bg-white/5 hover:text-on-surface transition-all cursor-pointer w-full text-left'
-
   return (
     <div
       ref={ref}
-      className="absolute right-0 top-full mt-2 w-56 bg-[#0e0f16]/97 backdrop-blur-2xl border border-purple-500/20 rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.6)] overflow-hidden"
-      style={{ animation: 'auth-slide-up 0.18s ease-out' }}
+      className="absolute right-0 top-full mt-2 w-64 rounded-2xl overflow-hidden z-50"
+      style={{
+        background: 'rgba(8, 7, 18, 0.97)',
+        backdropFilter: 'blur(28px)',
+        WebkitBackdropFilter: 'blur(28px)',
+        border: '1px solid rgba(138, 43, 226, 0.2)',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.03) inset',
+        animation: 'auth-slide-up 0.18s ease-out',
+      }}
     >
-      {/* User info */}
-      <div className="px-sm py-sm border-b border-white/8 flex items-center gap-sm">
-        <div className="w-9 h-9 rounded-full bg-purple-600/30 border border-purple-500/40 flex items-center justify-center text-xs font-black text-purple-300 flex-shrink-0">
-          {initials}
+      {/* Top glow line */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/40 to-transparent pointer-events-none" />
+
+      {/* ── User header ──────────────────── */}
+      <div className="px-4 py-4 flex items-center gap-3">
+        {/* Avatar with gradient ring */}
+        <div className="relative flex-shrink-0">
+          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-600 to-violet-900 flex items-center justify-center text-sm font-black text-white shadow-[0_0_16px_rgba(138,43,226,0.5)]">
+            {initials}
+          </div>
+          {isAdmin && (
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-yellow-400 flex items-center justify-center shadow-lg">
+              <i className="fa-solid fa-bolt text-[8px] text-yellow-900" />
+            </div>
+          )}
         </div>
-        <div className="min-w-0">
-          <p className="text-sm font-bold text-on-surface truncate">{user?.name ?? 'Usuario'}</p>
-          <p className="text-[11px] text-on-surface-variant truncate">{user?.email}</p>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-bold text-white truncate leading-tight">{user?.name ?? 'Usuario'}</p>
+          <p className="text-[11px] text-purple-300/60 truncate mt-0.5">{user?.email}</p>
         </div>
       </div>
 
-      {/* Role badge */}
+      {/* Admin badge */}
       {isAdmin && (
-        <div className="px-sm py-xs border-b border-white/8">
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-600/20 border border-purple-500/30 text-purple-300 text-[10px] font-bold rounded-full uppercase tracking-widest">
-            <span className="material-symbols-outlined text-xs">admin_panel_settings</span>
+        <div className="px-4 pb-3">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest text-yellow-300"
+            style={{ background: 'rgba(234,179,8,0.12)', border: '1px solid rgba(234,179,8,0.25)' }}>
+            <i className="fa-solid fa-shield-halved text-[10px]" />
             Administrador
           </span>
         </div>
       )}
 
-      {/* Links */}
-      <div className="p-xs space-y-0.5">
-        <Link to="/perfil" onClick={onClose} className={itemCls}>
-          <span className="material-symbols-outlined text-base text-purple-400">manage_accounts</span>
+      {/* ── Divider ──────────────────────── */}
+      <div className="mx-4 border-t border-white/8 mb-1" />
+
+      {/* ── Menu items ───────────────────── */}
+      <div className="px-2 py-2 space-y-0.5">
+
+        <Link
+          to="/perfil"
+          onClick={onClose}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/6 transition-all group"
+        >
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-purple-600/15 group-hover:bg-purple-600/25 transition-colors flex-shrink-0">
+            <i className="fa-solid fa-user text-purple-400 text-xs" />
+          </div>
           Mi perfil
         </Link>
 
         {isAdmin && (
           <>
-            <Link to="/admin" onClick={onClose} className={itemCls}>
-              <span className="material-symbols-outlined text-base text-primary-container">dashboard</span>
+            <div className="px-3 pt-2 pb-1">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Admin</p>
+            </div>
+
+            <Link
+              to="/admin"
+              onClick={onClose}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/6 transition-all group"
+            >
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-cyan-500/12 group-hover:bg-cyan-500/22 transition-colors flex-shrink-0">
+                <i className="fa-solid fa-gauge text-cyan-400 text-xs" />
+              </div>
               Panel de Admin
             </Link>
-            <Link to="/admin/productos" onClick={onClose} className={itemCls}>
-              <span className="material-symbols-outlined text-base text-primary-container">add_box</span>
+
+            <Link
+              to="/admin/productos"
+              onClick={onClose}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/6 transition-all group"
+            >
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-green-500/12 group-hover:bg-green-500/22 transition-colors flex-shrink-0">
+                <i className="fa-solid fa-plus text-green-400 text-xs" />
+              </div>
               Agregar producto
             </Link>
-            <Link to="/admin/productos?manage=true" onClick={onClose} className={itemCls}>
-              <span className="material-symbols-outlined text-base text-tertiary-container">inventory_2</span>
+
+            <Link
+              to="/admin/productos?manage=true"
+              onClick={onClose}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/6 transition-all group"
+            >
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-orange-500/12 group-hover:bg-orange-500/22 transition-colors flex-shrink-0">
+                <i className="fa-solid fa-boxes-stacked text-orange-400 text-xs" />
+              </div>
               Gestionar catálogo
             </Link>
-            <Link to="/admin/categorias" onClick={onClose} className={itemCls}>
-              <span className="material-symbols-outlined text-base text-secondary-container">category</span>
+
+            <Link
+              to="/admin/categorias"
+              onClick={onClose}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/6 transition-all group"
+            >
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-purple-500/12 group-hover:bg-purple-500/22 transition-colors flex-shrink-0">
+                <i className="fa-solid fa-layer-group text-purple-400 text-xs" />
+              </div>
               Categorías
             </Link>
           </>
         )}
 
-        <div className="border-t border-white/8 pt-xs mt-xs">
-          <button
-            onClick={() => { logout(); onClose() }}
-            className={`${itemCls} text-error hover:text-error hover:bg-error/10`}
-          >
-            <span className="material-symbols-outlined text-base">logout</span>
-            Cerrar sesión
-          </button>
-        </div>
+        {/* ── Divider ──────────────────────── */}
+        <div className="mx-1 border-t border-white/8 my-1" />
+
+        <button
+          onClick={() => { logout(); onClose() }}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-500/8 transition-all group w-full text-left"
+        >
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-red-500/10 group-hover:bg-red-500/18 transition-colors flex-shrink-0">
+            <i className="fa-solid fa-arrow-right-from-bracket text-red-400 text-xs" />
+          </div>
+          Cerrar sesión
+        </button>
       </div>
+
+      <div className="h-2" />
     </div>
   )
 }
