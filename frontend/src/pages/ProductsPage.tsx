@@ -1,18 +1,17 @@
 import { useState } from 'react'
-import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import CategorySidebar from '../components/products/CategorySidebar'
 import ProductCard from '../components/products/ProductCard'
 import { useDynamicProducts } from '../hooks/useDynamicProducts'
 import { useCategories, parseCategoryChildren } from '../context/CategoriesContext'
 
-type ViewMode = 'grid' | 'list'
 type StockFilter = 'all' | 'inStock' | 'outOfStock'
+type SortOrder = 'default' | 'price-asc' | 'price-desc'
 
 export default function ProductsPage() {
   const [searchParams] = useSearchParams()
-  const navigate = useNavigate()
-  const [viewMode, setViewMode]       = useState<ViewMode>('grid')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sortOrder, setSortOrder] = useState<SortOrder>('default')
 
   // Advanced filters (client-side after fetch)
   const [minPrice, setMinPrice] = useState('')
@@ -46,6 +45,10 @@ export default function ProductsPage() {
     if (search && !p.name.toLowerCase().includes(search.toLowerCase()) &&
         !p.description.toLowerCase().includes(search.toLowerCase())) return false
     return true
+  }).sort((a, b) => {
+    if (sortOrder === 'price-asc') return a.price - b.price
+    if (sortOrder === 'price-desc') return b.price - a.price
+    return 0
   })
 
   const catDef   = categories.find(c => c.slug === cat)
@@ -66,7 +69,7 @@ export default function ProductsPage() {
     <main className="max-w-screen-2xl mx-auto px-4 md:px-8 py-lg">
 
       {/* Mobile filter bar */}
-      <div className="flex md:hidden items-center justify-between mb-md">
+      <div className="flex md:hidden items-center justify-between mb-md gap-xs">
         <button
           onClick={() => setSidebarOpen(true)}
           className="flex items-center gap-xs px-sm py-xs bg-surface-container border border-white/10 rounded-xl text-sm font-semibold text-on-surface cursor-pointer hover:border-purple-500/30 transition-colors">
@@ -74,14 +77,14 @@ export default function ProductsPage() {
           Filtros
           {(cat || sub) && <span className="w-2 h-2 rounded-full bg-primary-container inline-block" />}
         </button>
-        <div className="flex gap-xs">
-          <button onClick={() => setViewMode('grid')} className={`p-2 border rounded-lg cursor-pointer transition-colors ${viewMode === 'grid' ? 'border-tertiary-container text-tertiary-container' : 'border-outline-variant text-on-surface-variant'}`}>
-            <span className="material-symbols-outlined text-sm">grid_view</span>
-          </button>
-          <button onClick={() => setViewMode('list')} className={`p-2 border rounded-lg cursor-pointer transition-colors ${viewMode === 'list' ? 'border-tertiary-container text-tertiary-container' : 'border-outline-variant text-on-surface-variant'}`}>
-            <span className="material-symbols-outlined text-sm">list</span>
-          </button>
-        </div>
+        <select
+          value={sortOrder}
+          onChange={e => setSortOrder(e.target.value as SortOrder)}
+          className="bg-surface-container border border-white/10 rounded-xl px-sm py-xs text-sm text-on-surface cursor-pointer outline-none focus:border-purple-500/50">
+          <option value="default">Relevancia</option>
+          <option value="price-asc">Menor precio</option>
+          <option value="price-desc">Mayor precio</option>
+        </select>
       </div>
 
       <div className="flex flex-col md:flex-row gap-lg">
@@ -112,6 +115,18 @@ export default function ProductsPage() {
               </p>
             </div>
             <div className="flex items-center gap-sm flex-shrink-0">
+              {/* Sort */}
+              <div className="relative flex items-center">
+                <span className="material-symbols-outlined text-sm text-on-surface-variant absolute left-2.5 pointer-events-none">swap_vert</span>
+                <select
+                  value={sortOrder}
+                  onChange={e => setSortOrder(e.target.value as SortOrder)}
+                  className={`pl-8 pr-3 py-2 border rounded-xl text-sm font-semibold cursor-pointer outline-none transition-all appearance-none ${sortOrder !== 'default' ? 'border-purple-500/60 text-purple-300 bg-purple-600/10' : 'border-outline-variant text-on-surface-variant bg-transparent hover:border-purple-500/30'}`}>
+                  <option value="default">Relevancia</option>
+                  <option value="price-asc">Menor precio</option>
+                  <option value="price-desc">Mayor precio</option>
+                </select>
+              </div>
               {/* Filtros avanzados toggle */}
               <button
                 onClick={() => setFiltersOpen(p => !p)}
@@ -119,12 +134,6 @@ export default function ProductsPage() {
                 <span className="material-symbols-outlined text-sm">filter_list</span>
                 Filtros
                 {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-purple-400 inline-block" />}
-              </button>
-              <button onClick={() => setViewMode('grid')} className={`p-2 border rounded-lg cursor-pointer transition-colors ${viewMode === 'grid' ? 'border-tertiary-container text-tertiary-container' : 'border-outline-variant text-on-surface-variant hover:border-tertiary-container'}`}>
-                <span className="material-symbols-outlined">grid_view</span>
-              </button>
-              <button onClick={() => setViewMode('list')} className={`p-2 border rounded-lg cursor-pointer transition-colors ${viewMode === 'list' ? 'border-tertiary-container text-tertiary-container' : 'border-outline-variant text-on-surface-variant hover:border-tertiary-container'}`}>
-                <span className="material-symbols-outlined">list</span>
               </button>
             </div>
           </div>
@@ -226,10 +235,7 @@ export default function ProductsPage() {
           )}
 
           {!isLoading && filtered.length > 0 && (
-            <div className={viewMode === 'grid'
-              ? 'grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-md'
-              : 'flex flex-col gap-md'
-            }>
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-md">
               {filtered.map(product => <ProductCard key={product.id} product={product} />)}
             </div>
           )}
