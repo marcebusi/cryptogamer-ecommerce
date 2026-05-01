@@ -240,7 +240,7 @@ export default function AdminProductPage() {
         conditionTags: conditionTags.split(',').map(t => t.trim()).filter(Boolean),
         badge: badge || null, badgeColor,
         image: galleryImages[0]?.url || null,
-        images: JSON.stringify(galleryImages),
+        images: galleryImages,   // send as array — backend will JSON.stringify
         sortOrder: parseInt(sortOrder) || 0,
         isOffer,
         isFeatured,

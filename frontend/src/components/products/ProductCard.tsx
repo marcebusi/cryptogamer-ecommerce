@@ -18,11 +18,11 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart()
   const accent = accentClasses[product.badgeColor ?? 'primary']
 
-  // Get position/zoom from the first item in images[] (new format), fallback to main image
-  const firstImg = product.images?.[0]
+  // Safely get position/zoom from images[] (handles string[], object[], or undefined)
+  const firstImg = Array.isArray(product.images) ? product.images[0] : undefined
   const mainSrc  = firstImg ? imgUrl(firstImg) : product.image
   const pos      = firstImg ? imgPosition(firstImg) : '50% 50%'
-  const zoom     = firstImg ? imgZoom(firstImg) : 1
+  const zoom     = firstImg ? Math.max(0.5, Math.min(3, imgZoom(firstImg))) : 1
 
   return (
     <div className={`group relative bg-surface-container-low border border-white/5 rounded-xl overflow-hidden transition-all duration-500 flex flex-col ${accent.border} ${accent.shadow}`}>
@@ -30,14 +30,10 @@ export default function ProductCard({ product }: ProductCardProps) {
       {/* ── Image ──────────────────────────────── */}
       <Link to={`/products/${product.id}`} className="block relative overflow-hidden bg-[#0b0c12] flex-shrink-0" style={{ aspectRatio: '1 / 1' }}>
         <img
-          className="w-full h-full object-cover transition-transform duration-700 cursor-pointer"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 cursor-pointer"
           src={mainSrc || product.image}
           alt={product.name}
-          style={{
-            objectPosition: pos,
-            transform: `scale(${zoom})`,
-            transformOrigin: pos,
-          }}
+          style={{ objectPosition: pos, transform: zoom !== 1 ? `scale(${zoom})` : undefined, transformOrigin: pos }}
           loading="lazy"
           onError={(e) => {
             (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIHZpZXdCb3g9IjAgMCAyNTAgMjUwIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0Ij48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWYyMTI4Ii8+PHBhdGggZD0iTTEyNSAxMDZhMTkgMTkgMCAxIDAgMCAzOGExOSAxOSAwIDAgMCAwLTM4em0tMjIgNTFhNDEgNDEgMCAwIDEgNDQtMTNsMjEgMjFWMTE2YTc1IDc1 0IDAgMC0xNTAtMHY1N2wyNi0yNmMxNS0xNSAzOS0xNSA1NCAweiIgZmlsbD0iIzM4M2I0ZCIvPjwvc3ZnPg=='

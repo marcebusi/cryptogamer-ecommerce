@@ -1,4 +1,27 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { Component, type ReactNode, type ErrorInfo } from 'react'
+
+/* ── Error boundary — prevents total black screen on render errors ── */
+class AppErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  state = { error: null }
+  static getDerivedStateFromError(e: Error) { return { error: e } }
+  componentDidCatch(e: Error, info: ErrorInfo) { console.error('[App Error]', e, info) }
+  render() {
+    if (this.state.error) return (
+      <div style={{ minHeight:'100vh', background:'#080910', display:'flex', alignItems:'center', justifyContent:'center', padding:'2rem', textAlign:'center' }}>
+        <div>
+          <p style={{ color:'#39ff14', fontFamily:'monospace', fontSize:'1.2rem', marginBottom:'1rem' }}>Cryptogamer's</p>
+          <p style={{ color:'#e0e0e0', marginBottom:'0.5rem' }}>Algo salió mal al cargar esta sección.</p>
+          <button onClick={() => { this.setState({ error: null }); window.location.href = '/' }}
+            style={{ background:'#7c3aed', color:'#fff', border:'none', padding:'10px 24px', borderRadius:'10px', cursor:'pointer', fontWeight:'bold' }}>
+            Volver al inicio
+          </button>
+        </div>
+      </div>
+    )
+    return this.props.children
+  }
+}
 import { CartProvider }       from './context/CartContext'
 import { AuthProvider }       from './context/AuthContext'
 import { CategoriesProvider } from './context/CategoriesContext'
@@ -27,6 +50,7 @@ import WhatsAppButton         from './components/common/WhatsAppButton'
 import { Toaster }            from 'react-hot-toast'
 function App() {
   return (
+    <AppErrorBoundary>
     <Router>
       <AuthProvider>
         <CategoriesProvider>
@@ -62,6 +86,7 @@ function App() {
         </CategoriesProvider>
       </AuthProvider>
     </Router>
+    </AppErrorBoundary>
   )
 }
 

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useCart } from '../../context/CartContext'
 import { useDynamicProducts } from '../../hooks/useDynamicProducts'
+import { imgUrl, imgPosition, imgZoom } from '../../types'
 import StarRating from './StarRating'
 import './LatestArrivals.css'
 
@@ -44,14 +45,20 @@ export default function LatestArrivals() {
       {/* Grid */}
       {!isLoading && products.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-gutter">
-          {products.map(product => (
+          {products.map(product => {
+            const fi  = Array.isArray(product.images) ? product.images[0] : undefined
+            const src = fi ? imgUrl(fi) : product.image
+            const pos = fi ? imgPosition(fi) : '50% 50%'
+            const zm  = fi ? Math.max(0.5, Math.min(3, imgZoom(fi))) : 1
+            return (
             <div key={product.id} className="group">
               <Link to={`/products/${product.id}`}>
                 <div className="relative rounded-xl overflow-hidden aspect-square mb-sm bg-[#0b0c12] border border-white/5 scanline cursor-pointer">
                   <img
-                    className="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-500"
-                    src={product.image}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    src={src || product.image}
                     alt={product.name}
+                    style={{ objectPosition: pos, transform: zm !== 1 ? `scale(${zm})` : undefined, transformOrigin: pos }}
                     loading="lazy"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIHZpZXdCb3g9IjAgMCAyNTAgMjUwIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0Ij48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWYyMTI4Ii8+PHBhdGggZD0iTTEyNSAxMDZhMTkgMTkgMCAxIDAgMCAzOGExOSAxOSAwIDAgMCAwLTM4em0tMjIgNTFhNDEgNDEgMCAwIDEgNDQtMTNsMjEgMjFWMTE2YTc1IDc1 0IDAgMC0xNTAtMHY1N2wyNi0yNmMxNS0xNSAzOS0xNSA1NCAweiIgZmlsbD0iIzM4M2I0ZCIvPjwvc3ZnPg=='
@@ -89,7 +96,8 @@ export default function LatestArrivals() {
                 <StarRating rating={product.rating} />
               </div>
             </div>
-          ))}
+          )
+          })}
         </div>
       )}
 
