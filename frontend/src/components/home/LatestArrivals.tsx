@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom'
 import { useCart } from '../../context/CartContext'
 import { useDynamicProducts } from '../../hooks/useDynamicProducts'
 import { imgUrl, imgPosition, imgZoom } from '../../types'
-import StarRating from './StarRating'
 import './LatestArrivals.css'
 
 const badgeClasses: Record<string, string> = {
@@ -54,16 +53,18 @@ export default function LatestArrivals() {
             <div key={product.id} className="group">
               <Link to={`/products/${product.id}`}>
                 <div className="relative rounded-xl overflow-hidden aspect-square mb-sm bg-[#0b0c12] border border-white/5 scanline cursor-pointer">
+                  <div className="w-full h-full group-hover:scale-105 transition-transform duration-500">
                   <img
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover"
                     src={src || product.image}
                     alt={product.name}
-                    style={{ objectPosition: pos, transform: zm !== 1 ? `scale(${zm})` : undefined, transformOrigin: pos }}
+                    style={{ objectPosition: pos, ...(zm !== 1 && { transform: `scale(${zm})`, transformOrigin: pos }) }}
                     loading="lazy"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIHZpZXdCb3g9IjAgMCAyNTAgMjUwIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0Ij48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWYyMTI4Ii8+PHBhdGggZD0iTTEyNSAxMDZhMTkgMTkgMCAxIDAgMCAzOGExOSAxOSAwIDAgMCAwLTM4em0tMjIgNTFhNDEgNDEgMCAwIDEgNDQtMTNsMjEgMjFWMTE2YTc1IDc1 0IDAgMC0xNTAtMHY1N2wyNi0yNmMxNS0xNSAzOS0xNSA1NCAweiIgZmlsbD0iIzM4M2I0ZCIvPjwvc3ZnPg=='
                     }}
                   />
+                  </div>
                   {product.badge && (
                     <div className={`absolute top-xs right-xs px-xs py-1 rounded font-label-caps text-[10px] ${badgeClasses[product.badgeColor ?? 'primary']}`}>
                       {product.badge}
@@ -89,11 +90,10 @@ export default function LatestArrivals() {
               <h4 className="text-sm font-semibold text-on-background group-hover:text-primary-container transition-colors leading-tight line-clamp-2 font-['Plus_Jakarta_Sans']">
                 {product.name}
               </h4>
-              <div className="flex justify-between items-center mt-1">
+              <div className="mt-1">
                 <span className={`font-bold text-sm ${product.inStock ? 'text-primary-container' : 'text-on-surface-variant'}`}>
                   {product.inStock ? `$${product.price.toFixed(0)}` : 'Sin stock'}
                 </span>
-                <StarRating rating={product.rating} />
               </div>
             </div>
           )

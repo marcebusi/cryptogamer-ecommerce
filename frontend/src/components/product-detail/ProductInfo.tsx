@@ -1,7 +1,6 @@
 import { useCart } from '../../context/CartContext'
 import type { Product, ProductCondition } from '../../types'
 import SpecsGrid from './SpecsGrid'
-import StarRating from '../home/StarRating'
 import './ProductInfo.css'
 
 interface ProductInfoProps {
@@ -43,12 +42,6 @@ export default function ProductInfo({ product }: ProductInfoProps) {
           </span>
         </h1>
 
-        <div className="flex items-center gap-xs mt-sm flex-wrap">
-          <StarRating rating={product.rating} />
-          {product.reviewCount && (
-            <span className="text-sm text-on-surface-variant">({product.reviewCount} Reseñas)</span>
-          )}
-        </div>
       </div>
 
       {/* ── Price ───────────────────────────── */}
