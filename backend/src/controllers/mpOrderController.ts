@@ -1,14 +1,15 @@
 import { MercadoPagoConfig, Preference } from 'mercadopago'
-import { Request, Response } from 'express'
+import { Response } from 'express'
 import { PrismaClient } from '@prisma/client'
 import crypto from 'crypto'
+import { AuthRequest } from '../middleware/auth'
 
 const prisma = new PrismaClient()
 const mp = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN! })
 
 /* ── POST /api/orders ─────────────────────────────── */
 /* Called by frontend checkout when user clicks "Pagar" */
-export const createOrder = async (req: Request, res: Response): Promise<void> => {
+export const createOrder = async (req: AuthRequest, res: Response): Promise<void> => {
   const userId = req.userId
   if (!userId) {
     res.status(401).json({ message: 'No autenticado' })
@@ -83,9 +84,33 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
   }
 }
 
+/* ── GET /api/orders/me ───────────────────────────── */
+export const getUserOrders = async (req: AuthRequest, res: Response): Promise<void> => {
+  const userId = req.userId
+  if (!userId) { res.status(401).json({ message: 'No autenticado' }); return }
+
+  try {
+    const orders = await prisma.order.findMany({
+      where: { userId },
+      include: {
+        seller: { select: { name: true } },
+        items: {
+          include: {
+            product: { select: { id: true, name: true, image: true, slug: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+    res.json(orders)
+  } catch {
+    res.status(500).json({ message: 'Error al obtener pedidos' })
+  }
+}
+
 /* ── POST /api/orders/webhook ─────────────────────── */
 /* Mercado Pago notifies payment here */
-export const handleWebhook = async (req: Request, res: Response): Promise<void> => {
+export const handleWebhook = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const secret = process.env.MP_WEBHOOK_SECRET
     if (secret) {
@@ -113,7 +138,7 @@ export const handleWebhook = async (req: Request, res: Response): Promise<void> 
       const mpRes = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
         headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` },
       })
-      const payment = await mpRes.json()
+      const payment = await mpRes.json() as { external_reference?: string; status?: string }
 
       const orderId = payment.external_reference
       const status  = payment.status // 'approved' | 'pending' | 'rejected'

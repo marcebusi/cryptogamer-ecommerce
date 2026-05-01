@@ -47,7 +47,7 @@ export default function RelatedProducts() {
             </div>
             <div className="p-md">
               <p className="text-[10px] text-label-caps text-on-surface-variant mb-1">
-                {product.categoryId ? 'PRODUCT' : 'ACCESSORY'}
+                {product.category ? 'PRODUCT' : 'ACCESSORY'}
               </p>
               <h4 className="font-bold text-lg mb-2 text-on-surface">{product.name}</h4>
               <div className="flex items-center justify-between">

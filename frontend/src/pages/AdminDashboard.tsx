@@ -46,6 +46,13 @@ const CARDS = [
     color: 'primary',
   },
   {
+    to:    '/admin/pedidos',
+    icon:  'receipt_long',
+    title: 'Pedidos',
+    desc:  'Historial completo de órdenes recibidas con estado y detalle.',
+    color: 'secondary',
+  },
+  {
     to:    '/admin/analytics',
     icon:  'bar_chart',
     title: 'Analytics',
