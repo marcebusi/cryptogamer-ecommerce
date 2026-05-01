@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useCart } from '../../context/CartContext'
+import { imgUrl, imgPosition, imgZoom } from '../../types'
 import type { Product } from '../../types'
 import './ProductCard.css'
 
@@ -17,15 +18,26 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart()
   const accent = accentClasses[product.badgeColor ?? 'primary']
 
+  // Get position/zoom from the first item in images[] (new format), fallback to main image
+  const firstImg = product.images?.[0]
+  const mainSrc  = firstImg ? imgUrl(firstImg) : product.image
+  const pos      = firstImg ? imgPosition(firstImg) : '50% 50%'
+  const zoom     = firstImg ? imgZoom(firstImg) : 1
+
   return (
     <div className={`group relative bg-surface-container-low border border-white/5 rounded-xl overflow-hidden transition-all duration-500 flex flex-col ${accent.border} ${accent.shadow}`}>
 
       {/* ── Image ──────────────────────────────── */}
       <Link to={`/products/${product.id}`} className="block relative overflow-hidden bg-[#0b0c12] flex-shrink-0" style={{ aspectRatio: '1 / 1' }}>
         <img
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 cursor-pointer"
-          src={product.image}
+          className="w-full h-full object-cover transition-transform duration-700 cursor-pointer"
+          src={mainSrc || product.image}
           alt={product.name}
+          style={{
+            objectPosition: pos,
+            transform: `scale(${zoom})`,
+            transformOrigin: pos,
+          }}
           loading="lazy"
           onError={(e) => {
             (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIHZpZXdCb3g9IjAgMCAyNTAgMjUwIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0Ij48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWYyMTI4Ii8+PHBhdGggZD0iTTEyNSAxMDZhMTkgMTkgMCAxIDAgMCAzOGExOSAxOSAwIDAgMCAwLTM4em0tMjIgNTFhNDEgNDEgMCAwIDEgNDQtMTNsMjEgMjFWMTE2YTc1IDc1 0IDAgMC0xNTAtMHY1N2wyNi0yNmMxNS0xNSAzOS0xNSA1NCAweiIgZmlsbD0iIzM4M2I0ZCIvPjwvc3ZnPg=='

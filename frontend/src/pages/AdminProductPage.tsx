@@ -88,7 +88,7 @@ export default function AdminProductPage() {
   const [conditionTags,      setConditionTags]      = useState('')
   const [badge,              setBadge]              = useState('')
   const [badgeColor,         setBadgeColor]         = useState<'primary'|'secondary'|'tertiary'>('primary')
-  const [galleryImages,      setGalleryImages]      = useState<string[]>([])
+  const [galleryImages, setGalleryImages] = useState<{url:string;position:string;zoom:number}[]>([])
   const [sortOrder,          setSortOrder]          = useState('0')
   const [isOffer,            setIsOffer]            = useState(false)
   const [isFeatured,         setIsFeatured]         = useState(false)
@@ -107,7 +107,10 @@ export default function AdminProductPage() {
       const uploads = await Promise.all(
         Array.from(files).slice(0, 8 - galleryImages.length).map(f => api.uploadImage(f))
       )
-      setGalleryImages(prev => [...prev, ...uploads.map(r => r.url)].slice(0, 8))
+      setGalleryImages(prev => [
+        ...prev,
+        ...uploads.map(r => ({ url: r.url, position: '50% 50%', zoom: 1 })),
+      ].slice(0, 8))
     } catch (err) {
       setUploadError((err as Error).message)
     } finally {
@@ -121,11 +124,25 @@ export default function AdminProductPage() {
   const moveImgToFront = (idx: number) =>
     setGalleryImages(prev => [prev[idx], ...prev.filter((_, i) => i !== idx)])
 
+  const updateImgSetting = (idx: number, patch: Partial<{position: string; zoom: number}>) =>
+    setGalleryImages(prev => prev.map((img, i) => i === idx ? { ...img, ...patch } : img))
+
+  // Position editor state
+  const [editingIdx, setEditingIdx] = useState<number | null>(null)
+
+  // 9-point focal grid
+  const FOCAL_POINTS = [
+    { label: '↖', pos: '15% 15%' }, { label: '↑', pos: '50% 15%' }, { label: '↗', pos: '85% 15%' },
+    { label: '←', pos: '15% 50%' }, { label: '⊙', pos: '50% 50%' }, { label: '→', pos: '85% 50%' },
+    { label: '↙', pos: '15% 85%' }, { label: '↓', pos: '50% 85%' }, { label: '↘', pos: '85% 85%' },
+  ]
+
   const handleImgDragStart = (idx: number) => { dragImgIdx.current = idx }
   const handleImgDrop = (toIdx: number) => {
     const from = dragImgIdx.current
     dragImgIdx.current = null
     if (from === null || from === toIdx) return
+    setEditingIdx(null)
     setGalleryImages(prev => {
       const arr = [...prev]
       const [item] = arr.splice(from, 1)
@@ -178,7 +195,7 @@ export default function AdminProductPage() {
         conditionDescription: conditionDesc || null,
         conditionTags: conditionTags.split(',').map(t => t.trim()).filter(Boolean),
         badge: badge || null, badgeColor,
-        image: galleryImages[0] || null,
+        image: galleryImages[0]?.url || null,
         images: JSON.stringify(galleryImages),
         sortOrder: parseInt(sortOrder) || 0,
         isOffer,
@@ -849,51 +866,89 @@ export default function AdminProductPage() {
 
               {/* Grid de imágenes */}
               <div className="grid grid-cols-2 gap-xs mb-sm">
-                {galleryImages.map((url, idx) => (
-                  <div
-                    key={url + idx}
-                    draggable
-                    onDragStart={() => handleImgDragStart(idx)}
-                    onDragOver={e => e.preventDefault()}
-                    onDrop={() => handleImgDrop(idx)}
-                    className="relative group aspect-square rounded-xl overflow-hidden border border-white/10 bg-[#07080d] cursor-grab active:cursor-grabbing"
-                  >
-                    <img
-                      src={url}
-                      alt={`Imagen ${idx + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                    {/* Drag overlay hint */}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-xs">
-                      <span className="material-symbols-outlined text-white/80 text-base">drag_indicator</span>
-                    </div>
-                    {/* Main badge */}
-                    {idx === 0 && (
-                      <span className="absolute top-1 left-1 bg-primary-container text-on-primary text-[9px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-wide leading-none">
-                        Principal
-                      </span>
-                    )}
-                    {/* Actions */}
-                    <div className="absolute top-1 right-1 flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {idx !== 0 && (
-                        <button
-                          type="button"
-                          onClick={() => moveImgToFront(idx)}
-                          title="Poner como principal"
-                          className="w-6 h-6 rounded-md bg-primary-container/90 flex items-center justify-center cursor-pointer"
-                        >
-                          <span className="material-symbols-outlined text-[12px] text-on-primary">star</span>
-                        </button>
+                {galleryImages.map((img, idx) => (
+                  <div key={img.url + idx} className="flex flex-col gap-0.5">
+                    <div
+                      draggable
+                      onDragStart={() => handleImgDragStart(idx)}
+                      onDragOver={e => e.preventDefault()}
+                      onDrop={() => handleImgDrop(idx)}
+                      className="relative group aspect-square rounded-xl overflow-hidden border border-white/10 bg-[#07080d] cursor-grab active:cursor-grabbing"
+                    >
+                      <img
+                        src={img.url}
+                        alt={`Imagen ${idx + 1}`}
+                        className="w-full h-full object-cover transition-all"
+                        style={{ objectPosition: img.position, transform: `scale(${img.zoom})`, transformOrigin: img.position }}
+                      />
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-xs">
+                        <span className="material-symbols-outlined text-white/80 text-base">drag_indicator</span>
+                      </div>
+                      {/* Main badge */}
+                      {idx === 0 && (
+                        <span className="absolute top-1 left-1 bg-primary-container text-on-primary text-[9px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-wide leading-none">
+                          Principal
+                        </span>
                       )}
-                      <button
-                        type="button"
-                        onClick={() => removeGalleryImg(idx)}
-                        title="Eliminar"
-                        className="w-6 h-6 rounded-md bg-error/90 flex items-center justify-center cursor-pointer"
-                      >
-                        <span className="material-symbols-outlined text-[12px] text-white">close</span>
-                      </button>
+                      {/* Action buttons */}
+                      <div className="absolute top-1 right-1 flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button type="button" onClick={() => setEditingIdx(editingIdx === idx ? null : idx)}
+                          title="Ajustar encuadre"
+                          className="w-6 h-6 rounded-md bg-purple-600/90 flex items-center justify-center cursor-pointer">
+                          <span className="material-symbols-outlined text-[12px] text-white">crop_free</span>
+                        </button>
+                        {idx !== 0 && (
+                          <button type="button" onClick={() => moveImgToFront(idx)} title="Poner como principal"
+                            className="w-6 h-6 rounded-md bg-primary-container/90 flex items-center justify-center cursor-pointer">
+                            <span className="material-symbols-outlined text-[12px] text-on-primary">star</span>
+                          </button>
+                        )}
+                        <button type="button" onClick={() => removeGalleryImg(idx)} title="Eliminar"
+                          className="w-6 h-6 rounded-md bg-error/90 flex items-center justify-center cursor-pointer">
+                          <span className="material-symbols-outlined text-[12px] text-white">close</span>
+                        </button>
+                      </div>
                     </div>
+
+                    {/* ── Position editor (inline) ── */}
+                    {editingIdx === idx && (
+                      <div className="bg-surface-container-high border border-white/10 rounded-xl p-xs space-y-xs">
+                        <p className="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wider">Encuadre</p>
+                        {/* 3×3 focal grid */}
+                        <div className="grid grid-cols-3 gap-0.5">
+                          {FOCAL_POINTS.map(fp => (
+                            <button
+                              key={fp.pos}
+                              type="button"
+                              onClick={() => updateImgSetting(idx, { position: fp.pos })}
+                              className={`h-7 rounded text-[11px] transition-all cursor-pointer font-bold ${
+                                img.position === fp.pos
+                                  ? 'bg-primary-container text-on-primary'
+                                  : 'bg-surface-container text-on-surface-variant hover:bg-white/10'
+                              }`}
+                            >{fp.label}</button>
+                          ))}
+                        </div>
+                        {/* Zoom slider */}
+                        <div>
+                          <div className="flex justify-between mb-0.5">
+                            <span className="text-[10px] text-on-surface-variant">Zoom</span>
+                            <span className="text-[10px] text-primary-container font-mono">{img.zoom.toFixed(1)}×</span>
+                          </div>
+                          <input
+                            type="range" min="0.8" max="2.5" step="0.1"
+                            value={img.zoom}
+                            onChange={e => updateImgSetting(idx, { zoom: parseFloat(e.target.value) })}
+                            className="w-full accent-primary-container h-1 cursor-pointer"
+                          />
+                        </div>
+                        <button type="button" onClick={() => updateImgSetting(idx, { position: '50% 50%', zoom: 1 })}
+                          className="w-full text-[10px] text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer py-0.5">
+                          Resetear
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
 
@@ -946,7 +1001,8 @@ export default function AdminProductPage() {
               <div className="rounded-xl border border-white/5 overflow-hidden bg-surface-container-low">
                 <div className="aspect-square bg-[#07080d] flex items-center justify-center relative overflow-hidden">
                   {galleryImages[0]
-                    ? <img src={galleryImages[0]} className="w-full h-full object-cover" alt="preview" />
+                    ? <img src={galleryImages[0].url} className="w-full h-full object-cover" alt="preview"
+                        style={{ objectPosition: galleryImages[0].position, transform: `scale(${galleryImages[0].zoom})`, transformOrigin: galleryImages[0].position }} />
                     : <span className="material-symbols-outlined text-4xl text-on-surface-variant opacity-20">image</span>
                   }
                   {badge && (
