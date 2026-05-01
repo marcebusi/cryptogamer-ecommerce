@@ -112,14 +112,17 @@ export const getStoreConfig = async (_req: Request, res: Response): Promise<void
 
 export const updateStoreConfig = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { subscriptionActive, subscriptionExpiresAt, planName, notes } = req.body
+    const { subscriptionActive, subscriptionExpiresAt, planName, notes, enabledSections } = req.body
     const existing = await prisma.storeConfig.findFirst()
 
     const data = {
-      subscriptionActive: subscriptionActive ?? true,
+      subscriptionActive:    subscriptionActive    ?? true,
       subscriptionExpiresAt: subscriptionExpiresAt ? new Date(subscriptionExpiresAt) : null,
-      planName:  planName  ?? 'PRO',
-      notes:     notes     ?? '',
+      planName:              planName  ?? 'PRO',
+      notes:                 notes     ?? '',
+      enabledSections:       Array.isArray(enabledSections)
+                               ? JSON.stringify(enabledSections)
+                               : (enabledSections ?? '["orders","analytics","sellers","contact"]'),
     }
 
     const config = existing
@@ -129,5 +132,21 @@ export const updateStoreConfig = async (req: Request, res: Response): Promise<vo
     res.json(config)
   } catch {
     res.status(500).json({ message: 'Error al actualizar config.' })
+  }
+}
+
+/* ── GET /api/superadmin/sections (public for admin) ── */
+export const getEnabledSections = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const config = await prisma.storeConfig.findFirst({
+      select: { enabledSections: true, subscriptionActive: true, subscriptionExpiresAt: true },
+    })
+    const raw = config?.enabledSections ?? '["orders","analytics","sellers","contact"]'
+    const sections: string[] = JSON.parse(raw)
+    const active = config?.subscriptionActive ?? true
+    const expired = config?.subscriptionExpiresAt ? new Date(config.subscriptionExpiresAt) < new Date() : false
+    res.json({ sections: active && !expired ? sections : [] })
+  } catch {
+    res.json({ sections: ['orders', 'analytics', 'sellers', 'contact'] })
   }
 }

@@ -115,7 +115,7 @@ export default function UserMenu({ onClose }: Props) {
           </>
         )}
 
-        {isAdmin && (
+        {isAdmin && !isSuperAdmin && (
           <>
             <div className="px-3 pt-2 pb-1">
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Admin</p>

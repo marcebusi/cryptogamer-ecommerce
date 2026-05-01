@@ -184,6 +184,8 @@ model StoreConfig {
   subscriptionExpiresAt DateTime?
   planName              String    @default("PRO")
   notes                 String    @default("")
+  // JSON array of enabled section keys, e.g. ["orders","analytics","sellers"]
+  enabledSections       String    @default("[\"orders\",\"analytics\",\"sellers\",\"contact\"]")
   updatedAt             DateTime  @updatedAt
 
   @@map("store_config")

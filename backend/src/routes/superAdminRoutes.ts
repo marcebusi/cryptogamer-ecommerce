@@ -4,10 +4,15 @@ import {
   getOverview, getUsers, updateUserRole,
   resetUserPassword, deleteUser,
   getStoreConfig, updateStoreConfig,
+  getEnabledSections,
 } from '../controllers/superAdminController'
 
 const router = Router()
 
+// Public for any authenticated admin — reads which sections are enabled
+router.get('/sections', authenticate, getEnabledSections)
+
+// Everything else requires superadmin
 router.use(authenticate, requireSuperAdmin)
 
 router.get('/overview',              getOverview)
