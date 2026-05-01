@@ -20,7 +20,10 @@
       "Bash(git push *)",
       "Bash(./node_modules/.bin/prisma migrate *)",
       "Bash(./node_modules/.bin/prisma generate *)",
-      "Bash(./node_modules/.bin/ts-node prisma/seed.ts)"
+      "Bash(./node_modules/.bin/ts-node prisma/seed.ts)",
+      "Bash(python3 \".claude/skills/ui-ux-pro-max/scripts/search.py\" \"gaming ecommerce dark neon transactional email\" --design-system -f markdown)",
+      "Bash(python \".claude/skills/ui-ux-pro-max/scripts/search.py\" \"gaming ecommerce dark neon transactional email\" --design-system -f markdown)",
+      "Bash(del src\\\\controllers\\\\employeeController.ts)"
     ]
   }
 }
