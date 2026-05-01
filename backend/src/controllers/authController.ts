@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
 import { PrismaClient } from '@prisma/client'
 import { AuthRequest } from '../middleware/auth'
+import { sendEmail, emailTemplates } from '../services/emailService'
 
 const prisma = new PrismaClient()
 
@@ -166,13 +167,10 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
 
     const resetUrl = `${process.env.FRONTEND_URL ?? 'http://localhost:5173'}/reset-password?token=${resetToken}`
 
-    // In dev: print link to console. In prod: wire up a real email service (SendGrid, Resend, etc.)
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('\n🔑 ─── PASSWORD RESET LINK ───────────────────────')
-      console.log(`   User : ${user.email}`)
-      console.log(`   Link : ${resetUrl}`)
-      console.log('─────────────────────────────────────────────────\n')
-    }
+    const { subject, html } = emailTemplates.passwordReset(resetUrl, user.name ?? undefined)
+    sendEmail(user.email, subject, html).catch(err =>
+      console.error('[forgotPassword] email error:', err)
+    )
 
     res.json(SUCCESS)
   } catch (err) {

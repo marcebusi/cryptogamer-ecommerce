@@ -3,9 +3,12 @@ import { Response } from 'express'
 import { PrismaClient } from '@prisma/client'
 import crypto from 'crypto'
 import { AuthRequest } from '../middleware/auth'
+import { sendEmail, emailTemplates } from '../services/emailService'
 
 const prisma = new PrismaClient()
 const mp = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN! })
+
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? process.env.SMTP_USER ?? ''
 
 /* ── POST /api/orders ─────────────────────────────── */
 /* Called by frontend checkout when user clicks "Pagar" */
@@ -144,10 +147,59 @@ export const handleWebhook = async (req: AuthRequest, res: Response): Promise<vo
       const status  = payment.status // 'approved' | 'pending' | 'rejected'
 
       if (orderId && status === 'approved') {
-        await prisma.order.update({
+        const updatedOrder = await prisma.order.update({
           where: { id: orderId },
           data:  { status: 'COMPLETED' },
+          include: {
+            user:   true,
+            seller: true,
+            items:  { include: { product: { select: { name: true } } } },
+          },
         })
+
+        // Send confirmation email to buyer
+        const emailItems = updatedOrder.items.map(i => ({
+          name: i.product?.name ?? 'Producto', qty: i.quantity, price: i.price,
+        }))
+        const orderNum = updatedOrder.id.slice(-8).toUpperCase()
+
+        const buyerEmail = emailTemplates.orderConfirmation({
+          orderNumber:          orderNum,
+          total:                updatedOrder.totalAmount,
+          buyerName:            updatedOrder.user.name ?? 'Cliente',
+          items:                emailItems,
+          sellerName:           updatedOrder.seller?.name,
+          sellerAlias:          updatedOrder.seller?.alias,
+          sellerBank:           updatedOrder.seller?.bank,
+          sellerAccountHolder:  updatedOrder.seller?.name, // same field in this schema
+        })
+        sendEmail(updatedOrder.user.email, buyerEmail.subject, buyerEmail.html).catch(console.error)
+
+        // Notify admin
+        if (ADMIN_EMAIL) {
+          const adminEmail = emailTemplates.newOrderAdmin({
+            orderNumber: orderNum,
+            buyerName:   updatedOrder.user.name ?? 'Cliente',
+            buyerEmail:  updatedOrder.user.email,
+            sellerName:  updatedOrder.seller?.name,
+            total:       updatedOrder.totalAmount,
+          })
+          sendEmail(ADMIN_EMAIL, adminEmail.subject, adminEmail.html).catch(console.error)
+        }
+
+        // Notify seller if they have a whatsapp/contact — use admin email for now
+        if (updatedOrder.seller && ADMIN_EMAIL) {
+          const sellerEmail = emailTemplates.newOrderSeller({
+            sellerName:  updatedOrder.seller.name,
+            orderNumber: orderNum,
+            buyerName:   updatedOrder.user.name ?? 'Cliente',
+            buyerEmail:  updatedOrder.user.email,
+            total:       updatedOrder.totalAmount,
+            items:       emailItems,
+          })
+          sendEmail(ADMIN_EMAIL, sellerEmail.subject, sellerEmail.html).catch(console.error)
+        }
+
       } else if (orderId && status === 'rejected') {
         await prisma.order.update({
           where: { id: orderId },
