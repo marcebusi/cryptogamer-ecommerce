@@ -7,8 +7,9 @@ export const getOrders = async (_req: Request, res: Response): Promise<void> => 
   try {
     const orders = await prisma.order.findMany({
       include: {
-        user: { select: { name: true, email: true } },
-        items: { include: { product: true } }
+        user:   { select: { name: true, email: true } },
+        seller: { select: { name: true } },
+        items:  { include: { product: { select: { id: true, name: true, image: true } } } },
       },
       orderBy: { createdAt: 'desc' }
     })

@@ -1,5 +1,5 @@
 /* ── Auth ──────────────────────────────────────────── */
-export type UserRole = 'CUSTOMER' | 'ADMIN'
+export type UserRole = 'CUSTOMER' | 'ADMIN' | 'SUPERADMIN'
 
 export interface User {
   id: string
@@ -14,13 +14,31 @@ export interface User {
 /* ── Products ──────────────────────────────────────── */
 export type ProductCondition = 'new' | 'like-new' | 'excellent' | 'good' | 'fair'
 
+/** Image item — supports both legacy string URLs and new object format */
+export interface ImageItem {
+  url:       string
+  position?: string   // CSS object-position, e.g. "50% 20%"
+  zoom?:     number   // scale factor, e.g. 1.2
+}
+
+export type ImgSrc = string | ImageItem
+
+export const imgUrl = (item: ImgSrc): string =>
+  typeof item === 'string' ? item : item.url
+
+export const imgPosition = (item: ImgSrc): string =>
+  typeof item === 'string' ? '50% 50%' : (item.position ?? '50% 50%')
+
+export const imgZoom = (item: ImgSrc): number =>
+  typeof item === 'string' ? 1 : (item.zoom ?? 1)
+
 export interface Product {
   id: string
   name: string
   price: number
   originalPrice?: number
   image: string
-  images?: string[]
+  images?: ImgSrc[]
   category: string
   subcategory?: string
   badge?: string

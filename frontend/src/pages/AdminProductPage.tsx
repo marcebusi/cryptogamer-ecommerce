@@ -88,7 +88,7 @@ export default function AdminProductPage() {
   const [conditionTags,      setConditionTags]      = useState('')
   const [badge,              setBadge]              = useState('')
   const [badgeColor,         setBadgeColor]         = useState<'primary'|'secondary'|'tertiary'>('primary')
-  const [imageUrl,           setImageUrl]           = useState('')
+  const [galleryImages, setGalleryImages] = useState<{url:string;position:string;zoom:number}[]>([])
   const [sortOrder,          setSortOrder]          = useState('0')
   const [isOffer,            setIsOffer]            = useState(false)
   const [isFeatured,         setIsFeatured]         = useState(false)
@@ -97,18 +97,102 @@ export default function AdminProductPage() {
   /* ── Image upload ─────────────────────────── */
   const [uploadBusy,   setUploadBusy]  = useState(false)
   const [uploadError,  setUploadError] = useState('')
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const fileInputRef    = useRef<HTMLInputElement>(null)
+  const dragImgIdx      = useRef<number | null>(null)
+  const previewRef      = useRef<HTMLDivElement>(null)
+  const isDraggingPrev  = useRef(false)
+  // Which image is being edited in the preview (0 = main/first)
+  const [previewEditIdx, setPreviewEditIdx] = useState(0)
+  // Refs for non-passive wheel handler (avoids page scroll)
+  const galleryRef     = useRef(galleryImages)
+  const previewIdxRef  = useRef(previewEditIdx)
+  useEffect(() => { galleryRef.current    = galleryImages },  [galleryImages])
+  useEffect(() => { previewIdxRef.current = previewEditIdx }, [previewEditIdx])
 
-  const handleFileSelect = async (file: File) => {
+  const handleFilesSelect = async (files: FileList | null) => {
+    if (!files || files.length === 0) return
     setUploadBusy(true); setUploadError('')
     try {
-      const result = await api.uploadImage(file)
-      setImageUrl(result.url)
+      const uploads = await Promise.all(
+        Array.from(files).slice(0, 8 - galleryImages.length).map(f => api.uploadImage(f))
+      )
+      setGalleryImages(prev => [
+        ...prev,
+        ...uploads.map(r => ({ url: r.url, position: '50% 50%', zoom: 1 })),
+      ].slice(0, 8))
     } catch (err) {
       setUploadError((err as Error).message)
     } finally {
       setUploadBusy(false)
     }
+  }
+
+  const removeGalleryImg = (idx: number) => {
+    setGalleryImages(prev => prev.filter((_, i) => i !== idx))
+    setPreviewEditIdx(prev => Math.max(0, prev === idx ? prev - 1 : prev > idx ? prev - 1 : prev))
+  }
+
+  const moveImgToFront = (idx: number) =>
+    setGalleryImages(prev => [prev[idx], ...prev.filter((_, i) => i !== idx)])
+
+  const updateImgSetting = (idx: number, patch: Partial<{position: string; zoom: number}>) =>
+    setGalleryImages(prev => prev.map((img, i) => i === idx ? { ...img, ...patch } : img))
+
+  // Position editor state (only for extra images, main uses preview drag)
+  const [editingIdx, setEditingIdx] = useState<number | null>(null)
+
+  /* ── Preview drag-to-reposition ─── */
+  const handlePreviewMouseDown = (e: React.MouseEvent) => {
+    if (!galleryImages[previewEditIdx]) return
+    isDraggingPrev.current = true
+    e.preventDefault()
+  }
+  const handlePreviewMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingPrev.current || !previewRef.current) return
+    if (!galleryImages[previewEditIdx]) return
+    const rect = previewRef.current.getBoundingClientRect()
+    const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100))
+    const y = Math.max(0, Math.min(100, ((e.clientY - rect.top)  / rect.height) * 100))
+    updateImgSetting(previewEditIdx, { position: `${x.toFixed(0)}% ${y.toFixed(0)}%` })
+  }
+  const handlePreviewMouseUp = () => { isDraggingPrev.current = false }
+
+  // Non-passive wheel listener — prevents page scroll while zooming
+  useEffect(() => {
+    const el = previewRef.current
+    if (!el) return
+    const onWheel = (e: WheelEvent) => {
+      const imgs = galleryRef.current
+      const idx  = previewIdxRef.current
+      if (!imgs[idx]) return
+      e.preventDefault()
+      const delta   = e.deltaY > 0 ? -0.1 : 0.1
+      const newZoom = parseFloat(Math.max(0.8, Math.min(2.5, imgs[idx].zoom + delta)).toFixed(1))
+      setGalleryImages(prev => prev.map((img, i) => i === idx ? { ...img, zoom: newZoom } : img))
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, []) // registrado una sola vez, usa refs internamente
+
+  // 9-point focal grid
+  const FOCAL_POINTS = [
+    { label: '↖', pos: '15% 15%' }, { label: '↑', pos: '50% 15%' }, { label: '↗', pos: '85% 15%' },
+    { label: '←', pos: '15% 50%' }, { label: '⊙', pos: '50% 50%' }, { label: '→', pos: '85% 50%' },
+    { label: '↙', pos: '15% 85%' }, { label: '↓', pos: '50% 85%' }, { label: '↘', pos: '85% 85%' },
+  ]
+
+  const handleImgDragStart = (idx: number) => { dragImgIdx.current = idx }
+  const handleImgDrop = (toIdx: number) => {
+    const from = dragImgIdx.current
+    dragImgIdx.current = null
+    if (from === null || from === toIdx) return
+    setEditingIdx(null)
+    setGalleryImages(prev => {
+      const arr = [...prev]
+      const [item] = arr.splice(from, 1)
+      arr.splice(toIdx, 0, item)
+      return arr
+    })
   }
 
   /* ── UI state ─────────────────────────────── */
@@ -155,7 +239,8 @@ export default function AdminProductPage() {
         conditionDescription: conditionDesc || null,
         conditionTags: conditionTags.split(',').map(t => t.trim()).filter(Boolean),
         badge: badge || null, badgeColor,
-        image: imageUrl || null,
+        image: galleryImages[0]?.url || null,
+        images: galleryImages,   // send as array — backend will JSON.stringify
         sortOrder: parseInt(sortOrder) || 0,
         isOffer,
         isFeatured,
@@ -174,7 +259,7 @@ export default function AdminProductPage() {
     if (categories.length > 0) setCategorySlug(categories[0].slug)
     setSubcategory(''); setCondition('new')
     setConditionScore('100'); setConditionDesc(''); setConditionTags('')
-    setBadge(''); setBadgeColor('primary'); setImageUrl('')
+    setBadge(''); setBadgeColor('primary'); setGalleryImages([])
     setSortOrder('0'); setIsOffer(false); setIsFeatured(false)
     setSpecs([{ ...EMPTY_SPEC }]); setSuccess(false); setError('')
   }
@@ -810,64 +895,203 @@ export default function AdminProductPage() {
           {/* ── Sidebar (right 4 cols) ─────────── */}
           <div className="lg:col-span-4 flex flex-col gap-md">
 
-            {/* Image upload + preview */}
+            {/* ── Multi-image gallery ──────────── */}
             <div className="admin-card rounded-2xl border border-white/10 p-md">
-              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-sm">
-                Imagen del producto
+              <div className="flex items-center justify-between mb-sm">
+                <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">
+                  Imágenes del producto
+                </p>
+                <span className="text-xs text-on-surface-variant">{galleryImages.length}/8</span>
+              </div>
+
+              <p className="text-[11px] text-on-surface-variant/60 mb-sm leading-relaxed">
+                La <strong className="text-primary-container">primera imagen</strong> es la principal (card y miniatura). Arrastrá para reordenar.
               </p>
 
-              {/* Preview */}
-              <div className={`rounded-xl border-2 border-dashed transition-all overflow-hidden mb-sm ${imageUrl ? 'border-primary-container/30' : 'border-white/15'}`}
-                style={{ aspectRatio: '1/1', background: '#07080d' }}>
-                {uploadBusy ? (
-                  <div className="w-full h-full flex flex-col items-center justify-center">
-                    <span className="material-symbols-outlined text-primary-container text-4xl animate-spin">progress_activity</span>
-                    <p className="text-xs text-on-surface-variant mt-2">Subiendo imagen...</p>
+              {/* Grid de imágenes */}
+              <div className="grid grid-cols-2 gap-xs mb-sm">
+                {galleryImages.map((img, idx) => (
+                  <div key={img.url + idx} className="flex flex-col gap-0.5">
+                    <div
+                      draggable
+                      onDragStart={() => handleImgDragStart(idx)}
+                      onDragOver={e => e.preventDefault()}
+                      onDrop={() => handleImgDrop(idx)}
+                      onClick={() => setPreviewEditIdx(idx)}
+                      className={`relative group aspect-square rounded-xl overflow-hidden border bg-[#07080d] cursor-grab active:cursor-grabbing transition-all ${
+                        previewEditIdx === idx ? 'border-primary-container/60 ring-1 ring-primary-container/40' : 'border-white/10'
+                      }`}
+                    >
+                      <img
+                        src={img.url}
+                        alt={`Imagen ${idx + 1}`}
+                        className="w-full h-full object-cover transition-all"
+                        style={{ objectPosition: img.position, transform: `scale(${img.zoom})`, transformOrigin: img.position }}
+                      />
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-xs">
+                        <span className="material-symbols-outlined text-white/80 text-base">drag_indicator</span>
+                      </div>
+                      {/* Main badge */}
+                      {idx === 0 && (
+                        <span className="absolute top-1 left-1 bg-primary-container text-on-primary text-[9px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-wide leading-none">
+                          Principal
+                        </span>
+                      )}
+                      {/* Action buttons */}
+                      <div className="absolute top-1 right-1 flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button type="button"
+                          onClick={e => { e.stopPropagation(); setPreviewEditIdx(idx) }}
+                          title="Editar en vista previa"
+                          className={`w-6 h-6 rounded-md flex items-center justify-center cursor-pointer transition-colors ${
+                            previewEditIdx === idx ? 'bg-primary-container' : 'bg-purple-600/90'
+                          }`}>
+                          <span className="material-symbols-outlined text-[12px] text-white">
+                            {previewEditIdx === idx ? 'check' : 'crop_free'}
+                          </span>
+                        </button>
+                        {idx !== 0 && (
+                          <button type="button" onClick={() => moveImgToFront(idx)} title="Poner como principal"
+                            className="w-6 h-6 rounded-md bg-primary-container/90 flex items-center justify-center cursor-pointer">
+                            <span className="material-symbols-outlined text-[12px] text-on-primary">star</span>
+                          </button>
+                        )}
+                        <button type="button" onClick={() => removeGalleryImg(idx)} title="Eliminar"
+                          className="w-6 h-6 rounded-md bg-error/90 flex items-center justify-center cursor-pointer">
+                          <span className="material-symbols-outlined text-[12px] text-white">close</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* ── Position editor (inline) ── */}
+                    {editingIdx === idx && (
+                      <div className="bg-surface-container-high border border-white/10 rounded-xl p-xs space-y-xs">
+                        <p className="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wider">Encuadre</p>
+                        {/* 3×3 focal grid */}
+                        <div className="grid grid-cols-3 gap-0.5">
+                          {FOCAL_POINTS.map(fp => (
+                            <button
+                              key={fp.pos}
+                              type="button"
+                              onClick={() => updateImgSetting(idx, { position: fp.pos })}
+                              className={`h-7 rounded text-[11px] transition-all cursor-pointer font-bold ${
+                                img.position === fp.pos
+                                  ? 'bg-primary-container text-on-primary'
+                                  : 'bg-surface-container text-on-surface-variant hover:bg-white/10'
+                              }`}
+                            >{fp.label}</button>
+                          ))}
+                        </div>
+                        {/* Zoom slider */}
+                        <div>
+                          <div className="flex justify-between mb-0.5">
+                            <span className="text-[10px] text-on-surface-variant">Zoom</span>
+                            <span className="text-[10px] text-primary-container font-mono">{img.zoom.toFixed(1)}×</span>
+                          </div>
+                          <input
+                            type="range" min="0.8" max="2.5" step="0.1"
+                            value={img.zoom}
+                            onChange={e => updateImgSetting(idx, { zoom: parseFloat(e.target.value) })}
+                            className="w-full accent-primary-container h-1 cursor-pointer"
+                          />
+                        </div>
+                        <button type="button" onClick={() => updateImgSetting(idx, { position: '50% 50%', zoom: 1 })}
+                          className="w-full text-[10px] text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer py-0.5">
+                          Resetear
+                        </button>
+                      </div>
+                    )}
                   </div>
-                ) : imageUrl ? (
-                  <img src={imageUrl} alt="Preview" className="w-full h-full object-contain p-4" />
-                ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center text-on-surface-variant">
-                    <span className="material-symbols-outlined text-5xl mb-2 opacity-30">image</span>
-                    <p className="text-xs opacity-50">Seleccioná un archivo desde tu PC</p>
-                  </div>
+                ))}
+
+                {/* Add slot */}
+                {galleryImages.length < 8 && (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadBusy}
+                    className="aspect-square rounded-xl border-2 border-dashed border-white/15 hover:border-primary-container/50 hover:bg-primary-container/5 transition-all cursor-pointer flex flex-col items-center justify-center gap-xs text-on-surface-variant hover:text-primary-container disabled:opacity-40"
+                  >
+                    {uploadBusy
+                      ? <span className="material-symbols-outlined text-2xl animate-spin">progress_activity</span>
+                      : <><span className="material-symbols-outlined text-2xl">add_photo_alternate</span>
+                        <span className="text-[10px] font-semibold">Agregar</span></>}
+                  </button>
                 )}
               </div>
 
               {uploadError && (
-                <p className="text-xs text-error mb-sm">{uploadError}</p>
+                <p className="text-xs text-error mb-xs">{uploadError}</p>
               )}
 
               <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
+                multiple
                 className="hidden"
-                onChange={e => {
-                  const file = e.target.files?.[0]
-                  if (file) handleFileSelect(file)
-                }}
+                onChange={e => handleFilesSelect(e.target.files)}
               />
-              <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploadBusy}
-                className="w-full py-2.5 border-2 border-dashed border-primary-container/30 rounded-xl text-xs text-primary-container font-semibold hover:border-primary-container/60 hover:bg-primary-container/5 active:scale-95 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-xs">
+
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadBusy || galleryImages.length >= 8}
+                className="w-full py-2.5 border-2 border-dashed border-primary-container/30 rounded-xl text-xs text-primary-container font-semibold hover:border-primary-container/60 hover:bg-primary-container/5 active:scale-95 transition-all cursor-pointer disabled:opacity-40 flex items-center justify-center gap-xs"
+              >
                 <span className="material-symbols-outlined text-sm">upload</span>
-                {imageUrl ? 'Cambiar imagen' : 'Seleccionar imagen desde PC'}
+                {galleryImages.length === 0 ? 'Seleccionar imágenes' : 'Agregar más imágenes'}
               </button>
-              {imageUrl && (
-                <button type="button" onClick={() => setImageUrl('')}
-                  className="w-full mt-1 py-1.5 text-xs text-error/70 hover:text-error transition-colors cursor-pointer">
-                  Quitar imagen
-                </button>
-              )}
+              <p className="text-[10px] text-on-surface-variant/40 text-center mt-xs">
+                JPG, PNG, WEBP · Máx. 8MB por imagen · Podés subir varias a la vez
+              </p>
             </div>
 
             {/* Live preview */}
             <div className="admin-card rounded-2xl border border-white/8 p-md">
-              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-sm">Vista previa</p>
+              <div className="flex items-center justify-between mb-sm">
+                <div>
+                  <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Vista previa</p>
+                  {galleryImages.length > 1 && (
+                    <p className="text-[10px] text-on-surface-variant/60 mt-0.5">
+                      Editando imagen {previewEditIdx + 1} de {galleryImages.length}
+                    </p>
+                  )}
+                </div>
+                {galleryImages[previewEditIdx] && (
+                  <div className="flex items-center gap-xs">
+                    <span className="text-[10px] text-on-surface-variant font-mono">
+                      {galleryImages[previewEditIdx].zoom.toFixed(1)}×
+                    </span>
+                    <button type="button"
+                      onClick={() => updateImgSetting(previewEditIdx, { position: '50% 50%', zoom: 1 })}
+                      className="text-[10px] text-on-surface-variant hover:text-primary-container transition-colors cursor-pointer border border-white/10 px-xs py-0.5 rounded-md">
+                      Reset
+                    </button>
+                  </div>
+                )}
+              </div>
               <div className="rounded-xl border border-white/5 overflow-hidden bg-surface-container-low">
-                <div className="aspect-square bg-[#07080d] flex items-center justify-center relative overflow-hidden">
-                  {imageUrl
-                    ? <img src={imageUrl} className="w-full h-full object-contain p-3" alt="preview" />
+                <div
+                  ref={previewRef}
+                  className={`aspect-square bg-[#07080d] flex items-center justify-center relative overflow-hidden ${galleryImages[0] ? 'cursor-crosshair select-none' : ''}`}
+                  onMouseDown={handlePreviewMouseDown}
+                  onMouseMove={handlePreviewMouseMove}
+                  onMouseUp={handlePreviewMouseUp}
+                  onMouseLeave={handlePreviewMouseUp}
+                >
+                  {galleryImages[previewEditIdx]
+                    ? <>
+                        <img src={galleryImages[previewEditIdx].url} className="w-full h-full object-cover pointer-events-none" alt="preview"
+                          style={{ objectPosition: galleryImages[previewEditIdx].position, transform: `scale(${galleryImages[previewEditIdx].zoom})`, transformOrigin: galleryImages[previewEditIdx].position }} />
+                        {/* Hint overlay */}
+                        <div className="absolute bottom-2 left-0 right-0 flex justify-center pointer-events-none">
+                          <span className="bg-black/60 backdrop-blur-sm text-white/70 text-[10px] px-xs py-0.5 rounded-full flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[10px]">open_with</span>
+                            Arrastrá · Scroll para zoom
+                          </span>
+                        </div>
+                      </>
                     : <span className="material-symbols-outlined text-4xl text-on-surface-variant opacity-20">image</span>
                   }
                   {badge && (

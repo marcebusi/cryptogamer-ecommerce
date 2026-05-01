@@ -46,8 +46,8 @@ export default function ProfilePage() {
   useEffect(() => {
     if (tab === 'orders' && orders.length === 0) {
       setLoadingOrders(true)
-      api.get('/auth/me/orders')
-        .then(res => setOrders(res.data))
+      api.get<{ data: any[] }>('/api/orders/me')
+        .then(res => setOrders(Array.isArray(res) ? res : (res as any).data ?? []))
         .catch(err => console.error(err))
         .finally(() => setLoadingOrders(false))
     }

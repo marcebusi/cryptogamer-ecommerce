@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { imgUrl, imgPosition, imgZoom } from '../../types'
 import type { Product } from '../../types'
 import './ImageGallery.css'
 
@@ -7,8 +8,12 @@ interface ImageGalleryProps {
 }
 
 export default function ImageGallery({ product }: ImageGalleryProps) {
-  const thumbs = product.images && product.images.length > 0 ? product.images : [product.image]
+  const rawImgs = product.images && product.images.length > 0 ? product.images : [product.image]
+  const thumbs  = rawImgs
   const [activeIdx, setActiveIdx] = useState(0)
+
+  const activePos  = imgPosition(thumbs[activeIdx])
+  const activeZoom = imgZoom(thumbs[activeIdx])
 
   return (
     <div className="lg:col-span-5 space-y-md">
@@ -22,8 +27,14 @@ export default function ImageGallery({ product }: ImageGalleryProps) {
 
         <img
           alt={product.name}
+<<<<<<< HEAD
           className="gallery-img relative z-[5] w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           src={thumbs[activeIdx]}
+=======
+          className="gallery-img relative z-[5] w-full h-full object-contain p-3 md:p-6 transition-all duration-700 group-hover:scale-105"
+          src={imgUrl(thumbs[activeIdx])}
+          style={{ objectPosition: activePos, transform: `scale(${activeZoom})`, transformOrigin: activePos }}
+>>>>>>> f978315c022390f644d5cf2e1c6bd5b1bbd68c96
         />
 
         {/* Condition badge top-left */}
@@ -63,7 +74,7 @@ export default function ImageGallery({ product }: ImageGalleryProps) {
               <img
                 alt={`${product.name} vista ${i + 1}`}
                 className="w-full h-full object-contain p-2 transition-transform duration-300 hover:scale-110"
-                src={src}
+                src={imgUrl(src)}
               />
             </div>
           </button>
@@ -83,7 +94,7 @@ export default function ImageGallery({ product }: ImageGalleryProps) {
               <img
                 alt="Más imágenes"
                 className="w-full h-full object-contain p-2 blur-[2px] opacity-40"
-                src={thumbs[3]}
+                src={imgUrl(thumbs[3])}
               />
               <span className="absolute inset-0 flex items-center justify-center font-bold text-on-surface text-lg">
                 +{thumbs.length - 3}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useCart } from '../../context/CartContext'
+import { api } from '../../lib/api'
 import SellerPicker from '../checkout/SellerPicker'
 import './CheckoutModal.css'
 
@@ -30,10 +31,11 @@ const VISIBLE: Step[] = ['seller', 'summary', 'shipping']
 
 export default function CheckoutModal() {
   const { items, totalPrice, clearCart, isCheckoutOpen, closeCheckout } = useCart()
-  const [step, setStep]     = useState<Step>('seller')
-  const [seller, setSeller] = useState<Seller | null>(null)
-  const [orderNumber]       = useState(generateOrderNumber)
-  const [form, setForm]     = useState({
+  const [step, setStep]         = useState<Step>('seller')
+  const [seller, setSeller]     = useState<Seller | null>(null)
+  const [orderNumber, setOrderNumber] = useState(generateOrderNumber)
+  const [submitting, setSubmitting]   = useState(false)
+  const [form, setForm]         = useState({
     name: '', email: '', phone: '',
     address: '', city: '', province: 'Buenos Aires', postal: '',
   })
@@ -74,12 +76,35 @@ export default function CheckoutModal() {
     return e
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
     setErrors({})
-    setStep('success')
+    setSubmitting(true)
+    try {
+      const payload = {
+        sellerId: seller?.id ?? null,
+        items: items.map(({ product, quantity }) => ({
+          productId: product.id,
+          quantity,
+        })),
+      }
+      const res = await api.post<{ orderId: string; orderNumber: string; checkoutUrl?: string }>(
+        '/api/orders', payload
+      )
+      if (res.checkoutUrl) {
+        // Redirect to MercadoPago
+        window.location.href = res.checkoutUrl
+        return
+      }
+      setOrderNumber(res.orderNumber)
+      setStep('success')
+    } catch (err) {
+      setErrors({ submit: (err as Error).message ?? 'Error al procesar el pedido.' })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const field = (key: keyof typeof form, label: string, type = 'text', ph = '') => (
@@ -247,10 +272,15 @@ export default function CheckoutModal() {
               </div>
             )}
 
+            {errors.submit && (
+              <p className="text-xs text-error bg-error/10 border border-error/30 rounded-lg px-sm py-xs">{errors.submit}</p>
+            )}
             <div className="flex gap-sm pt-xs">
               <button type="button" onClick={() => setStep('summary')} className="flex-1 border border-outline-variant text-on-surface-variant py-3 rounded-xl font-semibold text-sm hover:bg-white/5 cursor-pointer transition-all">Volver</button>
-              <button type="submit" className="flex-[2] bg-purple-600 hover:bg-purple-700 text-white py-3 px-lg rounded-xl font-bold text-sm flex items-center justify-center gap-xs hover:shadow-[0_0_20px_rgba(138,43,226,0.5)] cursor-pointer transition-all">
-                <i className="fa-solid fa-lock text-xs" /> Confirmar pedido
+              <button type="submit" disabled={submitting} className="flex-[2] bg-purple-600 hover:bg-purple-700 text-white py-3 px-lg rounded-xl font-bold text-sm flex items-center justify-center gap-xs hover:shadow-[0_0_20px_rgba(138,43,226,0.5)] cursor-pointer transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+                {submitting
+                  ? <><span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>Procesando...</>
+                  : <><i className="fa-solid fa-lock text-xs" /> Confirmar pedido</>}
               </button>
             </div>
           </form>

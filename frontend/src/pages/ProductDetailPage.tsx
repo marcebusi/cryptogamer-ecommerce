@@ -34,7 +34,7 @@ function mapApi(p: ApiProduct): Product {
   return {
     id: p.id, name: p.name, slug: p.slug,
     price: p.price, originalPrice: p.originalPrice ?? undefined,
-    image: p.image, images: tryParse<string[]>(p.images, []),
+    image: p.image, images: tryParse<import('../types').ImgSrc[]>(p.images, []),
     category: p.category?.slug ?? p.categoryId,
     subcategory: p.subcategory ?? undefined,
     badge: p.badge ?? undefined,

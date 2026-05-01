@@ -1,4 +1,27 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { Component, type ReactNode, type ErrorInfo } from 'react'
+
+/* ── Error boundary — prevents total black screen on render errors ── */
+class AppErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  state = { error: null }
+  static getDerivedStateFromError(e: Error) { return { error: e } }
+  componentDidCatch(e: Error, info: ErrorInfo) { console.error('[App Error]', e, info) }
+  render() {
+    if (this.state.error) return (
+      <div style={{ minHeight:'100vh', background:'#080910', display:'flex', alignItems:'center', justifyContent:'center', padding:'2rem', textAlign:'center' }}>
+        <div>
+          <p style={{ color:'#39ff14', fontFamily:'monospace', fontSize:'1.2rem', marginBottom:'1rem' }}>Cryptogamer's</p>
+          <p style={{ color:'#e0e0e0', marginBottom:'0.5rem' }}>Algo salió mal al cargar esta sección.</p>
+          <button onClick={() => { this.setState({ error: null }); window.location.href = '/' }}
+            style={{ background:'#7c3aed', color:'#fff', border:'none', padding:'10px 24px', borderRadius:'10px', cursor:'pointer', fontWeight:'bold' }}>
+            Volver al inicio
+          </button>
+        </div>
+      </div>
+    )
+    return this.props.children
+  }
+}
 import { CartProvider }       from './context/CartContext'
 import { AuthProvider }       from './context/AuthContext'
 import { CategoriesProvider } from './context/CategoriesContext'
@@ -18,14 +41,21 @@ import AdminProductPage       from './pages/AdminProductPage'
 import AdminCategoryPage      from './pages/AdminCategoryPage'
 import AdminEditorPage        from './pages/AdminEditorPage'
 import AdminSellersPage       from './pages/admin/AdminSellersPage'
+<<<<<<< HEAD
 import AdminAnalyticsPage         from './pages/admin/AdminAnalyticsPage'
 import AdminAnalyticsAdvancedPage from './pages/admin/AdminAnalyticsAdvancedPage'
+=======
+import AdminAnalyticsPage     from './pages/admin/AdminAnalyticsPage'
+import AdminOrdersPage        from './pages/admin/AdminOrdersPage'
+>>>>>>> f978315c022390f644d5cf2e1c6bd5b1bbd68c96
 import ResetPasswordPage      from './pages/ResetPasswordPage'
 import NotFoundPage           from './pages/NotFoundPage'
+import SuperAdminPage         from './pages/SuperAdminPage'
 import WhatsAppButton         from './components/common/WhatsAppButton'
 import { Toaster }            from 'react-hot-toast'
 function App() {
   return (
+    <AppErrorBoundary>
     <Router>
       <AuthProvider>
         <CategoriesProvider>
@@ -47,9 +77,15 @@ function App() {
                 <Route path="/admin/categorias"     element={<AdminCategoryPage />} />
                 <Route path="/admin/editor"         element={<AdminEditorPage />} />
                 <Route path="/admin/vendedores"     element={<AdminSellersPage />} />
+<<<<<<< HEAD
                 <Route path="/admin/analytics"           element={<AdminAnalyticsPage />} />
                 <Route path="/admin/analytics-avanzado" element={<AdminAnalyticsAdvancedPage />} />
+=======
+                <Route path="/admin/analytics"      element={<AdminAnalyticsPage />} />
+                <Route path="/admin/pedidos"        element={<AdminOrdersPage />} />
+>>>>>>> f978315c022390f644d5cf2e1c6bd5b1bbd68c96
                 <Route path="/reset-password"       element={<ResetPasswordPage />} />
+                <Route path="/superadmin"           element={<SuperAdminPage />} />
                 <Route path="*"                     element={<NotFoundPage />} />
               </Routes>
               <Footer />
@@ -60,6 +96,7 @@ function App() {
         </CategoriesProvider>
       </AuthProvider>
     </Router>
+    </AppErrorBoundary>
   )
 }
 

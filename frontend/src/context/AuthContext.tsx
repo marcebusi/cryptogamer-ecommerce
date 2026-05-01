@@ -8,6 +8,7 @@ interface AuthContextType {
   isLoading: boolean
   isAuthenticated: boolean
   isAdmin: boolean
+  isSuperAdmin: boolean
   login:          (email: string, password: string) => Promise<void>
   register:       (name: string, email: string, password: string) => Promise<void>
   logout:         () => void
@@ -83,7 +84,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider value={{
       user, isLoading,
       isAuthenticated: !!user,
-      isAdmin:         user?.role === 'ADMIN',
+      isAdmin:         user?.role === 'ADMIN' || user?.role === 'SUPERADMIN',
+      isSuperAdmin:    user?.role === 'SUPERADMIN',
       login, register, logout,
       updateProfile, changePassword,
       forgotPassword, resetPassword,

@@ -1,6 +1,17 @@
 import { Link } from 'react-router-dom'
 import { useDynamicProducts } from '../../hooks/useDynamicProducts'
+<<<<<<< HEAD
 import ProductCarousel from '../common/ProductCarousel'
+=======
+import { imgUrl, imgPosition, imgZoom } from '../../types'
+import './LatestArrivals.css'
+
+const badgeClasses: Record<string, string> = {
+  primary:   'bg-primary-container text-on-primary',
+  secondary: 'bg-secondary-container text-on-secondary',
+  tertiary:  'bg-tertiary-container text-on-tertiary-container',
+}
+>>>>>>> f978315c022390f644d5cf2e1c6bd5b1bbd68c96
 
 export default function LatestArrivals() {
   const { products, isLoading } = useDynamicProducts({ isFeatured: true, limit: 12 })
@@ -40,7 +51,66 @@ export default function LatestArrivals() {
 
       {/* Carousel */}
       {!isLoading && products.length > 0 && (
+<<<<<<< HEAD
         <ProductCarousel products={products} />
+=======
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-gutter">
+          {products.map(product => {
+            const fi  = Array.isArray(product.images) ? product.images[0] : undefined
+            const src = fi ? imgUrl(fi) : product.image
+            const pos = fi ? imgPosition(fi) : '50% 50%'
+            const zm  = fi ? Math.max(0.5, Math.min(3, imgZoom(fi))) : 1
+            return (
+            <div key={product.id} className="group">
+              <Link to={`/products/${product.id}`}>
+                <div className="relative rounded-xl overflow-hidden aspect-square mb-sm bg-[#0b0c12] border border-white/5 scanline cursor-pointer">
+                  <div className="w-full h-full group-hover:scale-105 transition-transform duration-500">
+                  <img
+                    className="w-full h-full object-cover"
+                    src={src || product.image}
+                    alt={product.name}
+                    style={{ objectPosition: pos, ...(zm !== 1 && { transform: `scale(${zm})`, transformOrigin: pos }) }}
+                    loading="lazy"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIHZpZXdCb3g9IjAgMCAyNTAgMjUwIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0Ij48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWYyMTI4Ii8+PHBhdGggZD0iTTEyNSAxMDZhMTkgMTkgMCAxIDAgMCAzOGExOSAxOSAwIDAgMCAwLTM4em0tMjIgNTFhNDEgNDEgMCAwIDEgNDQtMTNsMjEgMjFWMTE2YTc1IDc1 0IDAgMC0xNTAtMHY1N2wyNi0yNmMxNS0xNSAzOS0xNSA1NCAweiIgZmlsbD0iIzM4M2I0ZCIvPjwvc3ZnPg=='
+                    }}
+                  />
+                  </div>
+                  {product.badge && (
+                    <div className={`absolute top-xs right-xs px-xs py-1 rounded font-label-caps text-[10px] ${badgeClasses[product.badgeColor ?? 'primary']}`}>
+                      {product.badge}
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-sm">
+                    <button
+                      onClick={e => { e.preventDefault(); addToCart(product) }}
+                      disabled={!product.inStock}
+                      className="p-3 bg-primary-container text-on-primary rounded-full hover:scale-110 transition-transform cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      aria-label="Agregar al carrito">
+                      <span className="material-symbols-outlined">add_shopping_cart</span>
+                    </button>
+                    <button
+                      onClick={e => e.preventDefault()}
+                      className="p-3 bg-white/10 backdrop-blur-md rounded-full hover:scale-110 transition-transform cursor-pointer"
+                      aria-label="Favorito">
+                      <span className="material-symbols-outlined">favorite</span>
+                    </button>
+                  </div>
+                </div>
+              </Link>
+              <h4 className="text-sm font-semibold text-on-background group-hover:text-primary-container transition-colors leading-tight line-clamp-2 font-['Plus_Jakarta_Sans']">
+                {product.name}
+              </h4>
+              <div className="mt-1">
+                <span className={`font-bold text-sm ${product.inStock ? 'text-primary-container' : 'text-on-surface-variant'}`}>
+                  {product.inStock ? `$${product.price.toFixed(0)}` : 'Sin stock'}
+                </span>
+              </div>
+            </div>
+          )
+          })}
+        </div>
+>>>>>>> f978315c022390f644d5cf2e1c6bd5b1bbd68c96
       )}
 
       {/* Empty state */}

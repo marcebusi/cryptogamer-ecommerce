@@ -30,8 +30,16 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
 }
 
 export const requireAdmin = (req: AuthRequest, res: Response, next: NextFunction): void => {
-  if (req.userRole !== 'ADMIN') {
+  if (req.userRole !== 'ADMIN' && req.userRole !== 'SUPERADMIN') {
     res.status(403).json({ message: 'Acceso denegado. Se requieren permisos de administrador.' })
+    return
+  }
+  next()
+}
+
+export const requireSuperAdmin = (req: AuthRequest, res: Response, next: NextFunction): void => {
+  if (req.userRole !== 'SUPERADMIN') {
+    res.status(403).json({ message: 'Acceso denegado. Se requieren permisos de superadministrador.' })
     return
   }
   next()
