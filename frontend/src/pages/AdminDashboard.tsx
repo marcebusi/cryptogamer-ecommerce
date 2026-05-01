@@ -3,77 +3,18 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../lib/api'
 
-<<<<<<< HEAD
-const CARDS = [
-  {
-    to:    '/admin/productos',
-    icon:  'add_box',
-    title: 'Agregar Producto',
-    desc:  'Publicá un nuevo producto en el catálogo con imagen, precio y specs.',
-    color: 'primary',
-  },
-  {
-    to:    '/admin/productos?manage=true',
-    icon:  'inventory_2',
-    title: 'Gestionar Catálogo',
-    desc:  'Editá, reordenás o eliminás productos existentes.',
-    color: 'secondary',
-  },
-  {
-    to:    '/admin/categorias',
-    icon:  'category',
-    title: 'Categorías',
-    desc:  'Creá y administrá categorías y subcategorías del catálogo.',
-    color: 'primary',
-  },
-  {
-    to:    '/admin/productos?filter=offers',
-    icon:  'local_offer',
-    title: 'Gestionar Ofertas',
-    desc:  'Controlá qué productos aparecen en la sección de Ofertas.',
-    color: 'secondary',
-  },
-  {
-    to:    '/admin/productos?filter=featured',
-    icon:  'stars',
-    title: 'Últimas Llegadas',
-    desc:  'Elegí qué productos destacar en la Home.',
-    color: 'tertiary',
-  },
-  {
-    to:    '/products',
-    icon:  'storefront',
-    title: 'Ver Tienda',
-    desc:  'Mirá el catálogo como lo ven los clientes.',
-    color: 'primary',
-  },
-  {
-    to:    '/admin/analytics',
-    icon:  'bar_chart',
-    title: 'Analytics',
-    desc:  'Productos más vendidos, ranking de vendedores, ingresos y más.',
-    color: 'tertiary',
-  },
-  {
-    to:    '/admin/analytics-avanzado',
-    icon:  'electric_bolt',
-    title: 'Analytics Avanzado',
-    desc:  'KPIs, heatmap, inventario muerto, WhatsApp, alertas y métricas profundas.',
-    color: 'secondary',
-  },
-=======
 /* ── All possible cards ──────────────────────────────────────── */
 // sectionKey = null means always shown (core feature)
 const ALL_CARDS = [
-  { to: '/admin/productos',            icon: 'add_box',       title: 'Agregar Producto',  desc: 'Publicá un nuevo producto en el catálogo con imagen, precio y specs.',  color: 'primary',   sectionKey: null        },
-  { to: '/admin/productos?manage=true',icon: 'inventory_2',   title: 'Gestionar Catálogo',desc: 'Editá, reordenás o eliminás productos existentes.',                     color: 'secondary', sectionKey: null        },
-  { to: '/admin/categorias',           icon: 'category',      title: 'Categorías',        desc: 'Creá y administrá categorías y subcategorías del catálogo.',            color: 'primary',   sectionKey: null        },
-  { to: '/admin/productos?filter=offers',icon:'local_offer',  title: 'Gestionar Ofertas', desc: 'Controlá qué productos aparecen en la sección de Ofertas.',            color: 'secondary', sectionKey: null        },
-  { to: '/admin/productos?filter=featured',icon:'stars',      title: 'Últimas Llegadas',  desc: 'Elegí qué productos destacar en la Home.',                              color: 'tertiary',  sectionKey: null        },
-  { to: '/admin/vendedores',           icon: 'group',         title: 'Vendedores',        desc: 'Administrá los socios que aparecen al comprar con sus datos de pago.',  color: 'tertiary',  sectionKey: null        },
-  { to: '/admin/pedidos',              icon: 'receipt_long',  title: 'Pedidos',           desc: 'Historial completo de órdenes recibidas con estado y detalle.',         color: 'secondary', sectionKey: 'orders'    },
-  { to: '/admin/analytics',            icon: 'bar_chart',     title: 'Analytics',         desc: 'Productos más vendidos, ranking de vendedores, ingresos y más.',        color: 'tertiary',  sectionKey: 'analytics' },
->>>>>>> f978315c022390f644d5cf2e1c6bd5b1bbd68c96
+  { to: '/admin/productos',               icon: 'add_box',      title: 'Agregar Producto',    desc: 'Publicá un nuevo producto en el catálogo con imagen, precio y specs.',          color: 'primary',   sectionKey: null        },
+  { to: '/admin/productos?manage=true',   icon: 'inventory_2',  title: 'Gestionar Catálogo',  desc: 'Editá, reordenás o eliminás productos existentes.',                             color: 'secondary', sectionKey: null        },
+  { to: '/admin/categorias',              icon: 'category',     title: 'Categorías',          desc: 'Creá y administrá categorías y subcategorías del catálogo.',                    color: 'primary',   sectionKey: null        },
+  { to: '/admin/productos?filter=offers', icon: 'local_offer',  title: 'Gestionar Ofertas',   desc: 'Controlá qué productos aparecen en la sección de Ofertas.',                    color: 'secondary', sectionKey: null        },
+  { to: '/admin/productos?filter=featured',icon:'stars',        title: 'Últimas Llegadas',    desc: 'Elegí qué productos destacar en la Home.',                                      color: 'tertiary',  sectionKey: null        },
+  { to: '/admin/vendedores',              icon: 'group',        title: 'Vendedores',          desc: 'Administrá los socios que aparecen al comprar con sus datos de pago.',          color: 'tertiary',  sectionKey: null        },
+  { to: '/admin/pedidos',                 icon: 'receipt_long', title: 'Pedidos',             desc: 'Historial completo de órdenes recibidas con estado y detalle.',                 color: 'secondary', sectionKey: 'orders'    },
+  { to: '/admin/analytics',               icon: 'bar_chart',    title: 'Analytics',           desc: 'Productos más vendidos, ranking de vendedores, ingresos y más.',                color: 'tertiary',  sectionKey: 'analytics' },
+  { to: '/admin/analytics-avanzado',      icon: 'electric_bolt',title: 'Analytics Avanzado',  desc: 'KPIs, heatmap, inventario muerto, WhatsApp, alertas y métricas profundas.',     color: 'secondary', sectionKey: 'analytics' },
 ]
 
 const colorMap = {

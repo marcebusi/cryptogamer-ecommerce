@@ -63,17 +63,6 @@ export default function ProductCard({ product, accent = 'secondary' }: ProductCa
 
       {/* ── Image ──────────────────────────────── */}
       <Link to={`/products/${product.id}`} className="block relative overflow-hidden bg-[#0b0c12] flex-shrink-0" style={{ aspectRatio: '1 / 1' }}>
-<<<<<<< HEAD
-        <img
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 cursor-pointer"
-          src={product.image}
-          alt={product.name}
-          loading="lazy"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIHZpZXdCb3g9IjAgMCAyNTAgMjUwIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0Ij48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWYyMTI4Ii8+PHBhdGggZD0iTTEyNSAxMDZhMTkgMTkgMCAxIDAgMCAzOGExOSAxOSAwIDAgMCAwLTM4em0tMjIgNTFhNDEgNDEgMCAwIDEgNDQtMTNsMjEgMjFWMTE2YTc1IDc1IDAgMCAwLTE1MCAwdjU3bDI2LTI2YzE1LTE1IDM5LTE1IDU0IDB6IiBmaWxsPSIjMzgzYjRkIi8+PC9zdmc+'
-          }}
-        />
-=======
         {/* Wrapper handles hover-scale; img handles zoom — no conflict */}
         <div className="w-full h-full group-hover:scale-105 transition-transform duration-700">
           <img
@@ -83,11 +72,10 @@ export default function ProductCard({ product, accent = 'secondary' }: ProductCa
             style={{ objectPosition: pos, ...(zoom !== 1 && { transform: `scale(${zoom})`, transformOrigin: pos }) }}
             loading="lazy"
             onError={(e) => {
-            (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIHZpZXdCb3g9IjAgMCAyNTAgMjUwIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0Ij48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWYyMTI4Ii8+PHBhdGggZD0iTTEyNSAxMDZhMTkgMTkgMCAxIDAgMCAzOGExOSAxOSAwIDAgMCAwLTM4em0tMjIgNTFhNDEgNDEgMCAwIDEgNDQtMTNsMjEgMjFWMTE2YTc1IDc1 0IDAgMC0xNTAtMHY1N2wyNi0yNmMxNS0xNSAzOS0xNSA1NCAweiIgZmlsbD0iIzM4M2I0ZCIvPjwvc3ZnPg=='
+              (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIHZpZXdCb3g9IjAgMCAyNTAgMjUwIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0Ij48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWYyMTI4Ii8+PC9zdmc+'
             }}
           />
         </div>
->>>>>>> f978315c022390f644d5cf2e1c6bd5b1bbd68c96
         <div className="scanline-overlay absolute inset-0 opacity-15 pointer-events-none" />
 
         {/* Discount ribbon */}

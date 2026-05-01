@@ -10,14 +10,10 @@ import authRoutes     from './routes/authRoutes'
 import adminRoutes    from './routes/adminRoutes'
 import uploadRoutes   from './routes/uploadRoutes'
 import contactRoutes  from './routes/contactRoutes'
-import orderRoutes    from './routes/orderRoutes'
-<<<<<<< HEAD
-import sellerRoutes   from './routes/sellerRoutes'
-import trackingRoutes from './routes/trackingRoutes'
-=======
+import orderRoutes       from './routes/orderRoutes'
 import sellerRoutes      from './routes/sellerRoutes'
+import trackingRoutes    from './routes/trackingRoutes'
 import superAdminRoutes  from './routes/superAdminRoutes'
->>>>>>> f978315c022390f644d5cf2e1c6bd5b1bbd68c96
 import { errorHandler, notFound } from './middleware/errorHandler'
 
 dotenv.config()

@@ -107,12 +107,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
           <span className="px-3 py-1 rounded-full text-xs font-medium bg-white/5 border border-white/10 text-white/50 uppercase tracking-widest">
             {product.subcategory}
           </span>
-<<<<<<< HEAD
         )}
-=======
-        </h1>
-
->>>>>>> f978315c022390f644d5cf2e1c6bd5b1bbd68c96
       </div>
 
       {/* ── Title ──────────────────────────────── */}

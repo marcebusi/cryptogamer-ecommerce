@@ -40,14 +40,10 @@ import AdminDashboard         from './pages/AdminDashboard'
 import AdminProductPage       from './pages/AdminProductPage'
 import AdminCategoryPage      from './pages/AdminCategoryPage'
 import AdminEditorPage        from './pages/AdminEditorPage'
-import AdminSellersPage       from './pages/admin/AdminSellersPage'
-<<<<<<< HEAD
+import AdminSellersPage           from './pages/admin/AdminSellersPage'
 import AdminAnalyticsPage         from './pages/admin/AdminAnalyticsPage'
 import AdminAnalyticsAdvancedPage from './pages/admin/AdminAnalyticsAdvancedPage'
-=======
-import AdminAnalyticsPage     from './pages/admin/AdminAnalyticsPage'
-import AdminOrdersPage        from './pages/admin/AdminOrdersPage'
->>>>>>> f978315c022390f644d5cf2e1c6bd5b1bbd68c96
+import AdminOrdersPage            from './pages/admin/AdminOrdersPage'
 import ResetPasswordPage      from './pages/ResetPasswordPage'
 import NotFoundPage           from './pages/NotFoundPage'
 import SuperAdminPage         from './pages/SuperAdminPage'
@@ -76,14 +72,10 @@ function App() {
                 <Route path="/admin/productos"      element={<AdminProductPage />} />
                 <Route path="/admin/categorias"     element={<AdminCategoryPage />} />
                 <Route path="/admin/editor"         element={<AdminEditorPage />} />
-                <Route path="/admin/vendedores"     element={<AdminSellersPage />} />
-<<<<<<< HEAD
+                <Route path="/admin/vendedores"          element={<AdminSellersPage />} />
                 <Route path="/admin/analytics"           element={<AdminAnalyticsPage />} />
                 <Route path="/admin/analytics-avanzado" element={<AdminAnalyticsAdvancedPage />} />
-=======
-                <Route path="/admin/analytics"      element={<AdminAnalyticsPage />} />
-                <Route path="/admin/pedidos"        element={<AdminOrdersPage />} />
->>>>>>> f978315c022390f644d5cf2e1c6bd5b1bbd68c96
+                <Route path="/admin/pedidos"             element={<AdminOrdersPage />} />
                 <Route path="/reset-password"       element={<ResetPasswordPage />} />
                 <Route path="/superadmin"           element={<SuperAdminPage />} />
                 <Route path="*"                     element={<NotFoundPage />} />

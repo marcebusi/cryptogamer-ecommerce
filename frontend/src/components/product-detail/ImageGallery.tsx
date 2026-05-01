@@ -27,14 +27,9 @@ export default function ImageGallery({ product }: ImageGalleryProps) {
 
         <img
           alt={product.name}
-<<<<<<< HEAD
           className="gallery-img relative z-[5] w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          src={thumbs[activeIdx]}
-=======
-          className="gallery-img relative z-[5] w-full h-full object-contain p-3 md:p-6 transition-all duration-700 group-hover:scale-105"
           src={imgUrl(thumbs[activeIdx])}
-          style={{ objectPosition: activePos, transform: `scale(${activeZoom})`, transformOrigin: activePos }}
->>>>>>> f978315c022390f644d5cf2e1c6bd5b1bbd68c96
+          style={{ objectPosition: activePos }}
         />
 
         {/* Condition badge top-left */}
