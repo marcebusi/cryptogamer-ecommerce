@@ -7,7 +7,7 @@ interface Props {
 }
 
 export default function UserMenu({ onClose }: Props) {
-  const { user, isAdmin, logout } = useAuth()
+  const { user, isAdmin, isSuperAdmin, logout } = useAuth()
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -60,8 +60,17 @@ export default function UserMenu({ onClose }: Props) {
         </div>
       </div>
 
-      {/* Admin badge */}
-      {isAdmin && (
+      {/* Role badge */}
+      {isSuperAdmin && (
+        <div className="px-4 pb-3">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest text-purple-300"
+            style={{ background: 'rgba(138,43,226,0.15)', border: '1px solid rgba(138,43,226,0.35)' }}>
+            <span className="material-symbols-outlined text-[10px]">shield_person</span>
+            Superadmin
+          </span>
+        </div>
+      )}
+      {isAdmin && !isSuperAdmin && (
         <div className="px-4 pb-3">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest text-yellow-300"
             style={{ background: 'rgba(234,179,8,0.12)', border: '1px solid rgba(234,179,8,0.25)' }}>
@@ -87,6 +96,24 @@ export default function UserMenu({ onClose }: Props) {
           </div>
           Mi perfil
         </Link>
+
+        {isSuperAdmin && (
+          <>
+            <div className="px-3 pt-2 pb-1">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Atenea Techs</p>
+            </div>
+            <Link
+              to="/superadmin"
+              onClick={onClose}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/6 transition-all group"
+            >
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-purple-600/20 group-hover:bg-purple-600/30 transition-colors flex-shrink-0">
+                <span className="material-symbols-outlined text-purple-400 text-xs">shield_person</span>
+              </div>
+              Panel Superadmin
+            </Link>
+          </>
+        )}
 
         {isAdmin && (
           <>

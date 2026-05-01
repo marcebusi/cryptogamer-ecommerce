@@ -177,3 +177,14 @@ model ContactMessage {
 
   @@map("contact_messages")
 }
+
+model StoreConfig {
+  id                    String    @id @default(cuid())
+  subscriptionActive    Boolean   @default(true)
+  subscriptionExpiresAt DateTime?
+  planName              String    @default("PRO")
+  notes                 String    @default("")
+  updatedAt             DateTime  @updatedAt
+
+  @@map("store_config")
+}

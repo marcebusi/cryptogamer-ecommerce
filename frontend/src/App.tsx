@@ -22,6 +22,7 @@ import AdminAnalyticsPage     from './pages/admin/AdminAnalyticsPage'
 import AdminOrdersPage        from './pages/admin/AdminOrdersPage'
 import ResetPasswordPage      from './pages/ResetPasswordPage'
 import NotFoundPage           from './pages/NotFoundPage'
+import SuperAdminPage         from './pages/SuperAdminPage'
 import WhatsAppButton         from './components/common/WhatsAppButton'
 import { Toaster }            from 'react-hot-toast'
 function App() {
@@ -50,6 +51,7 @@ function App() {
                 <Route path="/admin/analytics"      element={<AdminAnalyticsPage />} />
                 <Route path="/admin/pedidos"        element={<AdminOrdersPage />} />
                 <Route path="/reset-password"       element={<ResetPasswordPage />} />
+                <Route path="/superadmin"           element={<SuperAdminPage />} />
                 <Route path="*"                     element={<NotFoundPage />} />
               </Routes>
               <Footer />

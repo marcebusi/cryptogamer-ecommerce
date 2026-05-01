@@ -11,7 +11,8 @@ import adminRoutes    from './routes/adminRoutes'
 import uploadRoutes   from './routes/uploadRoutes'
 import contactRoutes  from './routes/contactRoutes'
 import orderRoutes    from './routes/orderRoutes'
-import sellerRoutes   from './routes/sellerRoutes'
+import sellerRoutes      from './routes/sellerRoutes'
+import superAdminRoutes  from './routes/superAdminRoutes'
 import { errorHandler, notFound } from './middleware/errorHandler'
 
 dotenv.config()
@@ -63,6 +64,7 @@ app.use('/api/upload',     uploadRoutes)
 app.use('/api/contact',    contactRoutes)
 app.use('/api/orders',     orderRoutes)
 app.use('/api/sellers',    sellerRoutes)
+app.use('/api/superadmin', superAdminRoutes)
 
 /* ── Error handling ──────────────────────────────── */
 app.use(notFound)

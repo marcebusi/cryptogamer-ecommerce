@@ -6,7 +6,25 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱  Seeding database...')
 
-  /* ── Admin user ──────────────────────────────────── */
+  /* ── Superadmin (Atenea Techs) ───────────────────── */
+  const superEmail = 'ateneatechs@gmail.com'
+  const existingSuper = await prisma.user.findUnique({ where: { email: superEmail } })
+  if (!existingSuper) {
+    const hashed = await bcrypt.hash('CG#Atenea2025!', 12)
+    await prisma.user.create({
+      data: {
+        name:     'Atenea Techs',
+        email:    superEmail,
+        password: hashed,
+        role:     'SUPERADMIN',
+      },
+    })
+    console.log('✅  Superadmin  →  ateneatechs@gmail.com  /  CG#Atenea2025!')
+  } else {
+    console.log('ℹ️   Superadmin ya existe, se omite.')
+  }
+
+  /* ── Admin user (dueño de la tienda) ─────────────── */
   const adminEmail = 'admin@cryptogamer.ar'
   const existing   = await prisma.user.findUnique({ where: { email: adminEmail } })
 

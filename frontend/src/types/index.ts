@@ -1,5 +1,5 @@
 /* ── Auth ──────────────────────────────────────────── */
-export type UserRole = 'CUSTOMER' | 'ADMIN'
+export type UserRole = 'CUSTOMER' | 'ADMIN' | 'SUPERADMIN'
 
 export interface User {
   id: string
