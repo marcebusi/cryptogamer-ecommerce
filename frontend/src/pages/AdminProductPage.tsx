@@ -97,8 +97,10 @@ export default function AdminProductPage() {
   /* ── Image upload ─────────────────────────── */
   const [uploadBusy,   setUploadBusy]  = useState(false)
   const [uploadError,  setUploadError] = useState('')
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const dragImgIdx   = useRef<number | null>(null)
+  const fileInputRef   = useRef<HTMLInputElement>(null)
+  const dragImgIdx     = useRef<number | null>(null)
+  const previewRef     = useRef<HTMLDivElement>(null)
+  const isDraggingPrev = useRef(false)
 
   const handleFilesSelect = async (files: FileList | null) => {
     if (!files || files.length === 0) return
@@ -127,8 +129,31 @@ export default function AdminProductPage() {
   const updateImgSetting = (idx: number, patch: Partial<{position: string; zoom: number}>) =>
     setGalleryImages(prev => prev.map((img, i) => i === idx ? { ...img, ...patch } : img))
 
-  // Position editor state
+  // Position editor state (only for extra images, main uses preview drag)
   const [editingIdx, setEditingIdx] = useState<number | null>(null)
+
+  /* ── Preview drag-to-reposition ─── */
+  const handlePreviewMouseDown = (e: React.MouseEvent) => {
+    if (!galleryImages[0]) return
+    isDraggingPrev.current = true
+    e.preventDefault()
+  }
+  const handlePreviewMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingPrev.current || !previewRef.current || !galleryImages[0]) return
+    const rect = previewRef.current.getBoundingClientRect()
+    const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100))
+    const y = Math.max(0, Math.min(100, ((e.clientY - rect.top)  / rect.height) * 100))
+    updateImgSetting(0, { position: `${x.toFixed(0)}% ${y.toFixed(0)}%` })
+  }
+  const handlePreviewMouseUp = () => { isDraggingPrev.current = false }
+
+  const handlePreviewWheel = (e: React.WheelEvent) => {
+    if (!galleryImages[0]) return
+    e.preventDefault()
+    const delta   = e.deltaY > 0 ? -0.1 : 0.1
+    const newZoom = parseFloat(Math.max(0.8, Math.min(2.5, galleryImages[0].zoom + delta)).toFixed(1))
+    updateImgSetting(0, { zoom: newZoom })
+  }
 
   // 9-point focal grid
   const FOCAL_POINTS = [
@@ -893,11 +918,13 @@ export default function AdminProductPage() {
                       )}
                       {/* Action buttons */}
                       <div className="absolute top-1 right-1 flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {idx > 0 && (
                         <button type="button" onClick={() => setEditingIdx(editingIdx === idx ? null : idx)}
                           title="Ajustar encuadre"
                           className="w-6 h-6 rounded-md bg-purple-600/90 flex items-center justify-center cursor-pointer">
                           <span className="material-symbols-outlined text-[12px] text-white">crop_free</span>
                         </button>
+                      )}
                         {idx !== 0 && (
                           <button type="button" onClick={() => moveImgToFront(idx)} title="Poner como principal"
                             className="w-6 h-6 rounded-md bg-primary-container/90 flex items-center justify-center cursor-pointer">
@@ -997,12 +1024,43 @@ export default function AdminProductPage() {
 
             {/* Live preview */}
             <div className="admin-card rounded-2xl border border-white/8 p-md">
-              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-sm">Vista previa</p>
+              <div className="flex items-center justify-between mb-sm">
+                <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Vista previa</p>
+                {galleryImages[0] && (
+                  <div className="flex items-center gap-xs">
+                    <span className="text-[10px] text-on-surface-variant font-mono">
+                      {galleryImages[0].zoom.toFixed(1)}×
+                    </span>
+                    <button type="button"
+                      onClick={() => updateImgSetting(0, { position: '50% 50%', zoom: 1 })}
+                      className="text-[10px] text-on-surface-variant hover:text-primary-container transition-colors cursor-pointer border border-white/10 px-xs py-0.5 rounded-md">
+                      Reset
+                    </button>
+                  </div>
+                )}
+              </div>
               <div className="rounded-xl border border-white/5 overflow-hidden bg-surface-container-low">
-                <div className="aspect-square bg-[#07080d] flex items-center justify-center relative overflow-hidden">
+                <div
+                  ref={previewRef}
+                  className={`aspect-square bg-[#07080d] flex items-center justify-center relative overflow-hidden ${galleryImages[0] ? 'cursor-crosshair select-none' : ''}`}
+                  onMouseDown={handlePreviewMouseDown}
+                  onMouseMove={handlePreviewMouseMove}
+                  onMouseUp={handlePreviewMouseUp}
+                  onMouseLeave={handlePreviewMouseUp}
+                  onWheel={handlePreviewWheel}
+                >
                   {galleryImages[0]
-                    ? <img src={galleryImages[0].url} className="w-full h-full object-cover" alt="preview"
-                        style={{ objectPosition: galleryImages[0].position, transform: `scale(${galleryImages[0].zoom})`, transformOrigin: galleryImages[0].position }} />
+                    ? <>
+                        <img src={galleryImages[0].url} className="w-full h-full object-cover pointer-events-none" alt="preview"
+                          style={{ objectPosition: galleryImages[0].position, transform: `scale(${galleryImages[0].zoom})`, transformOrigin: galleryImages[0].position }} />
+                        {/* Hint overlay */}
+                        <div className="absolute bottom-2 left-0 right-0 flex justify-center pointer-events-none">
+                          <span className="bg-black/60 backdrop-blur-sm text-white/70 text-[10px] px-xs py-0.5 rounded-full flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[10px]">open_with</span>
+                            Arrastrá · Scroll para zoom
+                          </span>
+                        </div>
+                      </>
                     : <span className="material-symbols-outlined text-4xl text-on-surface-variant opacity-20">image</span>
                   }
                   {badge && (
