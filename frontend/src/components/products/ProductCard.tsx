@@ -3,32 +3,66 @@ import { useCart } from '../../context/CartContext'
 import type { Product } from '../../types'
 import './ProductCard.css'
 
+type AccentKey = 'primary' | 'secondary' | 'tertiary'
+
 interface ProductCardProps {
   product: Product
+  /** Override accent color. Defaults to 'secondary' (pink). */
+  accent?: AccentKey
 }
 
-const accentClasses = {
-  primary:   { border: 'hover:border-primary-container/30',   shadow: 'hover:shadow-[0_0_30px_rgba(57,255,20,0.1)]',    badge: 'bg-primary-container text-on-primary-container shadow-[0_0_12px_#39ff14]',   title: 'group-hover:text-primary-container',   price: 'text-primary-container',   btn: 'bg-primary-container text-on-primary hover:shadow-[0_0_20px_#39ff14]' },
-  secondary: { border: 'hover:border-secondary-container/30', shadow: 'hover:shadow-[0_0_30px_rgba(255,74,141,0.1)]',  badge: 'bg-secondary-container text-on-secondary shadow-[0_0_12px_#ff4a8d]',        title: 'group-hover:text-secondary-container', price: 'text-secondary-container', btn: 'bg-secondary-container text-on-secondary hover:shadow-[0_0_20px_#ff4a8d]' },
-  tertiary:  { border: 'hover:border-tertiary-container/30',  shadow: 'hover:shadow-[0_0_30px_rgba(58,244,255,0.1)]',  badge: 'bg-tertiary-container text-on-tertiary-container shadow-[0_0_12px_#3af4ff]', title: 'group-hover:text-tertiary-container',  price: 'text-tertiary-container',  btn: 'bg-tertiary-container text-on-tertiary-container hover:shadow-[0_0_20px_#3af4ff]' },
+const accentClasses: Record<AccentKey, {
+  border: string; shadow: string; badge: string
+  title: string; price: string; btn: string; glowDot: string
+}> = {
+  primary: {
+    border:  'hover:border-primary-container/30',
+    shadow:  'hover:shadow-[0_0_30px_rgba(57,255,20,0.12)]',
+    badge:   'bg-primary-container text-on-primary-container shadow-[0_0_12px_#39ff14]',
+    title:   'group-hover:text-primary-container',
+    price:   'text-primary-container',
+    btn:     'bg-primary-container text-on-primary hover:shadow-[0_0_20px_#39ff14]',
+    glowDot: 'bg-primary-container/20',
+  },
+  secondary: {
+    border:  'hover:border-secondary-container/40',
+    shadow:  'hover:shadow-[0_0_30px_rgba(255,74,141,0.15)]',
+    badge:   'bg-secondary-container text-on-secondary shadow-[0_0_12px_#ff4a8d]',
+    title:   'group-hover:text-secondary-container',
+    price:   'text-secondary-container',
+    btn:     'bg-secondary-container text-on-secondary hover:shadow-[0_0_20px_#ff4a8d]',
+    glowDot: 'bg-secondary-container/20',
+  },
+  tertiary: {
+    border:  'hover:border-tertiary-container/30',
+    shadow:  'hover:shadow-[0_0_30px_rgba(58,244,255,0.12)]',
+    badge:   'bg-tertiary-container text-on-tertiary-container shadow-[0_0_12px_#3af4ff]',
+    title:   'group-hover:text-tertiary-container',
+    price:   'text-tertiary-container',
+    btn:     'bg-tertiary-container text-on-tertiary-container hover:shadow-[0_0_20px_#3af4ff]',
+    glowDot: 'bg-tertiary-container/20',
+  },
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, accent = 'secondary' }: ProductCardProps) {
   const { addToCart } = useCart()
-  const accent = accentClasses[product.badgeColor ?? 'primary']
+  const theme = accentClasses[accent]
 
   return (
-    <div className={`group relative bg-surface-container-low border border-white/5 rounded-xl overflow-hidden transition-all duration-500 flex flex-col ${accent.border} ${accent.shadow}`}>
+    <div className={`group relative bg-surface-container-low border border-white/5 rounded-xl overflow-hidden transition-all duration-500 flex flex-col ${theme.border} ${theme.shadow}`}>
+
+      {/* Ambient glow top-right */}
+      <div className={`absolute -top-6 -right-6 w-24 h-24 rounded-full blur-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${theme.glowDot}`} />
 
       {/* ── Image ──────────────────────────────── */}
       <Link to={`/products/${product.id}`} className="block relative overflow-hidden bg-[#0b0c12] flex-shrink-0" style={{ aspectRatio: '1 / 1' }}>
         <img
-          className="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-700 cursor-pointer"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 cursor-pointer"
           src={product.image}
           alt={product.name}
           loading="lazy"
           onError={(e) => {
-            (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIHZpZXdCb3g9IjAgMCAyNTAgMjUwIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0Ij48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWYyMTI4Ii8+PHBhdGggZD0iTTEyNSAxMDZhMTkgMTkgMCAxIDAgMCAzOGExOSAxOSAwIDAgMCAwLTM4em0tMjIgNTFhNDEgNDEgMCAwIDEgNDQtMTNsMjEgMjFWMTE2YTc1IDc1 0IDAgMC0xNTAtMHY1N2wyNi0yNmMxNS0xNSAzOS0xNSA1NCAweiIgZmlsbD0iIzM4M2I0ZCIvPjwvc3ZnPg=='
+            (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIHZpZXdCb3g9IjAgMCAyNTAgMjUwIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0Ij48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWYyMTI4Ii8+PHBhdGggZD0iTTEyNSAxMDZhMTkgMTkgMCAxIDAgMCAzOGExOSAxOSAwIDAgMCAwLTM4em0tMjIgNTFhNDEgNDEgMCAwIDEgNDQtMTNsMjEgMjFWMTE2YTc1IDc1IDAgMCAwLTE1MCAwdjU3bDI2LTI2YzE1LTE1IDM5LTE1IDU0IDB6IiBmaWxsPSIjMzgzYjRkIi8+PC9zdmc+'
           }}
         />
         <div className="scanline-overlay absolute inset-0 opacity-15 pointer-events-none" />
@@ -41,7 +75,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         )}
 
         {product.badge && !product.originalPrice && (
-          <div className={`absolute top-2 right-2 font-label-caps text-[10px] px-2 py-0.5 rounded-full ${accent.badge}`}>
+          <div className={`absolute top-2 right-2 font-label-caps text-[10px] px-2 py-0.5 rounded-full ${theme.badge}`}>
             {product.badge}
           </div>
         )}
@@ -51,7 +85,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <button
             onClick={e => { e.preventDefault(); addToCart(product) }}
             disabled={!product.inStock}
-            className={`flex items-center gap-xs px-sm py-xs rounded-full text-xs font-bold transition-all active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${accent.btn}`}
+            className={`flex items-center gap-xs px-sm py-xs rounded-full text-xs font-bold transition-all active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${theme.btn}`}
             aria-label="Agregar al carrito"
           >
             <span className="material-symbols-outlined text-sm">add_shopping_cart</span>
@@ -63,7 +97,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       {/* ── Info ───────────────────────────────── */}
       <div className="p-3 flex flex-col flex-1 gap-1">
         <Link to={`/products/${product.id}`} className="block">
-          <h3 className={`font-semibold text-sm text-on-surface leading-tight line-clamp-2 transition-colors cursor-pointer ${accent.title} font-['Plus_Jakarta_Sans']`}>
+          <h3 className={`font-semibold text-sm text-on-surface leading-tight line-clamp-2 transition-colors cursor-pointer ${theme.title} font-['Plus_Jakarta_Sans']`}>
             {product.name}
           </h3>
         </Link>
@@ -74,19 +108,21 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         <div className="flex items-center justify-between mt-1 pt-1 border-t border-white/5">
           <div>
-            <span className={`font-black text-base ${product.inStock ? accent.price : 'text-on-surface-variant'}`}>
-              {product.inStock ? `$${product.price.toFixed(0)}` : 'Sin stock'}
+            <span className={`font-black text-base ${product.inStock ? theme.price : 'text-on-surface-variant'}`}>
+              {product.inStock
+                ? new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(product.price)
+                : 'Sin stock'}
             </span>
             {product.originalPrice && product.inStock && (
               <span className="text-on-surface-variant line-through text-xs ml-1">
-                ${product.originalPrice.toFixed(0)}
+                {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(product.originalPrice)}
               </span>
             )}
           </div>
           <button
             onClick={() => addToCart(product)}
             disabled={!product.inStock}
-            className={`p-1.5 rounded-full transition-all active:scale-90 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${accent.btn}`}
+            className={`p-1.5 rounded-full transition-all active:scale-90 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${theme.btn}`}
             aria-label="Agregar al carrito"
           >
             <span className="material-symbols-outlined text-sm">add_shopping_cart</span>

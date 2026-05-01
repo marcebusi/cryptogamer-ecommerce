@@ -52,6 +52,13 @@ const CARDS = [
     desc:  'Productos más vendidos, ranking de vendedores, ingresos y más.',
     color: 'tertiary',
   },
+  {
+    to:    '/admin/analytics-avanzado',
+    icon:  'electric_bolt',
+    title: 'Analytics Avanzado',
+    desc:  'KPIs, heatmap, inventario muerto, WhatsApp, alertas y métricas profundas.',
+    color: 'secondary',
+  },
 ]
 
 const colorMap = {

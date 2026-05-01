@@ -4,6 +4,7 @@ import ImageGallery from '../components/product-detail/ImageGallery'
 import ProductInfo from '../components/product-detail/ProductInfo'
 import RelatedProducts from '../components/product-detail/RelatedProducts'
 import { featuredProduct, allProducts, latestProducts } from '../data/products'
+import { navCategories } from '../data/categories'
 import { api } from '../lib/api'
 import type { Product } from '../types'
 
@@ -82,6 +83,8 @@ export default function ProductDetailPage() {
   }
 
   const p = product!
+  const catDef = navCategories.find(c => c.id === p.category)
+  const catLabel = catDef?.label ?? p.category ?? 'Productos'
 
   return (
     <main className="max-w-screen-2xl mx-auto px-4 md:px-margin py-lg">
@@ -89,15 +92,17 @@ export default function ProductDetailPage() {
       <nav className="mb-sm flex items-center space-x-2 text-label-caps text-on-surface-variant">
         <Link to="/" className="hover:text-primary-container transition-colors">Home</Link>
         <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-        <Link to="/products" className="hover:text-primary-container transition-colors">
-          {p.category ?? 'Productos'}
+        <Link
+          to={`/products?cat=${p.category ?? ''}`}
+          className="hover:text-primary-container transition-colors">
+          {catLabel}
         </Link>
         <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-        <span className="text-tertiary-fixed-dim">{p.name}</span>
+        <span className="text-tertiary-fixed-dim truncate max-w-[200px]">{p.name}</span>
       </nav>
 
       {/* Product hero */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-lg">
+      <div className="grid grid-cols-1 lg:grid-cols-11 gap-lg items-start">
         <ImageGallery product={p} />
         <ProductInfo product={p} />
       </div>

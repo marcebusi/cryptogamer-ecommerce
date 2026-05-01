@@ -11,7 +11,7 @@ export default function ImageGallery({ product }: ImageGalleryProps) {
   const [activeIdx, setActiveIdx] = useState(0)
 
   return (
-    <div className="lg:col-span-7 space-y-md">
+    <div className="lg:col-span-5 space-y-md">
       {/* Main image — dark studio style */}
       <div className="gallery-main relative rounded-xl overflow-hidden border border-white/5 shadow-2xl group">
         {/* Scanline overlay */}
@@ -22,7 +22,7 @@ export default function ImageGallery({ product }: ImageGalleryProps) {
 
         <img
           alt={product.name}
-          className="gallery-img relative z-[5] w-full h-full object-contain p-6 md:p-10 transition-transform duration-700 group-hover:scale-105"
+          className="gallery-img relative z-[5] w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           src={thumbs[activeIdx]}
         />
 

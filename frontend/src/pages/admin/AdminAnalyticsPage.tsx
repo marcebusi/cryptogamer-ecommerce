@@ -3,14 +3,40 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { api } from '../../lib/api'
 
+
 /* ── Types ───────────────────────────────────────────────── */
 interface Summary { totalRevenue:number; totalOrders:number; avgOrderValue:number; pendingOrders:number; paidOrders:number; cancelledOrders:number; totalSellers:number; totalProducts:number }
 interface TopProduct { id:string; name:string; image:string; category:string; price:number; qty:number; revenue:number }
 interface TopSeller  { id:string; name:string; avatar:string; orderCount:number; revenue:number }
-interface DayRevenue { date:string; revenue:number; orders:number }
+export interface DayRevenue { date:string; revenue:number; orders:number }
 interface CatRevenue { category:string; revenue:number }
 interface RecentOrder { id:string; status:string; totalAmount:number; createdAt:string; user:{name:string|null;email:string}; seller:{id:string;name:string}|null; itemCount:number }
-interface Analytics  { summary:Summary; topProducts:TopProduct[]; topSellers:TopSeller[]; revenueByDay:DayRevenue[]; revenueByCategory:CatRevenue[]; recentOrders:RecentOrder[] }
+
+export interface PrevPeriod { totalRevenue:number; totalOrders:number; paidOrders:number; cancelledOrders:number }
+export interface HeatCell   { day:number; block:number; count:number }
+export interface StatusDay  { date:string; PAID:number; PENDING:number; SHIPPED:number; DELIVERED:number; CANCELLED:number }
+export interface DeadProduct { id:string; name:string; image:string; price:number; category:string }
+export interface HighValueProduct { id:string; name:string; image:string; price:number; category:string; qty:number; revenue:number; revenuePerUnit:number }
+export interface CatOrder   { category:string; orders:number; revenue:number }
+export interface SellerTicket { id:string; name:string; avatar:string; orderCount:number; revenue:number; avgTicket:number; waContacts:number }
+
+export interface Analytics {
+  summary:          Summary
+  topProducts:      TopProduct[]
+  topSellers:       TopSeller[]
+  revenueByDay:     DayRevenue[]
+  revenueByCategory:CatRevenue[]
+  recentOrders:     RecentOrder[]
+  previousPeriod:   PrevPeriod
+  heatmap:          HeatCell[]
+  statusOverTime:   StatusDay[]
+  deadInventory:    DeadProduct[]
+  highValueProducts:HighValueProduct[]
+  categoryByOrders: CatOrder[]
+  avgTicketBySeller:SellerTicket[]
+  cancellationRate: number
+  waContactsTotal:  number
+}
 
 /* ── Date presets ────────────────────────────────────────── */
 type Preset = 'today' | 'week' | 'month' | 'custom'
@@ -33,7 +59,7 @@ function getRangeParams(preset:Preset, cf:string, ct:string): { from:string; to:
 }
 
 /* ── Helpers ─────────────────────────────────────────────── */
-const ARS = (n:number) => new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(n)
+export const ARS = (n:number) => new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(n)
 
 const STATUS_MAP: Record<string,{label:string;dot:string;badge:string}> = {
   PENDING:   {label:'Pendiente', dot:'bg-yellow-400', badge:'bg-yellow-400/10 text-yellow-400 border-yellow-400/20'},
@@ -43,6 +69,8 @@ const STATUS_MAP: Record<string,{label:string;dot:string;badge:string}> = {
   CANCELLED: {label:'Cancelado', dot:'bg-red-400',    badge:'bg-red-400/10 text-red-400 border-red-400/20'},
 }
 
+const calcTrend = (curr:number, prev:number) => prev > 0 ? ((curr - prev) / prev) * 100 : 0
+
 /* ── Animated counter ────────────────────────────────────── */
 function useCountUp(target:number, duration=1400, delay=0) {
   const [val, setVal] = useState(0)
@@ -50,7 +78,7 @@ function useCountUp(target:number, duration=1400, delay=0) {
     let frame:number
     const start = performance.now() + delay
     const tick = (now:number) => {
-      const elapsed = Math.max(0, now - start)
+      const elapsed  = Math.max(0, now - start)
       const progress = Math.min(elapsed / duration, 1)
       const ease = 1 - Math.pow(1 - progress, 3)
       setVal(Math.round(ease * target))
@@ -63,7 +91,7 @@ function useCountUp(target:number, duration=1400, delay=0) {
 }
 
 /* ── Area chart ──────────────────────────────────────────── */
-function AreaChart({ days, color, gradId }: { days:DayRevenue[]; color:string; gradId:string }) {
+export function AreaChart({ days, color, gradId, prevDays }: { days:DayRevenue[]; color:string; gradId:string; prevDays?:DayRevenue[] }) {
   const pathRef = useRef<SVGPathElement>(null)
   const wrapRef = useRef<HTMLDivElement>(null)
   const [animated, setAnimated] = useState(false)
@@ -71,18 +99,26 @@ function AreaChart({ days, color, gradId }: { days:DayRevenue[]; color:string; g
   const W=600; const H=140; const PX=12; const PY=16
 
   const vals = days.map(d=>d.revenue)
-  const maxV = Math.max(...vals, 1)
+  const maxV = Math.max(...vals, ...(prevDays?.map(d=>d.revenue)??[]), 1)
   const pts: [number,number][] = vals.map((v,i)=>[
     PX + (i/(vals.length-1||1))*(W-PX*2),
     H - PY - (v/maxV)*(H-PY*2-8),
   ])
 
-  const linePath = pts.reduce((acc,[x,y],i)=>{
+  const prevPts: [number,number][] = (prevDays??[]).map((d,i)=>[
+    PX + (i/((prevDays!.length-1)||1))*(W-PX*2),
+    H - PY - (d.revenue/maxV)*(H-PY*2-8),
+  ])
+
+  const buildLine = (p:[number,number][]) => p.reduce((acc,[x,y],i)=>{
     if(i===0) return `M ${x} ${y}`
-    const [px,py]=pts[i-1]; const cx=(px+x)/2
+    const [px,py]=p[i-1]; const cx=(px+x)/2
     return `${acc} C ${cx} ${py} ${cx} ${y} ${x} ${y}`
   },'')
-  const areaPath = pts.length ? `${linePath} L ${pts[pts.length-1][0]} ${H-PY} L ${PX} ${H-PY} Z` : ''
+
+  const linePath  = buildLine(pts)
+  const prevLine  = buildLine(prevPts)
+  const areaPath  = pts.length ? `${linePath} L ${pts[pts.length-1][0]} ${H-PY} L ${PX} ${H-PY} Z` : ''
 
   useEffect(()=>{
     setAnimated(false)
@@ -112,18 +148,30 @@ function AreaChart({ days, color, gradId }: { days:DayRevenue[]; color:string; g
 
   return (
     <div ref={wrapRef} className="relative" onMouseMove={onMove} onMouseLeave={()=>setHovIdx(null)}>
-
-      {/* Tooltip */}
       {hov && (
         <div className="absolute -top-1 z-10 pointer-events-none"
           style={{left:`${tipL}%`,transform:`translateX(${tipL<15?'0':tipL>85?'-100%':'-50%'})`}}>
           <div className="bg-[#0a0a1a] border border-white/12 rounded-xl px-3 py-2 shadow-xl whitespace-nowrap"
             style={{boxShadow:`0 4px 24px rgba(0,0,0,0.7),0 0 0 1px ${color}25`}}>
-            <p className="text-[10px] text-white/40 uppercase tracking-wider mb-1">
+            <p className="text-[10px] text-white/40 uppercase tracking-wider mb-1.5">
               {new Date(hov.date+'T12:00:00').toLocaleDateString('es-AR',{weekday:'short',day:'numeric',month:'short'})}
             </p>
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <div className="w-2 h-0.5 rounded" style={{background:color}}/>
+              <span className="text-[10px] text-white/40">Actual</span>
+            </div>
             <p className="text-sm font-black leading-none" style={{color}}>{ARS(hov.revenue)}</p>
-            <p className="text-[10px] text-white/40 mt-0.5">{hov.orders} orden{hov.orders!==1?'es':''}</p>
+            <p className="text-[10px] text-white/40 mt-0.5 mb-1.5">{hov.orders} orden{hov.orders!==1?'es':''}</p>
+            {prevDays && prevDays[hovIdx!] && (
+              <>
+                <div className="flex items-center gap-1.5 mb-0.5 border-t border-white/8 pt-1.5">
+                  <div className="w-2 h-px" style={{borderTop:`1.5px dashed ${color}`}}/>
+                  <span className="text-[10px] text-white/30">Período anterior</span>
+                </div>
+                <p className="text-sm font-bold leading-none" style={{color,opacity:0.45}}>{ARS(prevDays[hovIdx!].revenue)}</p>
+                <p className="text-[10px] text-white/25 mt-0.5">{prevDays[hovIdx!].orders} orden{prevDays[hovIdx!].orders!==1?'es':''}</p>
+              </>
+            )}
           </div>
           <div className="w-2 h-2 rotate-45 border-b border-r border-white/12 bg-[#0a0a1a] mx-auto -mt-1"/>
         </div>
@@ -131,13 +179,10 @@ function AreaChart({ days, color, gradId }: { days:DayRevenue[]; color:string; g
 
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-36" preserveAspectRatio="none">
         <defs>
-          {/* Area fill gradient */}
           <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%"  stopColor={color} stopOpacity="0.35"/>
             <stop offset="85%" stopColor={color} stopOpacity="0.02"/>
           </linearGradient>
-
-          {/* Sweeping shimmer across area */}
           <linearGradient id={`${gradId}-sh`} gradientUnits="userSpaceOnUse" x1="-300" y1="0" x2="-100" y2="0">
             <stop offset="0%"   stopColor={color} stopOpacity="0"/>
             <stop offset="50%"  stopColor={color} stopOpacity="0.2"/>
@@ -145,13 +190,9 @@ function AreaChart({ days, color, gradId }: { days:DayRevenue[]; color:string; g
             <animate attributeName="x1" values={`-300;${W+100};-300`} dur="6s" repeatCount="indefinite" calcMode="linear"/>
             <animate attributeName="x2" values={`-100;${W+300};-100`} dur="6s" repeatCount="indefinite" calcMode="linear"/>
           </linearGradient>
-
-          {/* Clip shimmer to area shape */}
           <mask id={`${gradId}-mask`}>
             <path d={areaPath} fill="white"/>
           </mask>
-
-          {/* Breathing glow on the line */}
           <filter id={`${gradId}-glow`}>
             <feGaussianBlur result="blur">
               <animate attributeName="stdDeviation" values="2;5;2" dur="7s" repeatCount="indefinite"/>
@@ -160,43 +201,43 @@ function AreaChart({ days, color, gradId }: { days:DayRevenue[]; color:string; g
           </filter>
         </defs>
 
-        {/* Grid lines */}
         {[0.25,0.5,0.75,1].map(f=>(
           <line key={f} x1={PX} x2={W-PX}
             y1={H-PY-(f*(H-PY*2-8))} y2={H-PY-(f*(H-PY*2-8))}
             stroke="rgba(255,255,255,0.04)" strokeWidth="1"/>
         ))}
 
-        {/* Area + shimmer */}
         <path d={areaPath} fill={`url(#${gradId})`}/>
         <rect width={W} height={H} fill={`url(#${gradId}-sh)`} mask={`url(#${gradId}-mask)`}/>
 
-        {/* Line with breathing glow */}
+        {/* Previous period dashed line */}
+        {prevLine && prevPts.length > 1 && (
+          <path d={prevLine} fill="none" stroke={color} strokeWidth="1.5"
+            strokeDasharray="5 4" strokeLinecap="round" opacity="0.35"/>
+        )}
+
         <path ref={pathRef} d={linePath} fill="none" stroke={color} strokeWidth="2.5"
           strokeLinecap="round" strokeLinejoin="round" filter={`url(#${gradId}-glow)`}/>
 
-        {/* Hover vertical guide */}
         {hovIdx!==null && (
           <line x1={hovX} y1={PY} x2={hovX} y2={H-PY}
             stroke={color} strokeWidth="1" strokeDasharray="3 3" opacity="0.5"/>
         )}
 
-        {/* Pulsing dot at last data point (live indicator) */}
         {lastPt && (
           <g>
             <circle cx={lastPt[0]} cy={lastPt[1]} r="4" fill={color} opacity="0">
-              <animate attributeName="r"       values="4;18;4"   dur="2.5s" repeatCount="indefinite"/>
+              <animate attributeName="r"       values="4;18;4"      dur="2.5s" repeatCount="indefinite"/>
               <animate attributeName="opacity" values="0.18;0;0.18" dur="2.5s" repeatCount="indefinite"/>
             </circle>
             <circle cx={lastPt[0]} cy={lastPt[1]} r="4" fill="none" stroke={color} strokeWidth="1.5" opacity="0">
-              <animate attributeName="r"       values="4;11;4"  dur="2s" begin="0.4s" repeatCount="indefinite"/>
+              <animate attributeName="r"       values="4;11;4"    dur="2s" begin="0.4s" repeatCount="indefinite"/>
               <animate attributeName="opacity" values="0.5;0;0.5" dur="2s" begin="0.4s" repeatCount="indefinite"/>
             </circle>
             <circle cx={lastPt[0]} cy={lastPt[1]} r="3.5" fill={color}/>
           </g>
         )}
 
-        {/* Hover dot */}
         {hovIdx!==null && (
           <g>
             <circle cx={hovX} cy={hovY} r="9" fill={color} opacity="0.1"/>
@@ -257,7 +298,7 @@ function DonutChart({ paid, pending, cancelled }: { paid:number; pending:number;
 }
 
 /* ── Animated bar with shimmer ───────────────────────────── */
-function AnimBar({ value, max, color, delay=0 }: { value:number; max:number; color:string; delay?:number }) {
+export function AnimBar({ value, max, color, delay=0 }: { value:number; max:number; color:string; delay?:number }) {
   const [w, setW] = useState('0%')
   useEffect(()=>{
     const t=setTimeout(()=>setW(`${max>0?(value/max)*100:0}%`), delay+200)
@@ -279,8 +320,8 @@ function AnimBar({ value, max, color, delay=0 }: { value:number; max:number; col
 }
 
 /* ── KPI Card ────────────────────────────────────────────── */
-function KpiCard({ icon, label, value, sub, color, sparkData, delay=0 }: {
-  icon:string; label:string; value:string; sub?:string; color:string; sparkData?:number[]; delay?:number
+export function KpiCard({ icon, label, value, sub, color, sparkData, delay=0, trend }: {
+  icon:string; label:string; value:string; sub?:string; color:string; sparkData?:number[]; delay?:number; trend?:number
 }) {
   const [visible, setVisible] = useState(false)
   useEffect(()=>{const t=setTimeout(()=>setVisible(true),delay);return()=>clearTimeout(t)},[delay])
@@ -309,6 +350,12 @@ function KpiCard({ icon, label, value, sub, color, sparkData, delay=0 }: {
         )}
       </div>
       <p className="text-2xl font-black text-white font-['Plus_Jakarta_Sans'] leading-none">{value}</p>
+      {trend !== undefined && !isNaN(trend) && (
+        <span className={`text-[10px] font-bold flex items-center gap-0.5 mt-0.5 ${trend>=0?'text-emerald-400':'text-red-400'}`}>
+          <span className="material-symbols-outlined text-xs">{trend>=0?'trending_up':'trending_down'}</span>
+          {trend>=0?'+':''}{trend.toFixed(1)}% vs período ant.
+        </span>
+      )}
       {sub && <p className="text-xs text-white/40 mt-1">{sub}</p>}
       <p className="text-[10px] text-white/30 uppercase tracking-widest font-semibold mt-3">{label}</p>
     </div>
@@ -342,6 +389,8 @@ export default function AdminAnalyticsPage() {
   const [customFrom, setCustomFrom] = useState('')
   const [customTo, setCustomTo]     = useState('')
   const [chartKey, setChartKey]     = useState(0)
+  const [ordersPage, setOrdersPage] = useState(1)
+  const PAGE_SIZE = 8
 
   useEffect(()=>{ if(!authLoading&&!isAdmin) navigate('/') },[authLoading,isAdmin,navigate])
 
@@ -350,6 +399,7 @@ export default function AdminAnalyticsPage() {
     if(preset==='custom'&&(!customFrom||!customTo)) return
     const { from, to } = getRangeParams(preset, customFrom, customTo)
     setLoading(true)
+    setOrdersPage(1)
     api.get<Analytics>(`/api/admin/analytics?from=${from}&to=${to}`)
       .then(res=>{ setData(res); setChartKey(k=>k+1) })
       .catch(e=>setError(e.message??'Error al cargar analytics'))
@@ -371,12 +421,38 @@ export default function AdminAnalyticsPage() {
   )
   if (!data) return null
 
-  const { summary, topProducts, topSellers, revenueByDay, revenueByCategory, recentOrders } = data
-  const sparkData = revenueByDay.slice(-14).map(d=>d.revenue)
-  const periodRev = revenueByDay.reduce((s,d)=>s+d.revenue, 0)
-  const maxProd   = topProducts[0]?.qty??1
-  const maxSell   = topSellers[0]?.revenue??1
-  const maxCat    = revenueByCategory[0]?.revenue??1
+  const { summary, topProducts, topSellers, revenueByDay, revenueByCategory, recentOrders, previousPeriod } = data
+  const sparkData   = revenueByDay.slice(-14).map(d=>d.revenue)
+  const periodRev   = revenueByDay.reduce((s,d)=>s+d.revenue, 0)
+  const maxProd     = topProducts[0]?.qty??1
+  const maxSell     = topSellers[0]?.revenue??1
+  const maxCat      = revenueByCategory[0]?.revenue??1
+
+  const pagedOrders = recentOrders.slice((ordersPage-1)*PAGE_SIZE, ordersPage*PAGE_SIZE)
+  const totalPages  = Math.ceil(recentOrders.length / PAGE_SIZE)
+
+  const exportCSV = () => {
+    const rows = [
+      ['ID','Cliente','Vendedor','Items','Total','Estado','Fecha'],
+      ...recentOrders.map(o=>[
+        o.id.slice(0,8),
+        o.user.name??o.user.email,
+        o.seller?.name??'',
+        String(o.itemCount),
+        String(o.totalAmount),
+        o.status,
+        new Date(o.createdAt).toLocaleDateString('es-AR'),
+      ])
+    ]
+    const csv  = rows.map(r=>r.map(c=>`"${c}"`).join(',')).join('\n')
+    const blob = new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'})
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a'); a.href=url
+    a.download = `ordenes-${new Date().toISOString().slice(0,10)}.csv`
+    a.click(); URL.revokeObjectURL(url)
+  }
+
+  const presetLabel = PRESETS.find(p=>p.key===preset)?.label??''
 
   return (
     <main className="max-w-screen-xl mx-auto px-4 md:px-8 py-lg space-y-8 bg-[#080812] min-h-screen">
@@ -449,8 +525,8 @@ export default function AdminAnalyticsPage() {
 
       {/* ── KPI Cards ────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard icon="payments"     label="Ingresos totales"   value={ARS(revCount)}    sub={`Prom. ${ARS(summary.avgOrderValue)}`} color="#4ade80" sparkData={sparkData} delay={0}/>
-        <KpiCard icon="receipt_long" label="Órdenes totales"    value={String(ordCount)} sub={`${summary.paidOrders} pagadas`}       color="#ff4a8d" sparkData={revenueByDay.slice(-14).map(d=>d.orders)} delay={100}/>
+        <KpiCard icon="payments"     label="Ingresos totales"   value={ARS(revCount)}    sub={`Prom. ${ARS(summary.avgOrderValue)}`} color="#4ade80" sparkData={sparkData} delay={0}   trend={calcTrend(summary.totalRevenue, previousPeriod.totalRevenue)}/>
+        <KpiCard icon="receipt_long" label="Órdenes totales"    value={String(ordCount)} sub={`${summary.paidOrders} pagadas`}       color="#ff4a8d" sparkData={revenueByDay.slice(-14).map(d=>d.orders)} delay={100} trend={calcTrend(summary.totalOrders, previousPeriod.totalOrders)}/>
         <KpiCard icon="inventory_2"  label="Productos"          value={String(prodCount)}                                            color="#3af4ff" delay={200}/>
         <KpiCard icon="storefront"   label="Vendedores activos" value={String(sellCount)}                                            color="#a855f7" delay={300}/>
       </div>
@@ -464,7 +540,7 @@ export default function AdminAnalyticsPage() {
               <h2 className="font-bold text-white font-['Plus_Jakarta_Sans'] text-base">Ingresos del período</h2>
               <p className="text-xs text-white/40 mt-0.5">
                 <span className="font-semibold" style={{color:'#4ade80'}}>{ARS(periodRev)}</span>
-                {' '}· {PRESETS.find(p=>p.key===preset)?.label}
+                {' '}· {presetLabel}
               </p>
             </div>
           </div>
@@ -592,48 +668,99 @@ export default function AdminAnalyticsPage() {
 
       {/* ── Recent Orders ─────────────────────────────────── */}
       <div className="bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
-        <h2 className="font-bold text-white font-['Plus_Jakarta_Sans'] text-base mb-5 flex items-center gap-2">
-          <span className="material-symbols-outlined text-white/30 text-base">receipt_long</span>
-          Órdenes recientes
-        </h2>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="font-bold text-white font-['Plus_Jakarta_Sans'] text-base flex items-center gap-2">
+            <span className="material-symbols-outlined text-white/30 text-base">receipt_long</span>
+            Órdenes recientes
+            <span className="text-[10px] bg-white/6 border border-white/10 rounded-full px-2 py-0.5 text-white/40 font-normal">{recentOrders.length}</span>
+          </h2>
+          <button
+            onClick={exportCSV}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#4ade80]/10 border border-[#4ade80]/20 text-[#4ade80] text-xs font-bold hover:bg-[#4ade80]/20 transition-all cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-sm">download</span>
+            Exportar CSV
+          </button>
+        </div>
         {recentOrders.length===0
           ? <div className="py-10 text-center text-white/20 text-sm">Sin órdenes en este período</div>
-          : <div className="overflow-x-auto -mx-5 px-5">
-            <table className="w-full text-sm min-w-[640px]">
-              <thead>
-                <tr className="border-b border-white/6">
-                  {['#','Cliente','Vendedor','Items','Total','Estado','Fecha'].map(h=>(
-                    <th key={h} className="pb-3 pr-4 text-left text-[10px] text-white/25 font-semibold uppercase tracking-widest">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {recentOrders.map(o=>{
-                  const st=STATUS_MAP[o.status]??{label:o.status,dot:'bg-white/20',badge:'bg-white/5 text-white/30 border-white/10'}
-                  return (
-                    <tr key={o.id} className="border-b border-white/4 hover:bg-white/2 transition-colors group">
-                      <td className="py-3 pr-4 text-[11px] text-white/20 font-mono group-hover:text-white/40 transition-colors">{o.id.slice(0,8)}</td>
-                      <td className="py-3 pr-4"><p className="font-medium text-white/80 truncate max-w-[130px]">{o.user.name??o.user.email}</p></td>
-                      <td className="py-3 pr-4 text-white/40 text-xs">{o.seller?.name??'—'}</td>
-                      <td className="py-3 pr-4 text-center text-white/40 text-xs">{o.itemCount}</td>
-                      <td className="py-3 pr-4 font-bold text-xs tabular-nums" style={{color:'#4ade80'}}>{ARS(o.totalAmount)}</td>
-                      <td className="py-3 pr-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${st.badge}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${st.dot}`}/>
-                          {st.label}
-                        </span>
-                      </td>
-                      <td className="py-3 text-[11px] text-white/30 whitespace-nowrap">
-                        {new Date(o.createdAt).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'})}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+          : <>
+            <div className="overflow-x-auto -mx-5 px-5">
+              <table className="w-full text-sm min-w-[640px]">
+                <thead>
+                  <tr className="border-b border-white/6">
+                    {['#','Cliente','Vendedor','Items','Total','Estado','Fecha'].map(h=>(
+                      <th key={h} className="pb-3 pr-4 text-left text-[10px] text-white/25 font-semibold uppercase tracking-widest">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {pagedOrders.map(o=>{
+                    const st=STATUS_MAP[o.status]??{label:o.status,dot:'bg-white/20',badge:'bg-white/5 text-white/30 border-white/10'}
+                    return (
+                      <tr key={o.id} className="border-b border-white/4 hover:bg-white/2 transition-colors group">
+                        <td className="py-3 pr-4 text-[11px] text-white/20 font-mono group-hover:text-white/40 transition-colors">{o.id.slice(0,8)}</td>
+                        <td className="py-3 pr-4"><p className="font-medium text-white/80 truncate max-w-[130px]">{o.user.name??o.user.email}</p></td>
+                        <td className="py-3 pr-4 text-white/40 text-xs">{o.seller?.name??'—'}</td>
+                        <td className="py-3 pr-4 text-center text-white/40 text-xs">{o.itemCount}</td>
+                        <td className="py-3 pr-4 font-bold text-xs tabular-nums" style={{color:'#4ade80'}}>{ARS(o.totalAmount)}</td>
+                        <td className="py-3 pr-4">
+                          <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${st.badge}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${st.dot}`}/>
+                            {st.label}
+                          </span>
+                        </td>
+                        <td className="py-3 text-[11px] text-white/30 whitespace-nowrap">
+                          {new Date(o.createdAt).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'})}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/6">
+                <span className="text-xs text-white/30">
+                  Mostrando {(ordersPage-1)*PAGE_SIZE+1}–{Math.min(ordersPage*PAGE_SIZE, recentOrders.length)} de {recentOrders.length}
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={()=>setOrdersPage(p=>Math.max(1,p-1))}
+                    disabled={ordersPage===1}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-white/10 text-white/40 hover:text-white hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-all"
+                  >
+                    <span className="material-symbols-outlined text-sm">chevron_left</span>
+                    Ant.
+                  </button>
+                  <div className="flex gap-1">
+                    {Array.from({length:totalPages},(_,i)=>i+1).map(p=>(
+                      <button key={p} onClick={()=>setOrdersPage(p)}
+                        className={`w-7 h-7 rounded-lg text-xs font-bold cursor-pointer transition-all
+                          ${p===ordersPage
+                            ? 'bg-[#3af4ff]/15 text-[#3af4ff] border border-[#3af4ff]/30'
+                            : 'text-white/30 hover:text-white/60 border border-transparent hover:border-white/10'}`}>
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    onClick={()=>setOrdersPage(p=>Math.min(totalPages,p+1))}
+                    disabled={ordersPage===totalPages}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-white/10 text-white/40 hover:text-white hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-all"
+                  >
+                    Sig.
+                    <span className="material-symbols-outlined text-sm">chevron_right</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         }
       </div>
+
 
     </main>
   )

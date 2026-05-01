@@ -12,6 +12,7 @@ import uploadRoutes   from './routes/uploadRoutes'
 import contactRoutes  from './routes/contactRoutes'
 import orderRoutes    from './routes/orderRoutes'
 import sellerRoutes   from './routes/sellerRoutes'
+import trackingRoutes from './routes/trackingRoutes'
 import { errorHandler, notFound } from './middleware/errorHandler'
 
 dotenv.config()
@@ -56,6 +57,7 @@ app.get('/api/health', (_req, res) => {
 })
 
 app.use('/api/auth',       authLimiter, authRoutes)
+app.use('/api/tracking',   trackingRoutes)
 app.use('/api/products',   productRoutes)
 app.use('/api/categories', categoryRoutes)
 app.use('/api/admin',      adminRoutes)

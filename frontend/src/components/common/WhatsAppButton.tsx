@@ -51,6 +51,11 @@ export default function WhatsAppButton() {
   }, [open])
 
   const handleSelect = (seller: Seller) => {
+    fetch('http://localhost:3001/api/tracking/event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'wa_click', sellerId: seller.id }),
+    }).catch(() => {})
     window.open(waUrl(seller.whatsapp), '_blank', 'noopener,noreferrer')
     setOpen(false)
   }

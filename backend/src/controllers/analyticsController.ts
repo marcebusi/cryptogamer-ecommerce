@@ -7,8 +7,8 @@ export const getAnalytics = async (req: Request, res: Response): Promise<void> =
   try {
     const { from, to } = req.query
 
-    const now     = new Date()
-    const toDate  = to   ? new Date(`${to}T23:59:59`)   : now
+    const now      = new Date()
+    const toDate   = to   ? new Date(`${to}T23:59:59`)   : now
     const fromDate = from ? new Date(`${from}T00:00:00`) : new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
 
     const [orders, sellers, products] = await Promise.all([
@@ -32,6 +32,21 @@ export const getAnalytics = async (req: Request, res: Response): Promise<void> =
     const pendingOrders   = orders.filter(o => o.status === 'PENDING').length
     const paidOrders      = orders.filter(o => o.status === 'PAID').length
     const cancelledOrders = orders.filter(o => o.status === 'CANCELLED').length
+
+    // ── Previous period ──────────────────────────────────────
+    const duration = toDate.getTime() - fromDate.getTime()
+    const prevTo   = new Date(fromDate.getTime() - 1000)
+    const prevFrom = new Date(prevTo.getTime() - duration)
+    const prevOrders = await prisma.order.findMany({
+      where: { createdAt: { gte: prevFrom, lte: prevTo } },
+      select: { totalAmount: true, status: true },
+    })
+    const previousPeriod = {
+      totalRevenue:    prevOrders.reduce((s, o) => s + o.totalAmount, 0),
+      totalOrders:     prevOrders.length,
+      paidOrders:      prevOrders.filter(o => o.status === 'PAID').length,
+      cancelledOrders: prevOrders.filter(o => o.status === 'CANCELLED').length,
+    }
 
     // ── Top products ─────────────────────────────────────────
     const productSales: Record<string, { name:string; image:string; category:string; price:number; qty:number; revenue:number }> = {}
@@ -99,8 +114,98 @@ export const getAnalytics = async (req: Request, res: Response): Promise<void> =
       .map(([category, revenue]) => ({ category, revenue }))
       .sort((a, b) => b.revenue - a.revenue)
 
-    // ── Recent orders ────────────────────────────────────────
-    const recentOrders = orders.slice(0, 10).map(o => ({
+    // ── Heatmap (day × time block) ───────────────────────────
+    const heatmapMap: Record<string, number> = {}
+    for (const order of orders) {
+      const d     = new Date(order.createdAt)
+      const day   = (d.getDay() + 6) % 7          // Mon=0 … Sun=6
+      const block = Math.floor(d.getHours() / 4)  // 0-5
+      const key   = `${day}_${block}`
+      heatmapMap[key] = (heatmapMap[key] ?? 0) + 1
+    }
+    const heatmap: { day:number; block:number; count:number }[] = []
+    for (let day = 0; day < 7; day++) {
+      for (let block = 0; block < 6; block++) {
+        heatmap.push({ day, block, count: heatmapMap[`${day}_${block}`] ?? 0 })
+      }
+    }
+
+    // ── Status over time ─────────────────────────────────────
+    const statusOverTime = days.map(day => {
+      const dOrders = orders.filter(o => new Date(o.createdAt).toISOString().slice(0, 10) === day.date)
+      return {
+        date:      day.date,
+        PAID:      dOrders.filter(o => o.status === 'PAID').length,
+        PENDING:   dOrders.filter(o => o.status === 'PENDING').length,
+        SHIPPED:   dOrders.filter(o => o.status === 'SHIPPED').length,
+        DELIVERED: dOrders.filter(o => o.status === 'DELIVERED').length,
+        CANCELLED: dOrders.filter(o => o.status === 'CANCELLED').length,
+      }
+    })
+
+    // ── Dead inventory ───────────────────────────────────────
+    const allProductsFull = await prisma.product.findMany({ include: { category: true } })
+    const soldIds = new Set(Object.keys(productSales))
+    const deadInventory = allProductsFull
+      .filter(p => !soldIds.has(p.id))
+      .map(p => ({
+        id:       p.id,
+        name:     p.name,
+        image:    p.image,
+        price:    p.price,
+        category: p.subcategory ?? p.category?.name ?? 'Sin categoría',
+      }))
+
+    // ── High value products ──────────────────────────────────
+    const highValueProducts = Object.entries(productSales)
+      .map(([id, v]) => ({ id, ...v, revenuePerUnit: v.qty > 0 ? v.revenue / v.qty : 0 }))
+      .sort((a, b) => b.revenuePerUnit - a.revenuePerUnit)
+      .slice(0, 6)
+
+    // ── Category by orders ───────────────────────────────────
+    const catOrdersMap: Record<string, { orders:number; revenue:number }> = {}
+    for (const order of orders) {
+      for (const item of order.items) {
+        const cat = item.product.subcategory ?? item.product.category?.name ?? 'Sin categoría'
+        if (!catOrdersMap[cat]) catOrdersMap[cat] = { orders: 0, revenue: 0 }
+        catOrdersMap[cat].orders  += item.quantity
+        catOrdersMap[cat].revenue += item.price * item.quantity
+      }
+    }
+    const categoryByOrders = Object.entries(catOrdersMap)
+      .map(([category, v]) => ({ category, ...v }))
+      .sort((a, b) => b.orders - a.orders)
+
+    // ── WA contacts + avg ticket by seller ───────────────────
+    const waEventsBySellerArr = await (async () => {
+      try {
+        const events = await prisma.analyticsEvent.findMany({
+          where: { type: 'wa_click', createdAt: { gte: fromDate, lte: toDate } },
+          select: { sellerId: true },
+        })
+        const map: Record<string, number> = {}
+        for (const e of events) if (e.sellerId) map[e.sellerId] = (map[e.sellerId] ?? 0) + 1
+        return map
+      } catch {
+        return {} as Record<string, number>
+      }
+    })()
+
+    const avgTicketBySeller = Object.entries(sellerStats)
+      .map(([id, v]) => ({
+        id, name: v.name, avatar: v.avatar,
+        orderCount: v.orderCount, revenue: v.revenue,
+        avgTicket:  v.orderCount ? v.revenue / v.orderCount : 0,
+        waContacts: waEventsBySellerArr[id] ?? 0,
+      }))
+      .filter(s => s.orderCount > 0)
+      .sort((a, b) => b.avgTicket - a.avgTicket)
+
+    const waContactsTotal  = Object.values(waEventsBySellerArr).reduce((s, n) => s + n, 0)
+    const cancellationRate = totalOrders > 0 ? (cancelledOrders / totalOrders) * 100 : 0
+
+    // ── Recent orders (50 for pagination) ───────────────────
+    const recentOrders = orders.slice(0, 50).map(o => ({
       id:          o.id,
       status:      o.status,
       totalAmount: o.totalAmount,
@@ -111,12 +216,25 @@ export const getAnalytics = async (req: Request, res: Response): Promise<void> =
     }))
 
     res.json({
-      summary: { totalRevenue, totalOrders, avgOrderValue, pendingOrders, paidOrders, cancelledOrders, totalSellers: sellers.length, totalProducts: products.length },
+      summary: {
+        totalRevenue, totalOrders, avgOrderValue,
+        pendingOrders, paidOrders, cancelledOrders,
+        totalSellers: sellers.length, totalProducts: products.length,
+      },
       topProducts,
       topSellers,
-      revenueByDay: days,
+      revenueByDay:      days,
       revenueByCategory,
       recentOrders,
+      previousPeriod,
+      heatmap,
+      statusOverTime,
+      deadInventory,
+      highValueProducts,
+      categoryByOrders,
+      avgTicketBySeller,
+      cancellationRate,
+      waContactsTotal,
     })
   } catch (err) {
     console.error('[getAnalytics]', err)

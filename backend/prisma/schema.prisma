@@ -177,3 +177,13 @@ model ContactMessage {
 
   @@map("contact_messages")
 }
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  type      String   // 'wa_click'
+  sellerId  String?
+  createdAt DateTime @default(now())
+
+  @@index([type, createdAt])
+  @@map("analytics_events")
+}

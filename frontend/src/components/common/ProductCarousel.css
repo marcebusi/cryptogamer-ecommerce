@@ -1,0 +1,250 @@
+/* ── Infinite Carousel — Premium Design ──────────────── */
+
+.pc-root {
+  position: relative;
+  padding: 0 2.5rem 0.5rem;
+}
+
+/* ── Track ── */
+.pc-track {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  overflow-y: clip; /* clip y-axis without creating a scroll container → allows hover lift */
+  padding: 14px 0.25rem 1.25rem; /* 14px top = room for the 10px hover lift */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-snap-type: x mandatory;
+  /* edge fades */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+}
+.pc-track::-webkit-scrollbar { display: none; }
+
+/* ── Card ── */
+.pc-card {
+  flex-shrink: 0;
+  width: 210px;
+  scroll-snap-align: start;
+  cursor: pointer;
+  /* spring lift on hover */
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform;
+}
+
+.pc-card:hover {
+  transform: translateY(-10px);
+}
+
+/* ── Card inner shell ── */
+.pc-card-inner {
+  border-radius: 1.125rem;
+  overflow: hidden;
+  background: #0e0d1b;
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: border-color 0.3s ease, box-shadow 0.35s ease;
+  position: relative;
+}
+
+.pc-card:hover .pc-card-inner {
+  border-color: rgba(255, 74, 141, 0.5);
+  box-shadow:
+    0 0 0 1px rgba(255,74,141,0.12),
+    0 12px 40px rgba(0,0,0,0.7),
+    0 0 48px rgba(255,74,141,0.14);
+}
+
+/* ── Image area ── */
+.pc-img-area {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  overflow: hidden;
+  background: #000;
+}
+
+/* Radial glow behind image — subtle at rest, more intense on hover */
+.pc-img-area::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 65% 60% at 50% 55%,
+    rgba(138,43,226,0.15) 0%,
+    rgba(255,74,141,0.08) 40%,
+    transparent 72%
+  );
+  opacity: 0.6;
+  transition: opacity 0.4s ease;
+  z-index: 1;
+  pointer-events: none;
+}
+.pc-card:hover .pc-img-area::before {
+  opacity: 1;
+  background: radial-gradient(ellipse 65% 60% at 50% 55%,
+    rgba(255,74,141,0.22) 0%,
+    rgba(138,43,226,0.12) 45%,
+    transparent 72%
+  );
+}
+
+.pc-img-area img {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+.pc-card:hover .pc-img-area img {
+  transform: scale(1.08) translateY(-3px);
+}
+
+/* Discount badge */
+.pc-badge {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.6rem;
+  z-index: 10;
+  background: #ff4a8d;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 999px;
+  box-shadow: 0 0 10px rgba(255,74,141,0.55);
+  animation: pc-badge-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes pc-badge-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(255,74,141,0.5); }
+  50%       { box-shadow: 0 0 18px rgba(255,74,141,0.85); }
+}
+
+/* Hover "add to cart" overlay */
+.pc-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  background: rgba(0,0,0,0.52);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.pc-card:hover .pc-overlay { opacity: 1; }
+
+/* ── Info area ── */
+.pc-info {
+  padding: 0.65rem 0.85rem 0.85rem;
+  background: linear-gradient(180deg, rgba(255,255,255,0.025) 0%, transparent 100%);
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.pc-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.75);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.2s ease;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.pc-card:hover .pc-name { color: #ff4a8d; }
+
+.pc-prices {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+
+.pc-price {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #ff4a8d;
+  /* neon glow on hover */
+  transition: text-shadow 0.3s ease;
+}
+.pc-card:hover .pc-price {
+  text-shadow: 0 0 14px rgba(255,74,141,0.7);
+}
+
+.pc-price-original {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.28);
+  text-decoration: line-through;
+}
+
+.pc-no-stock {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.22);
+}
+
+/* ── Arrows ── */
+.pc-arrow {
+  position: absolute;
+  top: calc(38% + 0.75rem);
+  transform: translateY(-50%);
+  z-index: 20;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 9999px;
+  background: rgba(15,14,30,0.92);
+  border: 1px solid rgba(255,255,255,0.13);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.75);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+              border-color 0.2s ease, box-shadow 0.2s ease,
+              color 0.2s ease, background 0.2s ease;
+  cursor: pointer;
+}
+
+.pc-arrow:hover {
+  border-color: rgba(255,74,141,0.65);
+  box-shadow: 0 0 22px rgba(255,74,141,0.45);
+  color: #ff4a8d;
+  background: rgba(26,10,30,0.95);
+  transform: translateY(-50%) scale(1.14);
+}
+
+.pc-arrow-left  { left:  0; }
+.pc-arrow-right { right: 0; }
+
+/* Arrow active (clicked state from JS) */
+.pc-arrow-active {
+  transform: translateY(-50%) scale(0.82) !important;
+  background: rgba(42,10,30,0.97) !important;
+  border-color: rgba(255,74,141,0.95) !important;
+  box-shadow: 0 0 0 4px rgba(255,74,141,0.22),
+              0 0 28px rgba(255,74,141,0.6) !important;
+  color: #ff4a8d !important;
+}
+
+/* ── Responsive ── */
+@media (min-width: 640px) {
+  .pc-card  { width: 230px; }
+  .pc-track { gap: 1.25rem; }
+}
+@media (min-width: 1024px) {
+  .pc-card  { width: 260px; }
+  .pc-track { gap: 1.5rem; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .pc-card,
+  .pc-arrow,
+  .pc-img-area img,
+  .pc-img-area::before,
+  .pc-card-inner { transition: none !important; animation: none !important; }
+}

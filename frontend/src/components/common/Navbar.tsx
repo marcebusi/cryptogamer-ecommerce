@@ -168,7 +168,7 @@ export default function Navbar() {
                   </div>
 
                   {/* Middle col: sub-categories */}
-                  <div className={`w-[185px] border-r border-white/8 p-sm space-y-0.5 transition-opacity duration-150 ${hoveredChildren.length > 0 ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                  <div className={`w-[195px] border-r border-white/8 p-sm space-y-0.5 transition-opacity duration-150 ${hoveredChildren.length > 0 ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                     {hoveredChildren.length > 0 && hoveredCat && (
                       <>
                         <p className="text-[10px] font-bold uppercase tracking-widest text-purple-400 px-xs mb-xs">
@@ -182,7 +182,7 @@ export default function Navbar() {
                             className={`w-full flex items-center gap-2 px-xs py-2 rounded-lg text-sm transition-all duration-150 cursor-pointer ${
                               hoveredSubId === sub.id ? 'bg-white/10 text-cyan-400' : 'text-on-surface-variant hover:bg-white/5 hover:text-cyan-400'
                             }`}>
-                            <span className="flex-1 text-left">{sub.label}</span>
+                            <span className="flex-1 text-left whitespace-nowrap">{sub.label}</span>
                             {(sub.children?.length ?? 0) > 0 && (
                               <span className={`material-symbols-outlined text-xs flex-shrink-0 ${hoveredSubId === sub.id ? 'text-cyan-400' : 'text-on-surface-variant/40'}`}>
                                 chevron_right
@@ -195,7 +195,7 @@ export default function Navbar() {
                   </div>
 
                   {/* Right col: sub-sub-categories */}
-                  <div className={`w-[160px] p-sm space-y-0.5 transition-opacity duration-150 ${hasSubSub ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                  <div className={`w-[210px] p-sm space-y-0.5 transition-opacity duration-150 ${hasSubSub ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                     {hasSubSub && hoveredSub && (
                       <>
                         <p className="text-[10px] font-bold uppercase tracking-widest text-cyan-400 px-xs mb-xs">
@@ -206,8 +206,8 @@ export default function Navbar() {
                             key={ssub.id}
                             onClick={() => goTo(hoveredCatSlug!, ssub.id)}
                             className="w-full flex items-center gap-2 px-xs py-2 rounded-lg text-sm text-on-surface-variant hover:text-cyan-400 hover:bg-white/5 transition-all duration-150 cursor-pointer">
-                            <span className="material-symbols-outlined text-xs text-cyan-400/60">chevron_right</span>
-                            {ssub.label}
+                            <span className="material-symbols-outlined text-xs text-cyan-400/60 flex-shrink-0">chevron_right</span>
+                            <span className="whitespace-nowrap">{ssub.label}</span>
                           </button>
                         ))}
                       </>

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import ProductCard from '../components/products/ProductCard'
 import { useDynamicProducts } from '../hooks/useDynamicProducts'
 
-type Sort = 'discount' | 'price-asc' | 'price-desc' | 'rating'
+type Sort = 'discount' | 'price-asc' | 'price-desc'
 
 export default function OffersPage() {
   const [sort, setSort] = useState<Sort>('discount')
@@ -17,7 +17,7 @@ export default function OffersPage() {
     }
     if (sort === 'price-asc')  return a.price - b.price
     if (sort === 'price-desc') return b.price - a.price
-    return b.rating - a.rating
+    return 0
   })
 
   return (
@@ -66,7 +66,6 @@ export default function OffersPage() {
               ['discount',   'Mayor descuento'],
               ['price-asc',  'Menor precio'],
               ['price-desc', 'Mayor precio'],
-              ['rating',     'Mejor puntuados'],
             ] as [Sort, string][]).map(([val, label]) => (
               <button
                 key={val}
