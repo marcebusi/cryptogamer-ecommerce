@@ -154,27 +154,6 @@ export default function UserMenu({ onClose }: Props) {
               Gestionar catálogo
             </Link>
 
-            <Link
-              to="/admin/categorias"
-              onClick={onClose}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/6 transition-all group"
-            >
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-purple-500/12 group-hover:bg-purple-500/22 transition-colors flex-shrink-0">
-                <i className="fa-solid fa-layer-group text-purple-400 text-xs" />
-              </div>
-              Categorías
-            </Link>
-
-            <Link
-              to="/admin/vendedores"
-              onClick={onClose}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/6 transition-all group"
-            >
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-yellow-500/12 group-hover:bg-yellow-500/22 transition-colors flex-shrink-0">
-                <i className="fa-solid fa-users text-yellow-400 text-xs" />
-              </div>
-              Vendedores
-            </Link>
           </>
         )}
 

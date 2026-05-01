@@ -114,7 +114,7 @@ export default function Footer() {
       </div>
 
       <div className="px-4 sm:px-6 py-5 border-t border-purple-500/10 text-center text-slate-500 text-xs font-['Plus_Jakarta_Sans']">
-        © 2025 Cryptogamer. Todos los derechos reservados.
+        © {new Date().getFullYear()} Cryptogamer. Todos los derechos reservados.
       </div>
     </footer>
   )

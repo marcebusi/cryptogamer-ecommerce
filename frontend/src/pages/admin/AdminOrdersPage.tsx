@@ -26,14 +26,17 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   CANCELLED: { label: 'Cancelado',  color: 'bg-red-500/15 text-red-400 border-red-500/30'         },
 }
 
+const PAGE_SIZE = 10
+
 export default function AdminOrdersPage() {
   const { isAdmin, isLoading } = useAuth()
   const navigate = useNavigate()
 
-  const [orders,     setOrders]     = useState<Order[]>([])
-  const [loading,    setLoading]    = useState(true)
-  const [expanded,   setExpanded]   = useState<string | null>(null)
-  const [filter,     setFilter]     = useState<string>('ALL')
+  const [orders,   setOrders]   = useState<Order[]>([])
+  const [loading,  setLoading]  = useState(true)
+  const [expanded, setExpanded] = useState<string | null>(null)
+  const [filter,   setFilter]   = useState<string>('ALL')
+  const [page,     setPage]     = useState(1)
 
   useEffect(() => {
     if (!isLoading && !isAdmin) navigate('/')
@@ -46,7 +49,12 @@ export default function AdminOrdersPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  const filtered = filter === 'ALL' ? orders : orders.filter(o => o.status === filter)
+  // Reset to page 1 when filter changes
+  useEffect(() => { setPage(1) }, [filter])
+
+  const filtered   = filter === 'ALL' ? orders : orders.filter(o => o.status === filter)
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
+  const paginated  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   const totals = {
     all:       orders.length,
@@ -125,8 +133,9 @@ export default function AdminOrdersPage() {
           No hay pedidos{filter !== 'ALL' ? ' con este estado' : ''}.
         </div>
       ) : (
+        <>
         <div className="space-y-sm">
-          {filtered.map(order => {
+          {paginated.map(order => {
             const st = STATUS_LABELS[order.status] ?? { label: order.status, color: 'bg-white/10 text-on-surface-variant border-white/10' }
             const isOpen = expanded === order.id
             return (
@@ -186,6 +195,54 @@ export default function AdminOrdersPage() {
             )
           })}
         </div>
+
+        {/* ── Pagination ─────────────────────── */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-md">
+            <p className="text-xs text-on-surface-variant">
+              Mostrando {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} de {filtered.length} pedidos
+            </p>
+            <div className="flex items-center gap-xs">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="w-8 h-8 rounded-lg border border-outline-variant flex items-center justify-center text-on-surface-variant hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-sm">chevron_left</span>
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(n => n === 1 || n === totalPages || Math.abs(n - page) <= 1)
+                .reduce<(number | '...')[]>((acc, n, idx, arr) => {
+                  if (idx > 0 && n - (arr[idx - 1] as number) > 1) acc.push('...')
+                  acc.push(n)
+                  return acc
+                }, [])
+                .map((n, i) =>
+                  n === '...'
+                    ? <span key={`dots-${i}`} className="w-8 text-center text-xs text-on-surface-variant">…</span>
+                    : <button
+                        key={n}
+                        onClick={() => setPage(n)}
+                        className={`w-8 h-8 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                          page === n
+                            ? 'bg-primary-container/20 text-primary-container border border-primary-container/40'
+                            : 'border border-outline-variant text-on-surface-variant hover:bg-white/5'
+                        }`}
+                      >{n}</button>
+                )}
+
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="w-8 h-8 rounded-lg border border-outline-variant flex items-center justify-center text-on-surface-variant hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-sm">chevron_right</span>
+              </button>
+            </div>
+          </div>
+        )}
+        </>
       )}
     </main>
   )

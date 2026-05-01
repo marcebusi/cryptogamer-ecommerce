@@ -80,7 +80,7 @@ const shell = (content: string) => `
         <!-- ── FOOTER ── -->
         <tr><td style="background:${T.bg};border:1px solid ${T.cardBorder};border-top:none;border-radius:0 0 16px 16px;padding:24px 40px;text-align:center;">
           <p style="margin:0 0 8px;font-size:12px;color:${T.textDim};">
-            © 2025 Cryptogamer's &nbsp;·&nbsp;
+            © ${new Date().getFullYear()} Cryptogamer's &nbsp;·&nbsp;
             <a href="mailto:hola@cryptogamer.ar" style="color:${T.purple};text-decoration:none;">hola@cryptogamer.ar</a>
           </p>
           <p style="margin:0;font-size:11px;color:${T.textDim};">
