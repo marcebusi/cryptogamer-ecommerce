@@ -97,10 +97,17 @@ export default function AdminProductPage() {
   /* ── Image upload ─────────────────────────── */
   const [uploadBusy,   setUploadBusy]  = useState(false)
   const [uploadError,  setUploadError] = useState('')
-  const fileInputRef   = useRef<HTMLInputElement>(null)
-  const dragImgIdx     = useRef<number | null>(null)
-  const previewRef     = useRef<HTMLDivElement>(null)
-  const isDraggingPrev = useRef(false)
+  const fileInputRef    = useRef<HTMLInputElement>(null)
+  const dragImgIdx      = useRef<number | null>(null)
+  const previewRef      = useRef<HTMLDivElement>(null)
+  const isDraggingPrev  = useRef(false)
+  // Which image is being edited in the preview (0 = main/first)
+  const [previewEditIdx, setPreviewEditIdx] = useState(0)
+  // Refs for non-passive wheel handler (avoids page scroll)
+  const galleryRef     = useRef(galleryImages)
+  const previewIdxRef  = useRef(previewEditIdx)
+  useEffect(() => { galleryRef.current    = galleryImages },  [galleryImages])
+  useEffect(() => { previewIdxRef.current = previewEditIdx }, [previewEditIdx])
 
   const handleFilesSelect = async (files: FileList | null) => {
     if (!files || files.length === 0) return
@@ -120,8 +127,10 @@ export default function AdminProductPage() {
     }
   }
 
-  const removeGalleryImg = (idx: number) =>
+  const removeGalleryImg = (idx: number) => {
     setGalleryImages(prev => prev.filter((_, i) => i !== idx))
+    setPreviewEditIdx(prev => Math.max(0, prev === idx ? prev - 1 : prev > idx ? prev - 1 : prev))
+  }
 
   const moveImgToFront = (idx: number) =>
     setGalleryImages(prev => [prev[idx], ...prev.filter((_, i) => i !== idx)])
@@ -134,26 +143,36 @@ export default function AdminProductPage() {
 
   /* ── Preview drag-to-reposition ─── */
   const handlePreviewMouseDown = (e: React.MouseEvent) => {
-    if (!galleryImages[0]) return
+    if (!galleryImages[previewEditIdx]) return
     isDraggingPrev.current = true
     e.preventDefault()
   }
   const handlePreviewMouseMove = (e: React.MouseEvent) => {
-    if (!isDraggingPrev.current || !previewRef.current || !galleryImages[0]) return
+    if (!isDraggingPrev.current || !previewRef.current) return
+    if (!galleryImages[previewEditIdx]) return
     const rect = previewRef.current.getBoundingClientRect()
     const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100))
     const y = Math.max(0, Math.min(100, ((e.clientY - rect.top)  / rect.height) * 100))
-    updateImgSetting(0, { position: `${x.toFixed(0)}% ${y.toFixed(0)}%` })
+    updateImgSetting(previewEditIdx, { position: `${x.toFixed(0)}% ${y.toFixed(0)}%` })
   }
   const handlePreviewMouseUp = () => { isDraggingPrev.current = false }
 
-  const handlePreviewWheel = (e: React.WheelEvent) => {
-    if (!galleryImages[0]) return
-    e.preventDefault()
-    const delta   = e.deltaY > 0 ? -0.1 : 0.1
-    const newZoom = parseFloat(Math.max(0.8, Math.min(2.5, galleryImages[0].zoom + delta)).toFixed(1))
-    updateImgSetting(0, { zoom: newZoom })
-  }
+  // Non-passive wheel listener — prevents page scroll while zooming
+  useEffect(() => {
+    const el = previewRef.current
+    if (!el) return
+    const onWheel = (e: WheelEvent) => {
+      const imgs = galleryRef.current
+      const idx  = previewIdxRef.current
+      if (!imgs[idx]) return
+      e.preventDefault()
+      const delta   = e.deltaY > 0 ? -0.1 : 0.1
+      const newZoom = parseFloat(Math.max(0.8, Math.min(2.5, imgs[idx].zoom + delta)).toFixed(1))
+      setGalleryImages(prev => prev.map((img, i) => i === idx ? { ...img, zoom: newZoom } : img))
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, []) // registrado una sola vez, usa refs internamente
 
   // 9-point focal grid
   const FOCAL_POINTS = [
@@ -898,7 +917,10 @@ export default function AdminProductPage() {
                       onDragStart={() => handleImgDragStart(idx)}
                       onDragOver={e => e.preventDefault()}
                       onDrop={() => handleImgDrop(idx)}
-                      className="relative group aspect-square rounded-xl overflow-hidden border border-white/10 bg-[#07080d] cursor-grab active:cursor-grabbing"
+                      onClick={() => setPreviewEditIdx(idx)}
+                      className={`relative group aspect-square rounded-xl overflow-hidden border bg-[#07080d] cursor-grab active:cursor-grabbing transition-all ${
+                        previewEditIdx === idx ? 'border-primary-container/60 ring-1 ring-primary-container/40' : 'border-white/10'
+                      }`}
                     >
                       <img
                         src={img.url}
@@ -918,13 +940,16 @@ export default function AdminProductPage() {
                       )}
                       {/* Action buttons */}
                       <div className="absolute top-1 right-1 flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {idx > 0 && (
-                        <button type="button" onClick={() => setEditingIdx(editingIdx === idx ? null : idx)}
-                          title="Ajustar encuadre"
-                          className="w-6 h-6 rounded-md bg-purple-600/90 flex items-center justify-center cursor-pointer">
-                          <span className="material-symbols-outlined text-[12px] text-white">crop_free</span>
+                        <button type="button"
+                          onClick={e => { e.stopPropagation(); setPreviewEditIdx(idx) }}
+                          title="Editar en vista previa"
+                          className={`w-6 h-6 rounded-md flex items-center justify-center cursor-pointer transition-colors ${
+                            previewEditIdx === idx ? 'bg-primary-container' : 'bg-purple-600/90'
+                          }`}>
+                          <span className="material-symbols-outlined text-[12px] text-white">
+                            {previewEditIdx === idx ? 'check' : 'crop_free'}
+                          </span>
                         </button>
-                      )}
                         {idx !== 0 && (
                           <button type="button" onClick={() => moveImgToFront(idx)} title="Poner como principal"
                             className="w-6 h-6 rounded-md bg-primary-container/90 flex items-center justify-center cursor-pointer">
@@ -1025,14 +1050,21 @@ export default function AdminProductPage() {
             {/* Live preview */}
             <div className="admin-card rounded-2xl border border-white/8 p-md">
               <div className="flex items-center justify-between mb-sm">
-                <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Vista previa</p>
-                {galleryImages[0] && (
+                <div>
+                  <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Vista previa</p>
+                  {galleryImages.length > 1 && (
+                    <p className="text-[10px] text-on-surface-variant/60 mt-0.5">
+                      Editando imagen {previewEditIdx + 1} de {galleryImages.length}
+                    </p>
+                  )}
+                </div>
+                {galleryImages[previewEditIdx] && (
                   <div className="flex items-center gap-xs">
                     <span className="text-[10px] text-on-surface-variant font-mono">
-                      {galleryImages[0].zoom.toFixed(1)}×
+                      {galleryImages[previewEditIdx].zoom.toFixed(1)}×
                     </span>
                     <button type="button"
-                      onClick={() => updateImgSetting(0, { position: '50% 50%', zoom: 1 })}
+                      onClick={() => updateImgSetting(previewEditIdx, { position: '50% 50%', zoom: 1 })}
                       className="text-[10px] text-on-surface-variant hover:text-primary-container transition-colors cursor-pointer border border-white/10 px-xs py-0.5 rounded-md">
                       Reset
                     </button>
@@ -1047,12 +1079,11 @@ export default function AdminProductPage() {
                   onMouseMove={handlePreviewMouseMove}
                   onMouseUp={handlePreviewMouseUp}
                   onMouseLeave={handlePreviewMouseUp}
-                  onWheel={handlePreviewWheel}
                 >
-                  {galleryImages[0]
+                  {galleryImages[previewEditIdx]
                     ? <>
-                        <img src={galleryImages[0].url} className="w-full h-full object-cover pointer-events-none" alt="preview"
-                          style={{ objectPosition: galleryImages[0].position, transform: `scale(${galleryImages[0].zoom})`, transformOrigin: galleryImages[0].position }} />
+                        <img src={galleryImages[previewEditIdx].url} className="w-full h-full object-cover pointer-events-none" alt="preview"
+                          style={{ objectPosition: galleryImages[previewEditIdx].position, transform: `scale(${galleryImages[previewEditIdx].zoom})`, transformOrigin: galleryImages[previewEditIdx].position }} />
                         {/* Hint overlay */}
                         <div className="absolute bottom-2 left-0 right-0 flex justify-center pointer-events-none">
                           <span className="bg-black/60 backdrop-blur-sm text-white/70 text-[10px] px-xs py-0.5 rounded-full flex items-center gap-1">
