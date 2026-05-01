@@ -146,19 +146,22 @@ export default function AdminOrdersPage() {
                   className="w-full flex items-center gap-sm p-sm text-left hover:bg-white/5 transition-colors cursor-pointer"
                 >
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-xs flex-wrap">
+                    <div className="flex items-center gap-xs flex-wrap mb-0.5">
                       <span className="font-mono text-xs text-on-surface-variant">#{order.id.slice(-8).toUpperCase()}</span>
                       <span className={`text-[10px] font-bold px-xs py-0.5 rounded-full border ${st.color}`}>{st.label}</span>
+                    </div>
+                    <p className="text-sm font-semibold text-on-surface truncate">
+                      {order.user.name ?? order.user.email}
+                    </p>
+                    <div className="flex items-center gap-md mt-0.5 flex-wrap">
+                      <p className="text-xs text-on-surface-variant">{order.user.email}</p>
                       {order.seller && (
-                        <span className="text-[10px] text-on-surface-variant border border-white/10 px-xs py-0.5 rounded-full">
+                        <span className="flex items-center gap-1 text-xs font-semibold text-purple-300">
+                          <span className="material-symbols-outlined text-[12px]">person</span>
                           {order.seller.name}
                         </span>
                       )}
                     </div>
-                    <p className="text-sm font-semibold text-on-surface mt-0.5 truncate">
-                      {order.user.name ?? order.user.email}
-                    </p>
-                    <p className="text-xs text-on-surface-variant">{order.user.email}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
                     <p className="text-base font-black text-primary-container">${order.totalAmount.toFixed(2)}</p>
