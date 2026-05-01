@@ -23,7 +23,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       {/* ── Image ──────────────────────────────── */}
       <Link to={`/products/${product.id}`} className="block relative overflow-hidden bg-[#0b0c12] flex-shrink-0" style={{ aspectRatio: '1 / 1' }}>
         <img
-          className="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-700 cursor-pointer"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 cursor-pointer"
           src={product.image}
           alt={product.name}
           loading="lazy"

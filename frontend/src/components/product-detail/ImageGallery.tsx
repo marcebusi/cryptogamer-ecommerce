@@ -22,7 +22,7 @@ export default function ImageGallery({ product }: ImageGalleryProps) {
 
         <img
           alt={product.name}
-          className="gallery-img relative z-[5] w-full h-full object-contain p-6 md:p-10 transition-transform duration-700 group-hover:scale-105"
+          className="gallery-img relative z-[5] w-full h-full object-contain p-3 md:p-6 transition-transform duration-700 group-hover:scale-105"
           src={thumbs[activeIdx]}
         />
 

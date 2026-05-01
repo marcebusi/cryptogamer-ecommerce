@@ -88,7 +88,7 @@ export default function AdminProductPage() {
   const [conditionTags,      setConditionTags]      = useState('')
   const [badge,              setBadge]              = useState('')
   const [badgeColor,         setBadgeColor]         = useState<'primary'|'secondary'|'tertiary'>('primary')
-  const [imageUrl,           setImageUrl]           = useState('')
+  const [galleryImages,      setGalleryImages]      = useState<string[]>([])
   const [sortOrder,          setSortOrder]          = useState('0')
   const [isOffer,            setIsOffer]            = useState(false)
   const [isFeatured,         setIsFeatured]         = useState(false)
@@ -98,17 +98,40 @@ export default function AdminProductPage() {
   const [uploadBusy,   setUploadBusy]  = useState(false)
   const [uploadError,  setUploadError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const dragImgIdx   = useRef<number | null>(null)
 
-  const handleFileSelect = async (file: File) => {
+  const handleFilesSelect = async (files: FileList | null) => {
+    if (!files || files.length === 0) return
     setUploadBusy(true); setUploadError('')
     try {
-      const result = await api.uploadImage(file)
-      setImageUrl(result.url)
+      const uploads = await Promise.all(
+        Array.from(files).slice(0, 8 - galleryImages.length).map(f => api.uploadImage(f))
+      )
+      setGalleryImages(prev => [...prev, ...uploads.map(r => r.url)].slice(0, 8))
     } catch (err) {
       setUploadError((err as Error).message)
     } finally {
       setUploadBusy(false)
     }
+  }
+
+  const removeGalleryImg = (idx: number) =>
+    setGalleryImages(prev => prev.filter((_, i) => i !== idx))
+
+  const moveImgToFront = (idx: number) =>
+    setGalleryImages(prev => [prev[idx], ...prev.filter((_, i) => i !== idx)])
+
+  const handleImgDragStart = (idx: number) => { dragImgIdx.current = idx }
+  const handleImgDrop = (toIdx: number) => {
+    const from = dragImgIdx.current
+    dragImgIdx.current = null
+    if (from === null || from === toIdx) return
+    setGalleryImages(prev => {
+      const arr = [...prev]
+      const [item] = arr.splice(from, 1)
+      arr.splice(toIdx, 0, item)
+      return arr
+    })
   }
 
   /* ── UI state ─────────────────────────────── */
@@ -155,7 +178,8 @@ export default function AdminProductPage() {
         conditionDescription: conditionDesc || null,
         conditionTags: conditionTags.split(',').map(t => t.trim()).filter(Boolean),
         badge: badge || null, badgeColor,
-        image: imageUrl || null,
+        image: galleryImages[0] || null,
+        images: JSON.stringify(galleryImages),
         sortOrder: parseInt(sortOrder) || 0,
         isOffer,
         isFeatured,
@@ -174,7 +198,7 @@ export default function AdminProductPage() {
     if (categories.length > 0) setCategorySlug(categories[0].slug)
     setSubcategory(''); setCondition('new')
     setConditionScore('100'); setConditionDesc(''); setConditionTags('')
-    setBadge(''); setBadgeColor('primary'); setImageUrl('')
+    setBadge(''); setBadgeColor('primary'); setGalleryImages([])
     setSortOrder('0'); setIsOffer(false); setIsFeatured(false)
     setSpecs([{ ...EMPTY_SPEC }]); setSuccess(false); setError('')
   }
@@ -810,55 +834,110 @@ export default function AdminProductPage() {
           {/* ── Sidebar (right 4 cols) ─────────── */}
           <div className="lg:col-span-4 flex flex-col gap-md">
 
-            {/* Image upload + preview */}
+            {/* ── Multi-image gallery ──────────── */}
             <div className="admin-card rounded-2xl border border-white/10 p-md">
-              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-sm">
-                Imagen del producto
+              <div className="flex items-center justify-between mb-sm">
+                <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">
+                  Imágenes del producto
+                </p>
+                <span className="text-xs text-on-surface-variant">{galleryImages.length}/8</span>
+              </div>
+
+              <p className="text-[11px] text-on-surface-variant/60 mb-sm leading-relaxed">
+                La <strong className="text-primary-container">primera imagen</strong> es la principal (card y miniatura). Arrastrá para reordenar.
               </p>
 
-              {/* Preview */}
-              <div className={`rounded-xl border-2 border-dashed transition-all overflow-hidden mb-sm ${imageUrl ? 'border-primary-container/30' : 'border-white/15'}`}
-                style={{ aspectRatio: '1/1', background: '#07080d' }}>
-                {uploadBusy ? (
-                  <div className="w-full h-full flex flex-col items-center justify-center">
-                    <span className="material-symbols-outlined text-primary-container text-4xl animate-spin">progress_activity</span>
-                    <p className="text-xs text-on-surface-variant mt-2">Subiendo imagen...</p>
+              {/* Grid de imágenes */}
+              <div className="grid grid-cols-2 gap-xs mb-sm">
+                {galleryImages.map((url, idx) => (
+                  <div
+                    key={url + idx}
+                    draggable
+                    onDragStart={() => handleImgDragStart(idx)}
+                    onDragOver={e => e.preventDefault()}
+                    onDrop={() => handleImgDrop(idx)}
+                    className="relative group aspect-square rounded-xl overflow-hidden border border-white/10 bg-[#07080d] cursor-grab active:cursor-grabbing"
+                  >
+                    <img
+                      src={url}
+                      alt={`Imagen ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    {/* Drag overlay hint */}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-xs">
+                      <span className="material-symbols-outlined text-white/80 text-base">drag_indicator</span>
+                    </div>
+                    {/* Main badge */}
+                    {idx === 0 && (
+                      <span className="absolute top-1 left-1 bg-primary-container text-on-primary text-[9px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-wide leading-none">
+                        Principal
+                      </span>
+                    )}
+                    {/* Actions */}
+                    <div className="absolute top-1 right-1 flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {idx !== 0 && (
+                        <button
+                          type="button"
+                          onClick={() => moveImgToFront(idx)}
+                          title="Poner como principal"
+                          className="w-6 h-6 rounded-md bg-primary-container/90 flex items-center justify-center cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-[12px] text-on-primary">star</span>
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeGalleryImg(idx)}
+                        title="Eliminar"
+                        className="w-6 h-6 rounded-md bg-error/90 flex items-center justify-center cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-[12px] text-white">close</span>
+                      </button>
+                    </div>
                   </div>
-                ) : imageUrl ? (
-                  <img src={imageUrl} alt="Preview" className="w-full h-full object-contain p-4" />
-                ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center text-on-surface-variant">
-                    <span className="material-symbols-outlined text-5xl mb-2 opacity-30">image</span>
-                    <p className="text-xs opacity-50">Seleccioná un archivo desde tu PC</p>
-                  </div>
+                ))}
+
+                {/* Add slot */}
+                {galleryImages.length < 8 && (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadBusy}
+                    className="aspect-square rounded-xl border-2 border-dashed border-white/15 hover:border-primary-container/50 hover:bg-primary-container/5 transition-all cursor-pointer flex flex-col items-center justify-center gap-xs text-on-surface-variant hover:text-primary-container disabled:opacity-40"
+                  >
+                    {uploadBusy
+                      ? <span className="material-symbols-outlined text-2xl animate-spin">progress_activity</span>
+                      : <><span className="material-symbols-outlined text-2xl">add_photo_alternate</span>
+                        <span className="text-[10px] font-semibold">Agregar</span></>}
+                  </button>
                 )}
               </div>
 
               {uploadError && (
-                <p className="text-xs text-error mb-sm">{uploadError}</p>
+                <p className="text-xs text-error mb-xs">{uploadError}</p>
               )}
 
               <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
+                multiple
                 className="hidden"
-                onChange={e => {
-                  const file = e.target.files?.[0]
-                  if (file) handleFileSelect(file)
-                }}
+                onChange={e => handleFilesSelect(e.target.files)}
               />
-              <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploadBusy}
-                className="w-full py-2.5 border-2 border-dashed border-primary-container/30 rounded-xl text-xs text-primary-container font-semibold hover:border-primary-container/60 hover:bg-primary-container/5 active:scale-95 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-xs">
+
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadBusy || galleryImages.length >= 8}
+                className="w-full py-2.5 border-2 border-dashed border-primary-container/30 rounded-xl text-xs text-primary-container font-semibold hover:border-primary-container/60 hover:bg-primary-container/5 active:scale-95 transition-all cursor-pointer disabled:opacity-40 flex items-center justify-center gap-xs"
+              >
                 <span className="material-symbols-outlined text-sm">upload</span>
-                {imageUrl ? 'Cambiar imagen' : 'Seleccionar imagen desde PC'}
+                {galleryImages.length === 0 ? 'Seleccionar imágenes' : 'Agregar más imágenes'}
               </button>
-              {imageUrl && (
-                <button type="button" onClick={() => setImageUrl('')}
-                  className="w-full mt-1 py-1.5 text-xs text-error/70 hover:text-error transition-colors cursor-pointer">
-                  Quitar imagen
-                </button>
-              )}
+              <p className="text-[10px] text-on-surface-variant/40 text-center mt-xs">
+                JPG, PNG, WEBP · Máx. 8MB por imagen · Podés subir varias a la vez
+              </p>
             </div>
 
             {/* Live preview */}
@@ -866,8 +945,8 @@ export default function AdminProductPage() {
               <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-sm">Vista previa</p>
               <div className="rounded-xl border border-white/5 overflow-hidden bg-surface-container-low">
                 <div className="aspect-square bg-[#07080d] flex items-center justify-center relative overflow-hidden">
-                  {imageUrl
-                    ? <img src={imageUrl} className="w-full h-full object-contain p-3" alt="preview" />
+                  {galleryImages[0]
+                    ? <img src={galleryImages[0]} className="w-full h-full object-cover" alt="preview" />
                     : <span className="material-symbols-outlined text-4xl text-on-surface-variant opacity-20">image</span>
                   }
                   {badge && (
