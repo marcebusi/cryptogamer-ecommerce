@@ -1,361 +1,630 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { api } from '../../lib/api'
 
-interface Summary {
-  totalRevenue: number
-  totalOrders: number
-  avgOrderValue: number
-  pendingOrders: number
-  paidOrders: number
-  cancelledOrders: number
-  totalSellers: number
-  totalProducts: number
+/* ── Types ───────────────────────────────────────────────── */
+interface Summary { totalRevenue:number; totalOrders:number; avgOrderValue:number; pendingOrders:number; paidOrders:number; cancelledOrders:number; totalSellers:number; totalProducts:number }
+interface TopProduct { id:string; name:string; image:string; category:string; price:number; qty:number; revenue:number }
+interface TopSeller  { id:string; name:string; avatar:string; orderCount:number; revenue:number }
+interface DayRevenue { date:string; revenue:number; orders:number }
+interface CatRevenue { category:string; revenue:number }
+interface RecentOrder { id:string; status:string; totalAmount:number; createdAt:string; user:{name:string|null;email:string}; seller:{id:string;name:string}|null; itemCount:number }
+interface Analytics  { summary:Summary; topProducts:TopProduct[]; topSellers:TopSeller[]; revenueByDay:DayRevenue[]; revenueByCategory:CatRevenue[]; recentOrders:RecentOrder[] }
+
+/* ── Date presets ────────────────────────────────────────── */
+type Preset = 'today' | 'week' | 'month' | 'custom'
+
+const PRESETS: { key:Preset; label:string; icon:string }[] = [
+  { key:'today',  label:'Hoy',           icon:'today' },
+  { key:'week',   label:'Semana',        icon:'date_range' },
+  { key:'month',  label:'Mes',           icon:'calendar_month' },
+  { key:'custom', label:'Personalizado', icon:'tune' },
+]
+
+const fmtDate = (d:Date) => d.toISOString().slice(0,10)
+
+function getRangeParams(preset:Preset, cf:string, ct:string): { from:string; to:string } {
+  const now = new Date()
+  if (preset==='today')  return { from:fmtDate(now), to:fmtDate(now) }
+  if (preset==='week')  { const d=new Date(now); d.setDate(d.getDate()-6);  return { from:fmtDate(d), to:fmtDate(now) } }
+  if (preset==='month') { const d=new Date(now); d.setDate(d.getDate()-29); return { from:fmtDate(d), to:fmtDate(now) } }
+  return { from:cf||fmtDate(now), to:ct||fmtDate(now) }
 }
 
-interface TopProduct {
-  id: string
-  name: string
-  image: string
-  category: string
-  price: number
-  qty: number
-  revenue: number
+/* ── Helpers ─────────────────────────────────────────────── */
+const ARS = (n:number) => new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(n)
+
+const STATUS_MAP: Record<string,{label:string;dot:string;badge:string}> = {
+  PENDING:   {label:'Pendiente', dot:'bg-yellow-400', badge:'bg-yellow-400/10 text-yellow-400 border-yellow-400/20'},
+  PAID:      {label:'Pagado',    dot:'bg-emerald-400',badge:'bg-emerald-400/10 text-emerald-400 border-emerald-400/20'},
+  SHIPPED:   {label:'Enviado',   dot:'bg-sky-400',    badge:'bg-sky-400/10 text-sky-400 border-sky-400/20'},
+  DELIVERED: {label:'Entregado', dot:'bg-purple-400', badge:'bg-purple-400/10 text-purple-400 border-purple-400/20'},
+  CANCELLED: {label:'Cancelado', dot:'bg-red-400',    badge:'bg-red-400/10 text-red-400 border-red-400/20'},
 }
 
-interface TopSeller {
-  id: string
-  name: string
-  avatar: string
-  orderCount: number
-  revenue: number
+/* ── Animated counter ────────────────────────────────────── */
+function useCountUp(target:number, duration=1400, delay=0) {
+  const [val, setVal] = useState(0)
+  useEffect(() => {
+    let frame:number
+    const start = performance.now() + delay
+    const tick = (now:number) => {
+      const elapsed = Math.max(0, now - start)
+      const progress = Math.min(elapsed / duration, 1)
+      const ease = 1 - Math.pow(1 - progress, 3)
+      setVal(Math.round(ease * target))
+      if (progress < 1) frame = requestAnimationFrame(tick)
+    }
+    frame = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(frame)
+  }, [target, duration, delay])
+  return val
 }
 
-interface DayRevenue {
-  date: string
-  revenue: number
-  orders: number
-}
+/* ── Area chart ──────────────────────────────────────────── */
+function AreaChart({ days, color, gradId }: { days:DayRevenue[]; color:string; gradId:string }) {
+  const pathRef = useRef<SVGPathElement>(null)
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const [animated, setAnimated] = useState(false)
+  const [hovIdx, setHovIdx]     = useState<number|null>(null)
+  const W=600; const H=140; const PX=12; const PY=16
 
-interface CategoryRevenue {
-  category: string
-  revenue: number
-}
+  const vals = days.map(d=>d.revenue)
+  const maxV = Math.max(...vals, 1)
+  const pts: [number,number][] = vals.map((v,i)=>[
+    PX + (i/(vals.length-1||1))*(W-PX*2),
+    H - PY - (v/maxV)*(H-PY*2-8),
+  ])
 
-interface RecentOrder {
-  id: string
-  status: string
-  totalAmount: number
-  createdAt: string
-  user: { name: string | null; email: string }
-  seller: { id: string; name: string } | null
-  itemCount: number
-}
+  const linePath = pts.reduce((acc,[x,y],i)=>{
+    if(i===0) return `M ${x} ${y}`
+    const [px,py]=pts[i-1]; const cx=(px+x)/2
+    return `${acc} C ${cx} ${py} ${cx} ${y} ${x} ${y}`
+  },'')
+  const areaPath = pts.length ? `${linePath} L ${pts[pts.length-1][0]} ${H-PY} L ${PX} ${H-PY} Z` : ''
 
-interface Analytics {
-  summary: Summary
-  topProducts: TopProduct[]
-  topSellers: TopSeller[]
-  revenueByDay: DayRevenue[]
-  revenueByCategory: CategoryRevenue[]
-  recentOrders: RecentOrder[]
-}
+  useEffect(()=>{
+    setAnimated(false)
+    const t = setTimeout(()=>setAnimated(true), 80)
+    return ()=>clearTimeout(t)
+  }, [days])
 
-const fmt = (n: number) =>
-  new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n)
+  useEffect(()=>{
+    if(!pathRef.current) return
+    const len = pathRef.current.getTotalLength()
+    pathRef.current.style.strokeDasharray  = String(len)
+    pathRef.current.style.strokeDashoffset = animated ? '0' : String(len)
+    pathRef.current.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1)'
+  },[animated])
 
-const statusLabel: Record<string, { label: string; color: string }> = {
-  PENDING:   { label: 'Pendiente',  color: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/20' },
-  PAID:      { label: 'Pagado',     color: 'bg-green-500/15 text-green-400 border-green-500/20' },
-  SHIPPED:   { label: 'Enviado',    color: 'bg-blue-500/15 text-blue-400 border-blue-500/20' },
-  DELIVERED: { label: 'Entregado',  color: 'bg-purple-500/15 text-purple-400 border-purple-500/20' },
-  CANCELLED: { label: 'Cancelado',  color: 'bg-red-500/15 text-red-400 border-red-500/20' },
-}
+  const onMove = (e:React.MouseEvent) => {
+    if(!wrapRef.current||days.length<2) return
+    const r = wrapRef.current.getBoundingClientRect()
+    setHovIdx(Math.round(Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*(days.length-1)))
+  }
 
-function StatCard({ icon, label, value, sub, color }: { icon: string; label: string; value: string; sub?: string; color: string }) {
+  const hov  = hovIdx!==null ? days[hovIdx] : null
+  const hovX = hovIdx!==null ? (pts[hovIdx]?.[0]??0) : 0
+  const hovY = hovIdx!==null ? (pts[hovIdx]?.[1]??0) : 0
+  const tipL = hovIdx!==null ? (hovIdx/(days.length-1))*100 : 50
+  const lastPt = pts[pts.length-1]
+
   return (
-    <div className={`relative rounded-2xl border bg-surface-container p-5 overflow-hidden ${color}`}>
-      <div className="absolute top-0 right-0 w-20 h-20 rounded-full opacity-10 blur-2xl bg-current pointer-events-none" />
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs text-on-surface-variant uppercase tracking-wider font-semibold mb-1">{label}</p>
-          <p className="text-2xl font-black text-on-surface font-['Plus_Jakarta_Sans']">{value}</p>
-          {sub && <p className="text-xs text-on-surface-variant mt-1">{sub}</p>}
+    <div ref={wrapRef} className="relative" onMouseMove={onMove} onMouseLeave={()=>setHovIdx(null)}>
+
+      {/* Tooltip */}
+      {hov && (
+        <div className="absolute -top-1 z-10 pointer-events-none"
+          style={{left:`${tipL}%`,transform:`translateX(${tipL<15?'0':tipL>85?'-100%':'-50%'})`}}>
+          <div className="bg-[#0a0a1a] border border-white/12 rounded-xl px-3 py-2 shadow-xl whitespace-nowrap"
+            style={{boxShadow:`0 4px 24px rgba(0,0,0,0.7),0 0 0 1px ${color}25`}}>
+            <p className="text-[10px] text-white/40 uppercase tracking-wider mb-1">
+              {new Date(hov.date+'T12:00:00').toLocaleDateString('es-AR',{weekday:'short',day:'numeric',month:'short'})}
+            </p>
+            <p className="text-sm font-black leading-none" style={{color}}>{ARS(hov.revenue)}</p>
+            <p className="text-[10px] text-white/40 mt-0.5">{hov.orders} orden{hov.orders!==1?'es':''}</p>
+          </div>
+          <div className="w-2 h-2 rotate-45 border-b border-r border-white/12 bg-[#0a0a1a] mx-auto -mt-1"/>
         </div>
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center border bg-current/10`}>
-          <span className="material-symbols-outlined text-lg">{icon}</span>
-        </div>
-      </div>
+      )}
+
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-36" preserveAspectRatio="none">
+        <defs>
+          {/* Area fill gradient */}
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"  stopColor={color} stopOpacity="0.35"/>
+            <stop offset="85%" stopColor={color} stopOpacity="0.02"/>
+          </linearGradient>
+
+          {/* Sweeping shimmer across area */}
+          <linearGradient id={`${gradId}-sh`} gradientUnits="userSpaceOnUse" x1="-300" y1="0" x2="-100" y2="0">
+            <stop offset="0%"   stopColor={color} stopOpacity="0"/>
+            <stop offset="50%"  stopColor={color} stopOpacity="0.2"/>
+            <stop offset="100%" stopColor={color} stopOpacity="0"/>
+            <animate attributeName="x1" values={`-300;${W+100};-300`} dur="6s" repeatCount="indefinite" calcMode="linear"/>
+            <animate attributeName="x2" values={`-100;${W+300};-100`} dur="6s" repeatCount="indefinite" calcMode="linear"/>
+          </linearGradient>
+
+          {/* Clip shimmer to area shape */}
+          <mask id={`${gradId}-mask`}>
+            <path d={areaPath} fill="white"/>
+          </mask>
+
+          {/* Breathing glow on the line */}
+          <filter id={`${gradId}-glow`}>
+            <feGaussianBlur result="blur">
+              <animate attributeName="stdDeviation" values="2;5;2" dur="7s" repeatCount="indefinite"/>
+            </feGaussianBlur>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        {/* Grid lines */}
+        {[0.25,0.5,0.75,1].map(f=>(
+          <line key={f} x1={PX} x2={W-PX}
+            y1={H-PY-(f*(H-PY*2-8))} y2={H-PY-(f*(H-PY*2-8))}
+            stroke="rgba(255,255,255,0.04)" strokeWidth="1"/>
+        ))}
+
+        {/* Area + shimmer */}
+        <path d={areaPath} fill={`url(#${gradId})`}/>
+        <rect width={W} height={H} fill={`url(#${gradId}-sh)`} mask={`url(#${gradId}-mask)`}/>
+
+        {/* Line with breathing glow */}
+        <path ref={pathRef} d={linePath} fill="none" stroke={color} strokeWidth="2.5"
+          strokeLinecap="round" strokeLinejoin="round" filter={`url(#${gradId}-glow)`}/>
+
+        {/* Hover vertical guide */}
+        {hovIdx!==null && (
+          <line x1={hovX} y1={PY} x2={hovX} y2={H-PY}
+            stroke={color} strokeWidth="1" strokeDasharray="3 3" opacity="0.5"/>
+        )}
+
+        {/* Pulsing dot at last data point (live indicator) */}
+        {lastPt && (
+          <g>
+            <circle cx={lastPt[0]} cy={lastPt[1]} r="4" fill={color} opacity="0">
+              <animate attributeName="r"       values="4;18;4"   dur="2.5s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.18;0;0.18" dur="2.5s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx={lastPt[0]} cy={lastPt[1]} r="4" fill="none" stroke={color} strokeWidth="1.5" opacity="0">
+              <animate attributeName="r"       values="4;11;4"  dur="2s" begin="0.4s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.5;0;0.5" dur="2s" begin="0.4s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx={lastPt[0]} cy={lastPt[1]} r="3.5" fill={color}/>
+          </g>
+        )}
+
+        {/* Hover dot */}
+        {hovIdx!==null && (
+          <g>
+            <circle cx={hovX} cy={hovY} r="9" fill={color} opacity="0.1"/>
+            <circle cx={hovX} cy={hovY} r="4" fill={color}/>
+            <circle cx={hovX} cy={hovY} r="5.5" fill="none" stroke={color} strokeWidth="2"/>
+          </g>
+        )}
+      </svg>
     </div>
   )
 }
 
-function MiniBar({ value, max, color = 'bg-primary-container' }: { value: number; max: number; color?: string }) {
-  const pct = max > 0 ? Math.round((value / max) * 100) : 0
+/* ── Donut chart ─────────────────────────────────────────── */
+function DonutChart({ paid, pending, cancelled }: { paid:number; pending:number; cancelled:number }) {
+  const [progress, setProgress] = useState(0)
+  useEffect(()=>{ const t=setTimeout(()=>setProgress(1),300); return()=>clearTimeout(t) },[])
+  const total = paid+pending+cancelled||1
+  const R=44; const cx=60; const cy=60; const sw=13; const C=2*Math.PI*R
+  const slices = [
+    {value:paid,      color:'#34d399', label:'Pagadas'},
+    {value:pending,   color:'#fbbf24', label:'Pendientes'},
+    {value:cancelled, color:'#f87171', label:'Canceladas'},
+  ]
+  let offset=0
+  const arcs = slices.map(s=>{
+    const len=(s.value/total)*C*progress
+    const el=<circle key={s.label} cx={cx} cy={cy} r={R} fill="none"
+      stroke={s.color} strokeWidth={sw}
+      strokeDasharray={`${len} ${C}`} strokeDashoffset={-offset}
+      style={{transform:`rotate(-90deg)`,transformOrigin:`${cx}px ${cy}px`,
+        transition:'stroke-dasharray 1s cubic-bezier(0.4,0,0.2,1)'}}/>
+    offset+=len; return el
+  })
   return (
-    <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
-      <div className={`h-full rounded-full ${color} transition-all duration-500`} style={{ width: `${pct}%` }} />
-    </div>
-  )
-}
-
-export default function AdminAnalyticsPage() {
-  const { isAdmin, isLoading: authLoading } = useAuth()
-  const navigate = useNavigate()
-  const [data, setData]       = useState<Analytics | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState('')
-  const [range, setRange]     = useState<7 | 30>(30)
-
-  useEffect(() => {
-    if (!authLoading && !isAdmin) navigate('/')
-  }, [authLoading, isAdmin, navigate])
-
-  useEffect(() => {
-    if (!isAdmin) return
-    setLoading(true)
-    api.get('/api/admin/analytics')
-      .then(res => setData(res.data))
-      .catch(() => setError('Error al cargar analytics'))
-      .finally(() => setLoading(false))
-  }, [isAdmin])
-
-  if (authLoading || loading) return (
-    <main className="max-w-screen-xl mx-auto px-4 md:px-8 py-lg">
-      <div className="flex items-center gap-3 text-on-surface-variant py-xl justify-center">
-        <span className="material-symbols-outlined animate-spin">progress_activity</span>
-        Cargando analytics...
-      </div>
-    </main>
-  )
-
-  if (error || !data) return (
-    <main className="max-w-screen-xl mx-auto px-4 md:px-8 py-lg">
-      <p className="text-error">{error || 'Sin datos'}</p>
-    </main>
-  )
-
-  const { summary, topProducts, topSellers, revenueByDay, revenueByCategory, recentOrders } = data
-  const days = revenueByDay.slice(range === 7 ? -7 : 0)
-  const maxDayRevenue = Math.max(...days.map(d => d.revenue), 1)
-  const maxProductQty = topProducts[0]?.qty ?? 1
-  const maxSellerRev  = topSellers[0]?.revenue ?? 1
-  const maxCatRev     = revenueByCategory[0]?.revenue ?? 1
-
-  return (
-    <main className="max-w-screen-xl mx-auto px-4 md:px-8 py-lg space-y-xl">
-
-      {/* Header */}
-      <div>
-        <div className="inline-flex items-center gap-xs px-sm py-1 rounded-full bg-tertiary-container/15 border border-tertiary-container/25 text-tertiary-container text-xs font-bold uppercase tracking-widest mb-sm">
-          <span className="material-symbols-outlined text-sm">bar_chart</span>
-          Analytics
+    <div className="flex items-center gap-5">
+      <div className="relative flex-shrink-0">
+        <svg viewBox="0 0 120 120" className="w-28 h-28">
+          <circle cx={cx} cy={cy} r={R} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={sw}/>
+          {arcs}
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-xl font-black text-white leading-none">{total}</span>
+          <span className="text-[10px] text-white/30 uppercase tracking-wider">total</span>
         </div>
-        <h1 className="text-3xl font-black text-on-background font-['Plus_Jakarta_Sans'] mb-1">
-          Panel de{' '}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-tertiary-container to-primary-container">
-            Analytics
-          </span>
-        </h1>
-        <p className="text-on-surface-variant text-sm">Métricas de ventas, productos y vendedores en tiempo real.</p>
       </div>
-
-      {/* Summary cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon="payments" label="Ingresos totales" value={fmt(summary.totalRevenue)} color="border-primary-container/20" />
-        <StatCard icon="receipt_long" label="Total órdenes" value={String(summary.totalOrders)} sub={`Promedio ${fmt(summary.avgOrderValue)}`} color="border-secondary-container/20" />
-        <StatCard icon="inventory_2" label="Productos" value={String(summary.totalProducts)} color="border-tertiary-container/20" />
-        <StatCard icon="group" label="Vendedores" value={String(summary.totalSellers)} color="border-outline-variant" />
-      </div>
-
-      {/* Order status row */}
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { label: 'Pendientes', value: summary.pendingOrders,  color: 'text-yellow-400', bar: 'bg-yellow-400' },
-          { label: 'Pagados',    value: summary.paidOrders,     color: 'text-green-400',  bar: 'bg-green-400'  },
-          { label: 'Cancelados', value: summary.cancelledOrders, color: 'text-red-400',   bar: 'bg-red-400'    },
-        ].map(({ label, value, color, bar }) => (
-          <div key={label} className="bg-surface-container border border-white/8 rounded-xl px-4 py-3 flex items-center gap-3">
-            <div className={`w-2.5 h-2.5 rounded-full ${bar} flex-shrink-0`} />
-            <div>
-              <p className="text-xs text-on-surface-variant">{label}</p>
-              <p className={`text-xl font-black ${color} font-['Plus_Jakarta_Sans']`}>{value}</p>
-            </div>
+      <div className="space-y-2.5 flex-1">
+        {slices.map(s=>(
+          <div key={s.label} className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{background:s.color}}/>
+            <span className="text-xs text-white/50 flex-1">{s.label}</span>
+            <span className="text-sm font-bold text-white">{s.value}</span>
+            <span className="text-[10px] text-white/30 w-9 text-right">{Math.round(s.value/total*100)}%</span>
           </div>
         ))}
       </div>
+    </div>
+  )
+}
 
-      {/* Revenue chart + Category */}
+/* ── Animated bar with shimmer ───────────────────────────── */
+function AnimBar({ value, max, color, delay=0 }: { value:number; max:number; color:string; delay?:number }) {
+  const [w, setW] = useState('0%')
+  useEffect(()=>{
+    const t=setTimeout(()=>setW(`${max>0?(value/max)*100:0}%`), delay+200)
+    return()=>clearTimeout(t)
+  },[value,max,delay])
+  return (
+    <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+      <div className="h-full rounded-full relative overflow-hidden"
+        style={{width:w, background:color, transition:'width 0.9s cubic-bezier(0.4,0,0.2,1)'}}>
+        <div className="absolute inset-0"
+          style={{
+            background:'linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.32) 50%,transparent 100%)',
+            backgroundSize:'200% 100%',
+            animation:'bar-shimmer 2s linear infinite',
+          }}/>
+      </div>
+    </div>
+  )
+}
+
+/* ── KPI Card ────────────────────────────────────────────── */
+function KpiCard({ icon, label, value, sub, color, sparkData, delay=0 }: {
+  icon:string; label:string; value:string; sub?:string; color:string; sparkData?:number[]; delay?:number
+}) {
+  const [visible, setVisible] = useState(false)
+  useEffect(()=>{const t=setTimeout(()=>setVisible(true),delay);return()=>clearTimeout(t)},[delay])
+  const W=80; const H=28
+  const spark = sparkData?.slice(-12)??[]
+  const maxS  = Math.max(...spark,1)
+  const sparkPath = spark.length>1 ? spark.map((v,i)=>{
+    const x=i/(spark.length-1)*W; const y=H-2-(v/maxS)*(H-4)
+    return `${i===0?'M':'L'} ${x} ${y}`
+  }).join(' ') : ''
+  return (
+    <div className={`relative rounded-2xl border border-white/8 bg-[#0f0f23] p-5 overflow-hidden transition-all duration-500 ${visible?'opacity-100 translate-y-0':'opacity-0 translate-y-4'}`}
+      style={{transitionDelay:`${delay}ms`}}>
+      <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full blur-3xl pointer-events-none"
+        style={{background:color, animation:'kpi-glow 4s ease-in-out infinite'}}/>
+      <div className="flex items-start justify-between mb-4">
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center border"
+          style={{background:`${color}18`,borderColor:`${color}30`}}>
+          <span className="material-symbols-outlined text-base" style={{color}}>{icon}</span>
+        </div>
+        {sparkPath && (
+          <svg viewBox={`0 0 ${W} ${H}`} className="w-16 h-7 opacity-60">
+            <path d={sparkPath} fill="none" stroke={color} strokeWidth="1.5"
+              strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )}
+      </div>
+      <p className="text-2xl font-black text-white font-['Plus_Jakarta_Sans'] leading-none">{value}</p>
+      {sub && <p className="text-xs text-white/40 mt-1">{sub}</p>}
+      <p className="text-[10px] text-white/30 uppercase tracking-widest font-semibold mt-3">{label}</p>
+    </div>
+  )
+}
+
+/* ── Skeleton ────────────────────────────────────────────── */
+function Skeleton() {
+  return (
+    <main className="max-w-screen-xl mx-auto px-4 md:px-8 py-lg space-y-8">
+      <div className="h-16 w-72 bg-white/5 rounded-xl animate-pulse"/>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[...Array(4)].map((_,i)=><div key={i} className="h-32 bg-white/5 rounded-2xl animate-pulse"/>)}
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Revenue by day */}
-        <div className="lg:col-span-2 bg-surface-container border border-white/8 rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-on-surface font-['Plus_Jakarta_Sans']">Ingresos diarios</h2>
-            <div className="flex gap-1">
-              {([7, 30] as const).map(r => (
-                <button key={r} onClick={() => setRange(r)}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-all ${range === r ? 'bg-primary-container/20 text-primary-container border border-primary-container/30' : 'text-on-surface-variant hover:bg-white/5'}`}>
-                  {r}d
-                </button>
-              ))}
+        <div className="lg:col-span-2 h-64 bg-white/5 rounded-2xl animate-pulse"/>
+        <div className="h-64 bg-white/5 rounded-2xl animate-pulse"/>
+      </div>
+    </main>
+  )
+}
+
+/* ── Page ────────────────────────────────────────────────── */
+export default function AdminAnalyticsPage() {
+  const { isAdmin, isLoading:authLoading } = useAuth()
+  const navigate = useNavigate()
+  const [data, setData]             = useState<Analytics|null>(null)
+  const [loading, setLoading]       = useState(true)
+  const [error, setError]           = useState('')
+  const [preset, setPreset]         = useState<Preset>('month')
+  const [customFrom, setCustomFrom] = useState('')
+  const [customTo, setCustomTo]     = useState('')
+  const [chartKey, setChartKey]     = useState(0)
+
+  useEffect(()=>{ if(!authLoading&&!isAdmin) navigate('/') },[authLoading,isAdmin,navigate])
+
+  useEffect(()=>{
+    if(!isAdmin) return
+    if(preset==='custom'&&(!customFrom||!customTo)) return
+    const { from, to } = getRangeParams(preset, customFrom, customTo)
+    setLoading(true)
+    api.get<Analytics>(`/api/admin/analytics?from=${from}&to=${to}`)
+      .then(res=>{ setData(res); setChartKey(k=>k+1) })
+      .catch(e=>setError(e.message??'Error al cargar analytics'))
+      .finally(()=>setLoading(false))
+  },[isAdmin, preset, customFrom, customTo])
+
+  const revCount  = useCountUp(data?.summary.totalRevenue??0, 1600, 300)
+  const ordCount  = useCountUp(data?.summary.totalOrders??0,  1200, 500)
+  const prodCount = useCountUp(data?.summary.totalProducts??0,1000, 700)
+  const sellCount = useCountUp(data?.summary.totalSellers??0,  800, 900)
+
+  if (authLoading||loading) return <Skeleton/>
+  if (error) return (
+    <main className="max-w-screen-xl mx-auto px-4 md:px-8 py-lg">
+      <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400 text-sm">
+        <span className="material-symbols-outlined">error</span>{error}
+      </div>
+    </main>
+  )
+  if (!data) return null
+
+  const { summary, topProducts, topSellers, revenueByDay, revenueByCategory, recentOrders } = data
+  const sparkData = revenueByDay.slice(-14).map(d=>d.revenue)
+  const periodRev = revenueByDay.reduce((s,d)=>s+d.revenue, 0)
+  const maxProd   = topProducts[0]?.qty??1
+  const maxSell   = topSellers[0]?.revenue??1
+  const maxCat    = revenueByCategory[0]?.revenue??1
+
+  return (
+    <main className="max-w-screen-xl mx-auto px-4 md:px-8 py-lg space-y-8 bg-[#080812] min-h-screen">
+
+      {/* Global keyframes */}
+      <style>{`
+        @keyframes kpi-glow {
+          0%,100% { opacity:.10; transform:scale(1); }
+          50%      { opacity:.20; transform:scale(1.15); }
+        }
+        @keyframes bar-shimmer {
+          0%   { background-position:-200% center; }
+          100% { background-position: 200% center; }
+        }
+      `}</style>
+
+      {/* ── Header ───────────────────────────────────────── */}
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-2"
+            style={{background:'rgba(58,244,255,0.08)',border:'1px solid rgba(58,244,255,0.2)',color:'#3af4ff'}}>
+            <span className="material-symbols-outlined text-sm">bar_chart</span>
+            Analytics
+          </div>
+          <h1 className="text-3xl md:text-4xl font-black text-white font-['Plus_Jakarta_Sans']">
+            Panel de{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3af4ff] via-[#a855f7] to-[#4ade80]">
+              Analytics
+            </span>
+          </h1>
+          <p className="text-white/40 text-sm mt-1">
+            {(() => {
+              const { from, to } = getRangeParams(preset, customFrom, customTo)
+              const fmt = (s:string) => new Date(s+'T12:00:00').toLocaleDateString('es-AR',{day:'numeric',month:'short'})
+              if (preset==='today') return `Hoy · ${fmt(from)}`
+              return `${fmt(from)} → ${fmt(to)}`
+            })()}
+          </p>
+        </div>
+
+        {/* ── Date filter ──────────────────────────────────── */}
+        <div className="flex flex-col gap-2 items-end">
+          <div className="flex gap-1 bg-white/4 border border-white/6 rounded-xl p-1">
+            {PRESETS.map(p=>(
+              <button key={p.key} onClick={()=>setPreset(p.key)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all whitespace-nowrap
+                  ${preset===p.key
+                    ? 'bg-[#3af4ff]/12 text-[#3af4ff] border border-[#3af4ff]/25'
+                    : 'text-white/30 hover:text-white/60 border border-transparent'}`}>
+                <span className="material-symbols-outlined text-sm">{p.icon}</span>
+                {p.label}
+              </button>
+            ))}
+          </div>
+          {preset==='custom' && (
+            <div className="flex items-center gap-2">
+              <input type="date" value={customFrom} onChange={e=>setCustomFrom(e.target.value)}
+                className="bg-[#0f0f23] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white/70
+                  cursor-pointer focus:outline-none focus:border-[#3af4ff]/50 transition-colors"
+                style={{colorScheme:'dark'}}/>
+              <span className="text-white/25 text-sm font-light">→</span>
+              <input type="date" value={customTo} onChange={e=>setCustomTo(e.target.value)}
+                className="bg-[#0f0f23] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white/70
+                  cursor-pointer focus:outline-none focus:border-[#3af4ff]/50 transition-colors"
+                style={{colorScheme:'dark'}}/>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── KPI Cards ────────────────────────────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <KpiCard icon="payments"     label="Ingresos totales"   value={ARS(revCount)}    sub={`Prom. ${ARS(summary.avgOrderValue)}`} color="#4ade80" sparkData={sparkData} delay={0}/>
+        <KpiCard icon="receipt_long" label="Órdenes totales"    value={String(ordCount)} sub={`${summary.paidOrders} pagadas`}       color="#ff4a8d" sparkData={revenueByDay.slice(-14).map(d=>d.orders)} delay={100}/>
+        <KpiCard icon="inventory_2"  label="Productos"          value={String(prodCount)}                                            color="#3af4ff" delay={200}/>
+        <KpiCard icon="storefront"   label="Vendedores activos" value={String(sellCount)}                                            color="#a855f7" delay={300}/>
+      </div>
+
+      {/* ── Revenue chart + Donut ─────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <div className="lg:col-span-2 bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
+          <div className="flex items-start justify-between mb-5">
+            <div>
+              <h2 className="font-bold text-white font-['Plus_Jakarta_Sans'] text-base">Ingresos del período</h2>
+              <p className="text-xs text-white/40 mt-0.5">
+                <span className="font-semibold" style={{color:'#4ade80'}}>{ARS(periodRev)}</span>
+                {' '}· {PRESETS.find(p=>p.key===preset)?.label}
+              </p>
             </div>
           </div>
-          {/* Bar chart */}
-          <div className="flex items-end gap-0.5 h-32">
-            {days.map(d => {
-              const h = maxDayRevenue > 0 ? Math.max(Math.round((d.revenue / maxDayRevenue) * 100), d.revenue > 0 ? 4 : 0) : 0
-              return (
-                <div key={d.date} className="flex-1 flex flex-col items-center gap-1 group relative">
-                  <div
-                    className="w-full rounded-t-sm bg-primary-container/30 group-hover:bg-primary-container/60 transition-colors"
-                    style={{ height: `${h}%`, minHeight: d.revenue > 0 ? '4px' : '0' }}
-                  />
-                  {/* Tooltip */}
-                  {d.revenue > 0 && (
-                    <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-[#111318] border border-white/10 rounded-lg px-2 py-1 text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
-                      {fmt(d.revenue)}<br />
-                      <span className="text-white/40">{d.orders} orden{d.orders !== 1 ? 'es' : ''}</span>
+          <AreaChart key={chartKey} days={revenueByDay} color="#4ade80" gradId="rev-grad"/>
+          <div className="flex justify-between mt-2 text-[10px] text-white/20 px-1">
+            <span>{revenueByDay[0]?.date.slice(5)}</span>
+            <span>{revenueByDay[Math.floor(revenueByDay.length/2)]?.date.slice(5)}</span>
+            <span>{revenueByDay[revenueByDay.length-1]?.date.slice(5)}</span>
+          </div>
+        </div>
+
+        <div className="bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
+          <h2 className="font-bold text-white font-['Plus_Jakarta_Sans'] text-base mb-5">Estado de órdenes</h2>
+          <DonutChart paid={summary.paidOrders} pending={summary.pendingOrders} cancelled={summary.cancelledOrders}/>
+          <div className="mt-5 pt-4 border-t border-white/6 grid grid-cols-2 gap-3">
+            {[
+              {label:'Enviadas',  val:summary.totalOrders-summary.pendingOrders-summary.cancelledOrders, color:'#818cf8'},
+              {label:'Canceladas',val:summary.cancelledOrders, color:'#f87171'},
+            ].map(s=>(
+              <div key={s.label} className="rounded-xl border border-white/5 p-2.5 text-center" style={{background:`${s.color}08`}}>
+                <p className="text-lg font-black" style={{color:s.color}}>{s.val}</p>
+                <p className="text-[10px] text-white/30 uppercase tracking-wide mt-0.5">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Top Products + Subcategories ─────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <div className="lg:col-span-2 bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
+          <h2 className="font-bold text-white font-['Plus_Jakarta_Sans'] text-base mb-5 flex items-center gap-2">
+            <span className="material-symbols-outlined text-base" style={{color:'#4ade80'}}>trending_up</span>
+            Productos más vendidos
+          </h2>
+          {topProducts.length===0
+            ? <div className="py-12 flex flex-col items-center gap-2 text-white/20"><span className="material-symbols-outlined text-4xl">inventory_2</span><p className="text-sm">Sin ventas en este período</p></div>
+            : <div className="space-y-3.5">
+              {topProducts.map((p,i)=>(
+                <div key={p.id} className="flex items-center gap-3">
+                  <div className={`w-6 text-center flex-shrink-0 text-xs font-black ${i===0?'text-yellow-400':i===1?'text-slate-300':i===2?'text-orange-400':'text-white/15'}`}>
+                    {i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`}
+                  </div>
+                  <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 bg-white/5 border border-white/8">
+                    <img src={p.image} alt={p.name} className="w-full h-full object-cover"/>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-white truncate">{p.name}</p>
+                    <p className="text-[10px] text-white/30 truncate">{p.category}</p>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <AnimBar value={p.qty} max={maxProd} color="#4ade80" delay={i*80}/>
+                      <span className="text-[11px] text-white/35 flex-shrink-0 w-14 text-right">{p.qty} uds.</span>
                     </div>
-                  )}
+                  </div>
+                  <span className="text-xs font-bold flex-shrink-0 w-20 text-right tabular-nums" style={{color:'#4ade80'}}>{ARS(p.revenue)}</span>
+                </div>
+              ))}
+            </div>
+          }
+        </div>
+
+        <div className="bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
+          <h2 className="font-bold text-white font-['Plus_Jakarta_Sans'] text-base mb-5 flex items-center gap-2">
+            <span className="material-symbols-outlined text-[#3af4ff] text-base">category</span>
+            Por subcategoría
+          </h2>
+          {revenueByCategory.length===0
+            ? <div className="py-12 flex flex-col items-center gap-2 text-white/20"><span className="material-symbols-outlined text-4xl">category</span><p className="text-sm">Sin datos</p></div>
+            : <div className="space-y-4">
+              {revenueByCategory.slice(0,7).map(({category,revenue},i)=>(
+                <div key={category}>
+                  <div className="flex justify-between text-xs mb-1.5">
+                    <span className="text-white/70 font-medium capitalize">{category}</span>
+                    <span className="text-white/35 tabular-nums">{ARS(revenue)}</span>
+                  </div>
+                  <AnimBar value={revenue} max={maxCat} color="#3af4ff" delay={i*60}/>
+                </div>
+              ))}
+            </div>
+          }
+        </div>
+      </div>
+
+      {/* ── Seller Ranking ────────────────────────────────── */}
+      <div className="bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
+        <h2 className="font-bold text-white font-['Plus_Jakarta_Sans'] text-base mb-5 flex items-center gap-2">
+          <span className="material-symbols-outlined text-[#ff4a8d] text-base">emoji_events</span>
+          Ranking de vendedores
+        </h2>
+        {topSellers.length===0
+          ? <div className="py-8 text-center text-white/20 text-sm">Sin vendedores</div>
+          : <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {topSellers.map((s,i)=>{
+              const medal = i===0
+                ? {ring:'ring-yellow-400/40', bg:'bg-yellow-400/8',  num:'text-yellow-400', label:'#1'}
+                : i===1
+                ? {ring:'ring-slate-400/30',  bg:'bg-slate-400/5',   num:'text-slate-300',  label:'#2'}
+                : {ring:'ring-orange-500/30', bg:'bg-orange-500/5',  num:'text-orange-400', label:`#${i+1}`}
+              return (
+                <div key={s.id} className={`relative rounded-xl p-4 border border-white/6 ring-1 ${medal.ring} ${medal.bg}`}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="relative flex-shrink-0">
+                      {s.avatar
+                        ? <img src={s.avatar} alt={s.name} className="w-12 h-12 rounded-full object-cover ring-2 ring-white/10"/>
+                        : <div className="w-12 h-12 rounded-full bg-purple-600/30 border border-purple-500/30 flex items-center justify-center text-white font-bold text-lg">{s.name.charAt(0)}</div>
+                      }
+                      <span className={`absolute -bottom-1 -right-1 text-xs font-black ${medal.num}`}>{medal.label}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-bold text-sm text-white truncate">{s.name}</p>
+                      <p className="text-xs text-white/35">{s.orderCount} venta{s.orderCount!==1?'s':''}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <AnimBar value={s.revenue} max={maxSell} color="#ff4a8d" delay={i*100}/>
+                    <p className="font-bold text-sm mt-1.5 tabular-nums" style={{color:'#ff4a8d'}}>{ARS(s.revenue)}</p>
+                  </div>
                 </div>
               )
             })}
           </div>
-          <div className="flex justify-between mt-2 text-[10px] text-on-surface-variant/50">
-            <span>{days[0]?.date.slice(5)}</span>
-            <span>{days[Math.floor(days.length / 2)]?.date.slice(5)}</span>
-            <span>{days[days.length - 1]?.date.slice(5)}</span>
-          </div>
-        </div>
-
-        {/* Revenue by category */}
-        <div className="bg-surface-container border border-white/8 rounded-2xl p-5">
-          <h2 className="font-bold text-on-surface font-['Plus_Jakarta_Sans'] mb-4">Por categoría</h2>
-          {revenueByCategory.length === 0 ? (
-            <p className="text-sm text-on-surface-variant text-center py-8">Sin datos</p>
-          ) : (
-            <div className="space-y-3">
-              {revenueByCategory.slice(0, 6).map(({ category, revenue }) => (
-                <div key={category}>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-on-surface font-medium capitalize">{category}</span>
-                    <span className="text-on-surface-variant">{fmt(revenue)}</span>
-                  </div>
-                  <MiniBar value={revenue} max={maxCatRev} color="bg-tertiary-container" />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        }
       </div>
 
-      {/* Top products + Top sellers */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        {/* Top products */}
-        <div className="bg-surface-container border border-white/8 rounded-2xl p-5">
-          <h2 className="font-bold text-on-surface font-['Plus_Jakarta_Sans'] mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary-container text-base">trending_up</span>
-            Productos más vendidos
-          </h2>
-          {topProducts.length === 0 ? (
-            <p className="text-sm text-on-surface-variant text-center py-8">Sin ventas registradas</p>
-          ) : (
-            <div className="space-y-3">
-              {topProducts.map((p, i) => (
-                <div key={p.id} className="flex items-center gap-3 group">
-                  <span className={`text-xs font-black w-5 text-center flex-shrink-0 ${i === 0 ? 'text-yellow-400' : i === 1 ? 'text-white/40' : i === 2 ? 'text-orange-400/60' : 'text-white/20'}`}>
-                    #{i + 1}
-                  </span>
-                  <img src={p.image} alt={p.name} className="w-9 h-9 rounded-lg object-cover flex-shrink-0 bg-white/5" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-on-surface truncate">{p.name}</p>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <MiniBar value={p.qty} max={maxProductQty} />
-                      <span className="text-xs text-on-surface-variant flex-shrink-0">{p.qty} uds</span>
-                    </div>
-                  </div>
-                  <span className="text-xs font-bold text-primary-container flex-shrink-0">{fmt(p.revenue)}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Top sellers */}
-        <div className="bg-surface-container border border-white/8 rounded-2xl p-5">
-          <h2 className="font-bold text-on-surface font-['Plus_Jakarta_Sans'] mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-secondary-container text-base">emoji_events</span>
-            Ranking de vendedores
-          </h2>
-          {topSellers.length === 0 ? (
-            <p className="text-sm text-on-surface-variant text-center py-8">Sin vendedores registrados</p>
-          ) : (
-            <div className="space-y-3">
-              {topSellers.map((s, i) => (
-                <div key={s.id} className="flex items-center gap-3">
-                  <span className={`text-xs font-black w-5 text-center flex-shrink-0 ${i === 0 ? 'text-yellow-400' : i === 1 ? 'text-white/40' : i === 2 ? 'text-orange-400/60' : 'text-white/20'}`}>
-                    #{i + 1}
-                  </span>
-                  {s.avatar
-                    ? <img src={s.avatar} alt={s.name} className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
-                    : <div className="w-9 h-9 rounded-full bg-purple-600/40 flex items-center justify-center flex-shrink-0 text-white text-sm font-bold">{s.name.charAt(0)}</div>
-                  }
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-on-surface truncate">{s.name}</p>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <MiniBar value={s.revenue} max={maxSellerRev} color="bg-secondary-container" />
-                      <span className="text-xs text-on-surface-variant flex-shrink-0">{s.orderCount} venta{s.orderCount !== 1 ? 's' : ''}</span>
-                    </div>
-                  </div>
-                  <span className="text-xs font-bold text-secondary-container flex-shrink-0">{fmt(s.revenue)}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Recent orders */}
-      <div className="bg-surface-container border border-white/8 rounded-2xl p-5">
-        <h2 className="font-bold text-on-surface font-['Plus_Jakarta_Sans'] mb-4 flex items-center gap-2">
-          <span className="material-symbols-outlined text-on-surface-variant text-base">history</span>
+      {/* ── Recent Orders ─────────────────────────────────── */}
+      <div className="bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
+        <h2 className="font-bold text-white font-['Plus_Jakarta_Sans'] text-base mb-5 flex items-center gap-2">
+          <span className="material-symbols-outlined text-white/30 text-base">receipt_long</span>
           Órdenes recientes
         </h2>
-        {recentOrders.length === 0 ? (
-          <p className="text-sm text-on-surface-variant text-center py-8">Sin órdenes</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+        {recentOrders.length===0
+          ? <div className="py-10 text-center text-white/20 text-sm">Sin órdenes en este período</div>
+          : <div className="overflow-x-auto -mx-5 px-5">
+            <table className="w-full text-sm min-w-[640px]">
               <thead>
-                <tr className="text-left border-b border-white/8">
-                  <th className="pb-2 text-xs text-on-surface-variant font-semibold uppercase tracking-wider">ID</th>
-                  <th className="pb-2 text-xs text-on-surface-variant font-semibold uppercase tracking-wider">Cliente</th>
-                  <th className="pb-2 text-xs text-on-surface-variant font-semibold uppercase tracking-wider">Vendedor</th>
-                  <th className="pb-2 text-xs text-on-surface-variant font-semibold uppercase tracking-wider">Items</th>
-                  <th className="pb-2 text-xs text-on-surface-variant font-semibold uppercase tracking-wider">Total</th>
-                  <th className="pb-2 text-xs text-on-surface-variant font-semibold uppercase tracking-wider">Estado</th>
-                  <th className="pb-2 text-xs text-on-surface-variant font-semibold uppercase tracking-wider">Fecha</th>
+                <tr className="border-b border-white/6">
+                  {['#','Cliente','Vendedor','Items','Total','Estado','Fecha'].map(h=>(
+                    <th key={h} className="pb-3 pr-4 text-left text-[10px] text-white/25 font-semibold uppercase tracking-widest">{h}</th>
+                  ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
-                {recentOrders.map(o => {
-                  const st = statusLabel[o.status] ?? { label: o.status, color: 'bg-white/10 text-white/50 border-white/10' }
+              <tbody>
+                {recentOrders.map(o=>{
+                  const st=STATUS_MAP[o.status]??{label:o.status,dot:'bg-white/20',badge:'bg-white/5 text-white/30 border-white/10'}
                   return (
-                    <tr key={o.id} className="hover:bg-white/3 transition-colors">
-                      <td className="py-2.5 pr-3 text-xs text-on-surface-variant font-mono">{o.id.slice(0, 8)}…</td>
-                      <td className="py-2.5 pr-3">
-                        <p className="font-medium text-on-surface truncate max-w-[120px]">{o.user.name ?? o.user.email}</p>
+                    <tr key={o.id} className="border-b border-white/4 hover:bg-white/2 transition-colors group">
+                      <td className="py-3 pr-4 text-[11px] text-white/20 font-mono group-hover:text-white/40 transition-colors">{o.id.slice(0,8)}</td>
+                      <td className="py-3 pr-4"><p className="font-medium text-white/80 truncate max-w-[130px]">{o.user.name??o.user.email}</p></td>
+                      <td className="py-3 pr-4 text-white/40 text-xs">{o.seller?.name??'—'}</td>
+                      <td className="py-3 pr-4 text-center text-white/40 text-xs">{o.itemCount}</td>
+                      <td className="py-3 pr-4 font-bold text-xs tabular-nums" style={{color:'#4ade80'}}>{ARS(o.totalAmount)}</td>
+                      <td className="py-3 pr-4">
+                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${st.badge}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${st.dot}`}/>
+                          {st.label}
+                        </span>
                       </td>
-                      <td className="py-2.5 pr-3 text-on-surface-variant">{o.seller?.name ?? <span className="text-white/20">—</span>}</td>
-                      <td className="py-2.5 pr-3 text-center text-on-surface-variant">{o.itemCount}</td>
-                      <td className="py-2.5 pr-3 font-semibold text-primary-container">{fmt(o.totalAmount)}</td>
-                      <td className="py-2.5 pr-3">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${st.color}`}>{st.label}</span>
-                      </td>
-                      <td className="py-2.5 text-xs text-on-surface-variant whitespace-nowrap">
-                        {new Date(o.createdAt).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit' })}
+                      <td className="py-3 text-[11px] text-white/30 whitespace-nowrap">
+                        {new Date(o.createdAt).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'})}
                       </td>
                     </tr>
                   )
@@ -363,8 +632,9 @@ export default function AdminAnalyticsPage() {
               </tbody>
             </table>
           </div>
-        )}
+        }
       </div>
+
     </main>
   )
 }
