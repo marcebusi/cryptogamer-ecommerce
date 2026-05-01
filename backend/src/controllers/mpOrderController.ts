@@ -20,7 +20,10 @@ export const createOrder = async (req: AuthRequest, res: Response): Promise<void
   }
 
   try {
-    const { items } = req.body as { items: { productId: string; quantity: number }[] }
+    const { items, sellerId } = req.body as {
+      items:    { productId: string; quantity: number }[]
+      sellerId?: string
+    }
     if (!items?.length) {
       res.status(400).json({ message: 'El carrito está vacío' })
       return
@@ -39,10 +42,20 @@ export const createOrder = async (req: AuthRequest, res: Response): Promise<void
 
     const totalAmount = orderItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
 
-    // Create order in DB (PENDING until MP webhook confirms)
+    // Validate seller if provided
+    if (sellerId) {
+      const sellerExists = await prisma.seller.findUnique({ where: { id: sellerId } })
+      if (!sellerExists) {
+        res.status(400).json({ message: 'Vendedor no encontrado.' })
+        return
+      }
+    }
+
+    // Create order in DB
     const order = await prisma.order.create({
       data: {
         userId,
+        sellerId: sellerId ?? null,
         totalAmount,
         status: 'PENDING',
         items: {
@@ -55,32 +68,43 @@ export const createOrder = async (req: AuthRequest, res: Response): Promise<void
       },
     })
 
-    // Build Mercado Pago preference
-    const preference = new Preference(mp)
-    const mpItems = orderItems.map(i => ({
-      id: i.product.id,
-      title: i.product.name,
-      quantity: i.quantity,
-      unit_price: i.price,
-      currency_id: 'ARS',
-      picture_url: i.product.image,
-    }))
+    const orderNumber = `CG-${order.id.slice(-6).toUpperCase()}`
 
-    const pref = await preference.create({
-      body: {
-        items: mpItems,
-        external_reference: order.id,
-        back_urls: {
-          success: `${process.env.FRONTEND_URL}/perfil?tab=orders&status=success`,
-          failure: `${process.env.FRONTEND_URL}/perfil?tab=orders&status=failure`,
-          pending: `${process.env.FRONTEND_URL}/perfil?tab=orders&status=pending`,
-        },
-        auto_return: 'approved',
-        notification_url: `${process.env.BACKEND_URL ?? 'http://localhost:3001'}/api/orders/webhook`,
-      },
-    })
+    // Try MercadoPago preference (only if a real token is configured)
+    const mpToken = process.env.MP_ACCESS_TOKEN ?? ''
+    const mpConfigured = mpToken && !mpToken.startsWith('TEST-tu') && mpToken !== ''
 
-    res.json({ orderId: order.id, checkoutUrl: pref.init_point })
+    if (mpConfigured) {
+      try {
+        const preference = new Preference(mp)
+        const mpItems = orderItems.map(i => ({
+          id: i.product.id, title: i.product.name,
+          quantity: i.quantity, unit_price: i.price,
+          currency_id: 'ARS', picture_url: i.product.image,
+        }))
+        const pref = await preference.create({
+          body: {
+            items: mpItems,
+            external_reference: order.id,
+            back_urls: {
+              success: `${process.env.FRONTEND_URL}/perfil?tab=orders&status=success`,
+              failure: `${process.env.FRONTEND_URL}/perfil?tab=orders&status=failure`,
+              pending: `${process.env.FRONTEND_URL}/perfil?tab=orders&status=pending`,
+            },
+            auto_return: 'approved',
+            notification_url: `${process.env.BACKEND_URL ?? 'http://localhost:3001'}/api/orders/webhook`,
+          },
+        })
+        res.json({ orderId: order.id, orderNumber, checkoutUrl: pref.init_point })
+        return
+      } catch (mpErr) {
+        console.error('[MP preference error]', mpErr)
+        // Fall through — return order without checkout URL
+      }
+    }
+
+    // Transfer payment flow (no MP redirect)
+    res.json({ orderId: order.id, orderNumber })
   } catch (err: any) {
     console.error(err)
     res.status(400).json({ message: err.message ?? 'Error al crear la orden' })
