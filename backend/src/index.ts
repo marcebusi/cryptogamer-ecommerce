@@ -13,6 +13,7 @@ import orderRoutes       from './routes/orderRoutes'
 import sellerRoutes      from './routes/sellerRoutes'
 import trackingRoutes    from './routes/trackingRoutes'
 import superAdminRoutes  from './routes/superAdminRoutes'
+import shippingRoutes    from './routes/shippingRoutes'
 import { errorHandler, notFound } from './middleware/errorHandler'
 
 dotenv.config()
@@ -59,6 +60,7 @@ app.use('/api/contact',    contactRoutes)
 app.use('/api/orders',     orderRoutes)
 app.use('/api/sellers',    sellerRoutes)
 app.use('/api/superadmin', superAdminRoutes)
+app.use('/api/shipping',  shippingRoutes)
 
 /* ── Error handling ──────────────────────────────── */
 app.use(notFound)

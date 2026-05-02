@@ -46,6 +46,7 @@ import AdminAnalyticsPage         from './pages/admin/AdminAnalyticsPage'
 import AdminAnalyticsAdvancedPage from './pages/admin/AdminAnalyticsAdvancedPage'
 import AdminOrdersPage            from './pages/admin/AdminOrdersPage'
 import ResetPasswordPage      from './pages/ResetPasswordPage'
+import OrderTrackingPage      from './pages/OrderTrackingPage'
 import NotFoundPage           from './pages/NotFoundPage'
 import SuperAdminPage         from './pages/SuperAdminPage'
 import WhatsAppButton         from './components/common/WhatsAppButton'
@@ -79,6 +80,7 @@ function App() {
                 <Route path="/admin/analytics-avanzado" element={<AdminAnalyticsAdvancedPage />} />
                 <Route path="/admin/pedidos"             element={<AdminOrdersPage />} />
                 <Route path="/reset-password"       element={<ResetPasswordPage />} />
+                <Route path="/seguimiento/:orderNumber" element={<OrderTrackingPage />} />
                 <Route path="/superadmin"           element={<SuperAdminPage />} />
                 <Route path="*"                     element={<NotFoundPage />} />
               </Routes>

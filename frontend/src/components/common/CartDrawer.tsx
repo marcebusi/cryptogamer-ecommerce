@@ -2,13 +2,9 @@ import { useEffect } from 'react'
 import { useCart } from '../../context/CartContext'
 import './CartDrawer.css'
 
-const FREE_SHIPPING_THRESHOLD = 200
-
 export default function CartDrawer() {
   const { items, isCartOpen, closeCart, openCheckout, removeFromCart, updateQuantity, totalPrice } = useCart()
 
-  const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - totalPrice)
-  const shippingProgress = Math.min(100, (totalPrice / FREE_SHIPPING_THRESHOLD) * 100)
   const tax = totalPrice * 0.1
 
   /* Lock body scroll when cart is open */
@@ -130,27 +126,6 @@ export default function CartDrawer() {
                 </div>
               ))}
 
-              {/* Free shipping progress */}
-              <div className="bg-surface-container-low rounded-xl p-sm border border-tertiary-container/20">
-                <div className="flex justify-between items-center mb-xs">
-                  <span className="text-[11px] font-bold uppercase tracking-widest text-tertiary-fixed-dim">
-                    Envío gratis
-                  </span>
-                  {remaining > 0 ? (
-                    <span className="text-[11px] font-bold text-tertiary-fixed-dim">
-                      Faltan ${remaining.toFixed(2)}
-                    </span>
-                  ) : (
-                    <span className="text-[11px] font-bold text-primary-container">¡Alcanzado!</span>
-                  )}
-                </div>
-                <div className="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-tertiary-container rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(58,244,255,0.5)]"
-                    style={{ width: `${shippingProgress}%` }}
-                  />
-                </div>
-              </div>
             </>
           )}
         </div>

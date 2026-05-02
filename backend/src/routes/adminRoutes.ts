@@ -6,7 +6,7 @@ import {
 import {
   createCategory, updateCategory, deleteCategory,
 } from '../controllers/categoryController'
-import { getOrders } from '../controllers/adminOrderController'
+import { getOrders, updateOrderStatus, updateTrackingCode } from '../controllers/adminOrderController'
 import {
   createSeller, updateSeller, deleteSeller, getSellerOrders,
 } from '../controllers/sellerController'
@@ -30,7 +30,9 @@ router.put('/categories/:id',     updateCategory)
 router.delete('/categories/:id',  deleteCategory)
 
 /* ── Orders ───────────────────────────────────────── */
-router.get('/orders',             getOrders)
+router.get('/orders',                    getOrders)
+router.patch('/orders/:id/status',       updateOrderStatus)
+router.patch('/orders/:id/trackingCode', updateTrackingCode)
 
 /* ── Sellers ──────────────────────────────────────── */
 router.post('/sellers',              createSeller)

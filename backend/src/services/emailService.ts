@@ -4,23 +4,37 @@ import nodemailer from 'nodemailer'
 const transporter = nodemailer.createTransport({
   host:   process.env.SMTP_HOST  ?? 'smtp.gmail.com',
   port:   Number(process.env.SMTP_PORT ?? 587),
-  secure: false,
+  secure: false,   // STARTTLS on port 587
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
+  },
+  tls: {
+    rejectUnauthorized: false,  // allow self-signed certs in dev
   },
 })
 
 const FROM       = process.env.SMTP_FROM ?? "Cryptogamer's <noreply@cryptogamer.ar>"
 const CONFIGURED = !!(process.env.SMTP_USER && process.env.SMTP_PASS)
 
+// Verify SMTP connection at startup
+if (CONFIGURED) {
+  transporter.verify()
+    .then(() => console.log('✅ [EMAIL] SMTP conectado correctamente —', process.env.SMTP_USER))
+    .catch(err => console.error('❌ [EMAIL] Error al conectar SMTP:', err?.message ?? err))
+} else {
+  console.warn('⚠️  [EMAIL] SMTP no configurado — revisar SMTP_USER y SMTP_PASS en .env')
+}
+
 /* ── Core sender ─────────────────────────────────── */
 export async function sendEmail(to: string, subject: string, html: string): Promise<void> {
   if (!CONFIGURED) {
-    console.log(`\n📧 [EMAIL — no configurado] Para: ${to} | Asunto: ${subject}\n`)
+    console.log(`📧 [EMAIL — no configurado] Para: ${to} | Asunto: ${subject}`)
     return
   }
+  console.log(`📧 [EMAIL] Enviando a ${to} — "${subject}"`)
   await transporter.sendMail({ from: FROM, to, subject, html })
+  console.log(`✅ [EMAIL] Enviado correctamente a ${to}`)
 }
 
 /* ── Design tokens (match frontend palette) ──────── */
@@ -132,7 +146,9 @@ export const emailTemplates = {
     sellerAlias?: string
     sellerBank?: string
     sellerAccountHolder?: string
-  }) => ({
+  }) => {
+    const trackingUrl = `${process.env.FRONTEND_URL ?? 'http://localhost:5173'}/seguimiento/${params.orderNumber}`
+    return ({
     subject: `Pedido confirmado #${params.orderNumber} · Cryptogamer's`,
     html: shell(`
       <p style="margin:0 0 6px;font-size:12px;color:${T.textMuted};text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">Confirmación de compra</p>
@@ -140,6 +156,8 @@ export const emailTemplates = {
       <p style="margin:0 0 24px;font-size:14px;color:${T.textMuted};line-height:1.6;">Tu pedido fue recibido y está siendo procesado.</p>
 
       ${badge(`Orden #${params.orderNumber}`, T.primary)}
+
+      ${ctaButton(trackingUrl, '📦 Seguir mi pedido →', T.purple)}
 
       ${divider()}
 
@@ -181,7 +199,7 @@ export const emailTemplates = {
         <p style="margin:12px 0 0;font-size:12px;color:${T.textMuted};text-align:center;">Realizá la transferencia y tu pedido quedará confirmado.</p>
       ` : ''}
     `),
-  }),
+  })},
 
   /* ── Nueva orden al vendedor ─────────────────── */
   newOrderSeller: (params: {

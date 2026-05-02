@@ -221,10 +221,23 @@ export default function ProfilePage() {
             {tab === 'orders' && (
               <div className="profile-card rounded-2xl border border-purple-500/20 p-lg relative overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/40 to-transparent" />
-                <h2 className="text-lg font-black text-on-surface font-['Plus_Jakarta_Sans'] mb-lg flex items-center gap-xs">
-                  <span className="material-symbols-outlined text-purple-400">shopping_bag</span>
-                  Mis pedidos
-                </h2>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-sm mb-lg">
+                  <h2 className="text-lg font-black text-on-surface font-['Plus_Jakarta_Sans'] flex items-center gap-xs">
+                    <span className="material-symbols-outlined text-purple-400">shopping_bag</span>
+                    Mis pedidos
+                  </h2>
+                  {/* Search by order number */}
+                  <a href="/seguimiento"
+                    onClick={e => {
+                      e.preventDefault()
+                      const num = prompt('Ingresá el número de orden (ej: CG-R0M3NF):')
+                      if (num?.trim()) window.open(`/seguimiento/${num.trim().toUpperCase()}`, '_blank')
+                    }}
+                    className="flex items-center gap-1.5 px-sm py-xs rounded-xl border border-purple-500/30 text-xs text-purple-300 hover:bg-purple-500/10 transition-colors cursor-pointer">
+                    <span className="material-symbols-outlined text-sm">search</span>
+                    Buscar por N.° de orden
+                  </a>
+                </div>
 
                 {loadingOrders ? (
                   <div className="flex justify-center py-xl">
@@ -236,32 +249,48 @@ export default function ProfilePage() {
                     <p>Aún no realizaste ningún pedido.</p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    {orders.map((order: any) => (
-                      <div key={order.id} className="bg-surface-container border border-white/5 rounded-xl p-4 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xs font-mono text-on-surface-variant">#{order.id.slice(-6).toUpperCase()}</span>
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                              order.status === 'PENDING' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
-                              order.status === 'COMPLETED' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
-                              'bg-surface-container-high text-on-surface-variant border border-white/10'
-                            }`}>
-                              {order.status}
-                            </span>
+                  <div className="space-y-3">
+                    {orders.map((order: any) => {
+                      const orderNum = `CG-${order.id.slice(-6).toUpperCase()}`
+                      const statusLabels: Record<string, { label: string; cls: string }> = {
+                        PENDING:    { label: 'Pendiente',       cls: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
+                        CONFIRMED:  { label: 'Pago confirmado', cls: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30'       },
+                        PROCESSING: { label: 'En preparación',  cls: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
+                        SHIPPED:    { label: 'Enviado',         cls: 'bg-blue-500/20 text-blue-400 border-blue-500/30'       },
+                        COMPLETED:  { label: 'Completado',      cls: 'bg-green-500/20 text-green-400 border-green-500/30'    },
+                        CANCELLED:  { label: 'Cancelado',       cls: 'bg-red-500/20 text-red-400 border-red-500/30'          },
+                      }
+                      const st = statusLabels[order.status] ?? { label: order.status, cls: 'bg-white/10 text-on-surface-variant border-white/10' }
+                      return (
+                        <div key={order.id} className="bg-surface-container border border-white/8 rounded-xl p-4">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                <span className="font-mono text-xs font-bold text-white/70">{orderNum}</span>
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${st.cls}`}>
+                                  {st.label}
+                                </span>
+                              </div>
+                              <p className="text-xs text-on-surface-variant">
+                                {new Date(order.createdAt).toLocaleDateString('es-AR', { year:'numeric', month:'short', day:'numeric' })}
+                                {' · '}
+                                {order.items.length} {order.items.length === 1 ? 'producto' : 'productos'}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-3 sm:flex-shrink-0">
+                              <p className="text-base font-black text-primary-container">
+                                {new Intl.NumberFormat('es-AR', { style:'currency', currency:'ARS', maximumFractionDigits:0 }).format(order.totalAmount)}
+                              </p>
+                              <a href={`/seguimiento/${orderNum}`} target="_blank" rel="noreferrer"
+                                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-purple-500/30 text-[11px] text-purple-300 hover:bg-purple-500/10 transition-colors cursor-pointer flex-shrink-0">
+                                <span className="material-symbols-outlined text-sm">open_in_new</span>
+                                Seguir
+                              </a>
+                            </div>
                           </div>
-                          <p className="text-sm text-on-surface font-semibold">
-                            {new Date(order.createdAt).toLocaleDateString('es-AR', { year: 'numeric', month: 'short', day: 'numeric' })}
-                          </p>
-                          <p className="text-xs text-on-surface-variant mt-1">
-                            {order.items.length} {order.items.length === 1 ? 'producto' : 'productos'}
-                          </p>
                         </div>
-                        <div className="text-right">
-                          <p className="text-lg font-black text-primary-container">${order.totalAmount.toFixed(0)}</p>
-                        </div>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 )}
               </div>

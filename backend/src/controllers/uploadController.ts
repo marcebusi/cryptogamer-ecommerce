@@ -41,7 +41,8 @@ if (useCloudinary) {
   })
 }
 
-const fileFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+/* Image-only filter (products) */
+const imageFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const allowed = /jpeg|jpg|png|gif|webp|avif/
   if (allowed.test(path.extname(file.originalname).toLowerCase()) && allowed.test(file.mimetype)) {
     cb(null, true)
@@ -50,7 +51,21 @@ const fileFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFil
   }
 }
 
-export const upload = multer({ storage, fileFilter, limits: { fileSize: 8 * 1024 * 1024 } })
+/* Image + PDF filter (comprobantes) */
+const comprovanteFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  const ext  = path.extname(file.originalname).toLowerCase()
+  const mime = file.mimetype
+  const okImg = /jpeg|jpg|png|gif|webp|avif/.test(ext) && /jpeg|jpg|png|gif|webp|avif/.test(mime)
+  const okPdf = ext === '.pdf' && mime === 'application/pdf'
+  if (okImg || okPdf) {
+    cb(null, true)
+  } else {
+    cb(new Error('Solo se permiten imágenes o PDF.'))
+  }
+}
+
+export const upload           = multer({ storage, fileFilter: imageFilter,      limits: { fileSize: 8  * 1024 * 1024 } })
+export const uploadComprobante = multer({ storage, fileFilter: comprovanteFilter, limits: { fileSize: 15 * 1024 * 1024 } })
 
 /* ── Magic bytes validator (local only) ──────────── */
 const checkMagicBytes = (filePath: string): boolean => {
@@ -60,23 +75,25 @@ const checkMagicBytes = (filePath: string): boolean => {
   fs.readSync(fd, buffer, 0, 4, 0)
   fs.closeSync(fd)
   const hex = buffer.toString('hex').toUpperCase()
-  if (hex.startsWith('FFD8FF')) return true
-  if (hex.startsWith('89504E47')) return true
-  if (hex.startsWith('47494638')) return true
-  if (hex.startsWith('52494646')) return true
-  if (hex === '0000001C' || hex === '00000020') return true
+  if (hex.startsWith('FFD8FF')) return true      // JPEG
+  if (hex.startsWith('89504E47')) return true    // PNG
+  if (hex.startsWith('47494638')) return true    // GIF
+  if (hex.startsWith('52494646')) return true    // WebP (RIFF)
+  if (hex === '0000001C' || hex === '00000020') return true  // AVIF
+  if (hex.startsWith('25504446')) return true    // PDF (%PDF)
   return false
 }
 
 /* ── Controller ─────────────────────────────────── */
-export const uploadImage = (req: Request, res: Response): void => {
+
+/** Shared response logic for both upload controllers */
+const respondWithUrl = (req: Request, res: Response): void => {
   if (!req.file) {
     res.status(400).json({ message: 'No se recibió ningún archivo.' })
     return
   }
 
   if (!useCloudinary) {
-    // Local: validate magic bytes
     const isValid = checkMagicBytes(req.file.path)
     if (!isValid) {
       fs.unlinkSync(req.file.path)
@@ -92,3 +109,9 @@ export const uploadImage = (req: Request, res: Response): void => {
   const url = (req.file as any).path
   res.json({ url })
 }
+
+/** Admin-only image upload (products, etc.) */
+export const uploadImage = (req: Request, res: Response): void => respondWithUrl(req, res)
+
+/** Public comprobante upload (images + PDFs, no auth required) */
+export const uploadComprobanteImage = (req: Request, res: Response): void => respondWithUrl(req, res)

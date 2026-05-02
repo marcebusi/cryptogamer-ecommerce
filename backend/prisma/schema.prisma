@@ -122,6 +122,25 @@ model Order {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Shipping
+  shippingCarrier    String?
+  shippingService    String?
+  shippingCost       Float?
+  shippingPostalCode String?
+  shippingAddress    String?
+  shippingCity       String?
+  shippingProvince   String?
+  customerName       String?
+  customerEmail      String?
+  customerPhone      String?
+
+  // Payment
+  paymentMethod  String?   // 'transfer' | 'mercadopago' | 'cash'
+  comprovanteUrl String?   // URL of uploaded payment proof
+
+  // Carrier tracking
+  trackingCode   String?   // Tracking number from Andreani / Correo Argentino
+
   userId   String
   user     User       @relation(fields: [userId], references: [id])
   sellerId String?
