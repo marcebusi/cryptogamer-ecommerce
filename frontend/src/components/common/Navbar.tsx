@@ -6,7 +6,6 @@ import { useCategories, parseCategoryChildren } from '../../context/CategoriesCo
 import type { CategoryChild } from '../../types'
 import AuthModal from './AuthModal'
 import UserMenu from './UserMenu'
-import { useTheme } from '../../context/ThemeContext'
 import './Navbar.css'
 
 const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3001'
@@ -14,7 +13,6 @@ const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3001'
 export default function Navbar() {
   const { totalItems, openCart } = useCart()
   const { isAuthenticated, user } = useAuth()
-  const { isDark, toggleTheme } = useTheme()
   const { categories } = useCategories()
   const navigate = useNavigate()
 
@@ -290,18 +288,6 @@ export default function Navbar() {
                 </div>
               )}
             </div>
-
-            {/* Theme toggle */}
-            <button
-              onClick={toggleTheme}
-              className="navbar-icon-btn cursor-pointer"
-              aria-label={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-              title={isDark ? 'Modo claro' : 'Modo oscuro'}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
-                {isDark ? 'light_mode' : 'dark_mode'}
-              </span>
-            </button>
 
             {/* Cart */}
             <button
