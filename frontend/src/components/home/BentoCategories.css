@@ -1,16 +1,15 @@
-/* Main bento card (Consolas) */
-.bento-card-main {
-  min-height: 260px;
-}
-
-/* Smaller bento cards (Juegos, Accesorios) */
-.bento-card-sm {
-  min-height: 140px;
-}
+.bento-card-main { min-height: 260px; }
+.bento-card-sm   { min-height: 140px; }
 
 @media (min-width: 768px) {
-  .bento-card-main,
-  .bento-card-sm {
-    min-height: unset;
-  }
+  .bento-card-main, .bento-card-sm { min-height: unset; }
 }
+
+/* ── Light mode ──────────────────────────────────── */
+html.light .bento-card-main,
+html.light .bento-card-sm {
+  border-color: rgba(0,0,0,0.07) !important;
+  background: #f4f4f6;
+}
+html.light .bento-card-main:hover { border-color: rgba(220,38,38,0.25) !important; }
+html.light .bento-card-sm:hover   { border-color: rgba(220,38,38,0.2)  !important; }
