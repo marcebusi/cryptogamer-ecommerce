@@ -271,3 +271,65 @@ html.light .bg-white\/5.animate-pulse { background-color: rgba(0,0,0,0.05) !impo
 
 /* ── Surface variant / outline areas ── */
 html.light .bg-surface-variant { background-color: #e3e2e7 !important; }
+
+/* ══════════════════════════════════════════════════════
+   LIGHT MODE — COLORES ADICIONALES
+   Paleta exacta de code.html: rojo #eb0000, textos zinc
+   ══════════════════════════════════════════════════════ */
+
+/* ── Purple / cyan → rojo en modo claro ── */
+html.light .bg-purple-600\/10  { background-color: rgba(235,0,0,0.05) !important; }
+html.light .bg-purple-600\/15  { background-color: rgba(235,0,0,0.07) !important; }
+html.light .bg-purple-600\/20  { background-color: rgba(235,0,0,0.08) !important; }
+html.light .border-purple-500\/20 { border-color: rgba(235,0,0,0.12) !important; }
+html.light .border-purple-500\/15 { border-color: rgba(235,0,0,0.09) !important; }
+html.light .text-purple-400    { color: #eb0000 !important; }
+html.light .text-purple-300    { color: #bc0100 !important; }
+html.light .text-cyan-400      { color: #eb0000 !important; }
+
+/* ── Variantes de opacidad de surface ── */
+html.light [class*="bg-surface-container-lowest\/"] { background-color: rgba(244,243,248,0.8) !important; }
+html.light [class*="bg-surface-container-low\/"]    { background-color: rgba(244,243,248,0.9) !important; }
+html.light [class*="bg-surface-container\/"]        { background-color: rgba(238,237,243,0.9) !important; }
+html.light [class*="bg-primary-container\/"]        { background-color: rgba(235,0,0,var(--tw-bg-opacity,1)) !important; }
+
+/* ── Gradients from/to tertiary/primary ── */
+html.light [class*="from-tertiary-container"] {
+  --tw-gradient-from: #eb0000 var(--tw-gradient-from-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+html.light [class*="to-primary-container"] {
+  --tw-gradient-to: #7f0000 var(--tw-gradient-to-position);
+}
+
+/* ── Textos de colores neon → apagados en modo claro ── */
+html.light .text-tertiary-container { color: #5a5c5e !important; }
+html.light .text-primary            { color: #7f0000 !important; }
+
+/* ── Admin: páginas internas ── */
+html.light .bg-\[\#080910\]    { background-color: #faf8fe !important; }
+html.light .bg-\[#080910\]     { background-color: #faf8fe !important; }
+html.light .bg-zinc-950         { background-color: #faf8fe !important; }
+html.light .bg-slate-950        { background-color: #faf8fe !important; }
+html.light .text-white          { color: #1a1b1f !important; }
+html.light .text-white\/80      { color: rgba(26,27,31,0.8) !important; }
+html.light .text-slate-500      { color: #6b7280 !important; }
+html.light .text-slate-400      { color: #9ca3af !important; }
+html.light .text-zinc-500       { color: #6b7280 !important; }
+html.light .text-zinc-400       { color: #9ca3af !important; }
+html.light .text-zinc-900       { color: #1a1b1f !important; }
+
+/* ── Fondos de texto/etiquetas ── */
+html.light .bg-white\/10        { background-color: rgba(0,0,0,0.05) !important; }
+html.light .bg-white\/6         { background-color: rgba(0,0,0,0.04) !important; }
+html.light .bg-white\/8         { background-color: rgba(0,0,0,0.05) !important; }
+html.light .hover\:bg-white\/5:hover  { background-color: rgba(0,0,0,0.03) !important; }
+html.light .hover\:bg-white\/6:hover  { background-color: rgba(0,0,0,0.04) !important; }
+
+/* ── Dividers ── */
+html.light .divide-white\/8 > * + *  { border-color: rgba(0,0,0,0.07) !important; }
+html.light .border-white\/5          { border-color: rgba(0,0,0,0.05) !important; }
+
+/* ── Ring/focus colors ── */
+html.light .focus\:ring-primary-container\/40:focus { box-shadow: 0 0 0 2px rgba(235,0,0,0.2) !important; }
+html.light .focus\:border-primary-container:focus   { border-color: rgba(235,0,0,0.5) !important; }

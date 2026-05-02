@@ -156,6 +156,54 @@
   background: rgba(138, 43, 226, 0.1);
 }
 
+/* ══ USER MENU DARK (default) ══════════════════════ */
+.user-menu-panel {
+  background: rgba(8, 7, 18, 0.97);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(138, 43, 226, 0.2);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.03) inset;
+}
+.user-menu-glow-line {
+  background: linear-gradient(to right, transparent, rgba(138,43,226,0.4), transparent);
+}
+.user-menu-avatar {
+  background: linear-gradient(135deg, #7c3aed, #4c1d95);
+  box-shadow: 0 0 16px rgba(138,43,226,0.5);
+}
+.user-menu-name  { color: #ffffff; }
+.user-menu-email { color: rgba(216,180,254,0.6); }
+.user-menu-divider  { border-color: rgba(255,255,255,0.08); }
+.user-menu-section-label { color: #64748b; }
+.user-menu-badge-admin {
+  color: #fde047;
+  background: rgba(234,179,8,0.12);
+  border: 1px solid rgba(234,179,8,0.25);
+}
+.user-menu-badge-super {
+  color: #c084fc;
+  background: rgba(138,43,226,0.15);
+  border: 1px solid rgba(138,43,226,0.35);
+}
+.user-menu-item {
+  color: #94a3b8;
+}
+.user-menu-item:hover { color: #ffffff; background: rgba(255,255,255,0.06); }
+.user-menu-item-icon  { background: rgba(255,255,255,0.06); color: #94a3b8; }
+.icon-profile  { color: #a78bfa; background: rgba(138,43,226,0.15); }
+.icon-super    { color: #a78bfa; background: rgba(138,43,226,0.2); }
+.icon-admin    { color: #67e8f9; background: rgba(6,182,212,0.12); }
+.icon-add      { color: #86efac; background: rgba(34,197,94,0.12); }
+.icon-manage   { color: #fdba74; background: rgba(249,115,22,0.12); }
+.icon-logout   { color: #f87171; background: rgba(239,68,68,0.1); }
+.user-menu-item-logout { color: #f87171; }
+.user-menu-item-logout:hover { color: #fca5a5; background: rgba(239,68,68,0.08); }
+
+/* Logo text */
+.navbar-logo-text { color: #ffffff; }
+.navbar-logo-text .text-purple-400 { color: #a78bfa; }
+.navbar-logo-text .text-purple-300 { color: #c4b5fd; }
+
 /* ── LIGHT MODE ─────────────────────────────────── */
 html.light .navbar-header {
   background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(250,250,252,0.93) 100%);
@@ -208,3 +256,46 @@ html.light .search-dropdown {
   box-shadow: 0 20px 60px rgba(0,0,0,0.12);
 }
 html.light .search-dropdown-item:hover { background: rgba(220,38,38,0.05); }
+
+/* ── Logo text light mode ──────────────────────── */
+html.light .navbar-logo-text { color: #1a1b1f; }
+html.light .navbar-logo-text .text-purple-400 { color: #eb0000 !important; }
+html.light .navbar-logo-text .text-purple-300 { color: #bc0100 !important; }
+
+/* ── UserMenu light mode ───────────────────────── */
+html.light .user-menu-panel {
+  background: rgba(255,255,255,0.99);
+  border-color: rgba(235,0,0,0.12);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.02) inset;
+}
+html.light .user-menu-glow-line {
+  background: linear-gradient(to right, transparent, rgba(235,0,0,0.25), transparent);
+}
+html.light .user-menu-avatar {
+  background: linear-gradient(135deg, #eb0000, #7f0000);
+  box-shadow: 0 0 12px rgba(235,0,0,0.3);
+}
+html.light .user-menu-name  { color: #1a1b1f; }
+html.light .user-menu-email { color: #6b7280; }
+html.light .user-menu-divider  { border-color: rgba(0,0,0,0.07); }
+html.light .user-menu-section-label { color: #9ca3af; }
+html.light .user-menu-badge-admin {
+  color: #92400e;
+  background: rgba(234,179,8,0.1);
+  border-color: rgba(234,179,8,0.2);
+}
+html.light .user-menu-badge-super {
+  color: #6b21a8;
+  background: rgba(107,33,168,0.08);
+  border-color: rgba(107,33,168,0.15);
+}
+html.light .user-menu-item { color: #374151; }
+html.light .user-menu-item:hover { color: #1a1b1f; background: rgba(0,0,0,0.04); }
+html.light .icon-profile  { color: #eb0000;  background: rgba(235,0,0,0.08); }
+html.light .icon-super    { color: #7c3aed;  background: rgba(124,58,237,0.08); }
+html.light .icon-admin    { color: #0e7490;  background: rgba(6,182,212,0.08); }
+html.light .icon-add      { color: #15803d;  background: rgba(34,197,94,0.08); }
+html.light .icon-manage   { color: #c2410c;  background: rgba(249,115,22,0.08); }
+html.light .icon-logout   { color: #dc2626;  background: rgba(220,38,38,0.07); }
+html.light .user-menu-item-logout { color: #dc2626; }
+html.light .user-menu-item-logout:hover { color: #991b1b; background: rgba(220,38,38,0.06); }

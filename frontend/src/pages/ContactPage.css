@@ -1,42 +1,126 @@
+/* ── DARK MODE (default) ──────────────────────────── */
 .contact-hero {
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(58, 244, 255, 0.06) 0%, transparent 70%),
-              radial-gradient(ellipse 60% 40% at 20% 100%, rgba(138, 43, 226, 0.08) 0%, transparent 70%);
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(58,244,255,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 20% 100%, rgba(138,43,226,0.08) 0%, transparent 70%);
 }
-
 .contact-grid-bg {
   background-image:
     linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
   background-size: 48px 48px;
 }
-
 .contact-info-card {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255,255,255,0.03);
   backdrop-filter: blur(8px);
 }
-
 .contact-form-card {
-  background: rgba(17, 19, 24, 0.8);
+  background: rgba(17,19,24,0.8);
   backdrop-filter: blur(20px);
+}
+.contact-faq-section {
+  background: rgba(12,14,18,0.5);
+}
+
+/* Submit button dark */
+.contact-submit-btn {
+  background-color: #3af4ff;
+  color: #00373a;
+  box-shadow: 0 0 0 0 rgba(58,244,255,0);
+  transition: box-shadow 0.2s, filter 0.2s, transform 0.15s;
+}
+.contact-submit-btn:hover {
+  box-shadow: 0 0 24px rgba(58,244,255,0.35);
+  filter: brightness(1.1);
 }
 
 /* ── LIGHT MODE ───────────────────────────────────── */
 html.light .contact-hero {
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(220,38,38,0.05) 0%, transparent 70%),
-              radial-gradient(ellipse 60% 40% at 20% 100%, rgba(185,28,28,0.04) 0%, transparent 70%);
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(235,0,0,0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 20% 100%, rgba(188,1,0,0.03) 0%, transparent 70%);
 }
 html.light .contact-grid-bg {
   background-image:
     linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
 }
 html.light .contact-info-card {
-  background: rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.85);
   backdrop-filter: blur(8px);
-  border-color: rgba(220,38,38,0.1);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
 }
 html.light .contact-form-card {
-  background: rgba(255,255,255,0.95);
+  background: rgba(255,255,255,0.98);
   backdrop-filter: blur(20px);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+  box-shadow: 0 4px 32px rgba(0,0,0,0.07);
+  border-color: rgba(235,0,0,0.1) !important;
+}
+html.light .contact-faq-section {
+  background: #f4f3f8;
+  border-top-color: rgba(0,0,0,0.06);
+}
+html.light .contact-faq-section .bg-surface-container {
+  background-color: #ffffff !important;
+  border-color: rgba(0,0,0,0.07) !important;
+}
+html.light .contact-faq-section .hover\:border-purple-500\/20:hover {
+  border-color: rgba(235,0,0,0.2) !important;
+}
+
+/* Submit button light */
+html.light .contact-submit-btn {
+  background-color: #eb0000;
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(235,0,0,0.3);
+}
+html.light .contact-submit-btn:hover {
+  box-shadow: 0 6px 24px rgba(235,0,0,0.45);
+  filter: brightness(1.06);
+}
+
+/* Form inputs light mode */
+html.light .contact-form-card input,
+html.light .contact-form-card select,
+html.light .contact-form-card textarea {
+  background-color: #f4f3f8 !important;
+  border-color: rgba(0,0,0,0.1) !important;
+  color: #1a1b1f !important;
+}
+html.light .contact-form-card input:focus,
+html.light .contact-form-card select:focus,
+html.light .contact-form-card textarea:focus {
+  border-color: rgba(235,0,0,0.4) !important;
+  box-shadow: 0 0 0 2px rgba(235,0,0,0.1) !important;
+}
+
+/* Social buttons light */
+html.light .contact-hero + section .border-white\/10,
+html.light [class*="border-white\/10"] {
+  border-color: rgba(0,0,0,0.1);
+}
+
+/* Hero border light */
+html.light .contact-hero { border-bottom-color: rgba(235,0,0,0.1); }
+
+/* Trust row border light */
+html.light .border-white\/8 { border-color: rgba(0,0,0,0.07) !important; }
+
+/* Form top glow line + corner glow → subtle red */
+html.light .contact-form-card .via-tertiary-container\/50 {
+  --tw-gradient-via: rgba(235,0,0,0.15) !important;
+}
+html.light .bg-purple-600\/10 { background-color: rgba(235,0,0,0.04) !important; }
+html.light .bg-tertiary-container\/8 { background-color: rgba(235,0,0,0.03) !important; }
+html.light .bg-tertiary-container\/15 { background-color: rgba(235,0,0,0.06) !important; }
+html.light .bg-primary-container\/20 { background-color: rgba(235,0,0,0.12) !important; }
+html.light .bg-primary-container\/10 { background-color: rgba(235,0,0,0.07) !important; }
+
+/* Hero gradient text: from-tertiary to primary → from red to dark red */
+html.light .from-tertiary-container {
+  --tw-gradient-from: #eb0000 var(--tw-gradient-from-position) !important;
+}
+html.light .to-primary-container {
+  --tw-gradient-to: #7f0000 var(--tw-gradient-to-position) !important;
 }

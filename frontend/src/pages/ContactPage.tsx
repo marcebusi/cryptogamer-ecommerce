@@ -278,7 +278,7 @@ export default function ContactPage() {
                     <button
                       type="submit"
                       disabled={status === 'sending'}
-                      className="w-full bg-tertiary-container text-on-tertiary py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-xs hover:shadow-[0_0_24px_rgba(58,244,255,0.35)] hover:brightness-110 active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="contact-submit-btn w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-xs active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                       {status === 'sending' ? (
                         <>
@@ -301,7 +301,7 @@ export default function ContactPage() {
       </section>
 
       {/* ── FAQ strip ────────────────────────────────── */}
-      <section className="border-t border-white/5 bg-surface-container-lowest/50">
+      <section className="contact-faq-section border-t border-white/5">
         <div className="max-w-screen-xl mx-auto px-4 md:px-8 py-lg">
           <h2 className="text-xl font-black text-on-surface font-['Plus_Jakarta_Sans'] mb-lg text-center">
             Preguntas frecuentes
