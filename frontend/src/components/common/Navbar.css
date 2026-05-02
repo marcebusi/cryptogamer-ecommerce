@@ -118,7 +118,7 @@
   background: rgba(8, 7, 18, 0.97);
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
-  width: 530px;
+  width: 610px;
   border: 1px solid rgba(138, 43, 226, 0.18);
   border-radius: 16px;
   box-shadow:
@@ -199,6 +199,12 @@
 .user-menu-item-logout { color: #f87171; }
 .user-menu-item-logout:hover { color: #fca5a5; background: rgba(239,68,68,0.08); }
 
+/* Logo icon */
+.navbar-logo-icon {
+  background: linear-gradient(135deg, #7c3aed, #4c1d95);
+  box-shadow: 0 0 12px rgba(138,43,226,0.5);
+}
+
 /* Logo text */
 .navbar-logo-text { color: #ffffff; }
 .navbar-logo-text .text-purple-400 { color: #a78bfa; }
@@ -257,7 +263,12 @@ html.light .search-dropdown {
 }
 html.light .search-dropdown-item:hover { background: rgba(220,38,38,0.05); }
 
-/* ── Logo text light mode ──────────────────────── */
+/* ── Logo icon + text light mode ──────────────── */
+html.light .navbar-logo-icon {
+  background: linear-gradient(135deg, #eb0000, #7f0000);
+  box-shadow: 0 0 10px rgba(235,0,0,0.3);
+}
+html.light .navbar-logo-icon .fa-gamepad { color: #ffffff; }
 html.light .navbar-logo-text { color: #1a1b1f; }
 html.light .navbar-logo-text .text-purple-400 { color: #eb0000 !important; }
 html.light .navbar-logo-text .text-purple-300 { color: #bc0100 !important; }

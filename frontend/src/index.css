@@ -285,39 +285,91 @@ html.light .border-purple-500\/20 { border-color: rgba(235,0,0,0.12) !important;
 html.light .border-purple-500\/15 { border-color: rgba(235,0,0,0.09) !important; }
 html.light .text-purple-400    { color: #eb0000 !important; }
 html.light .text-purple-300    { color: #bc0100 !important; }
-html.light .text-cyan-400      { color: #eb0000 !important; }
+html.light .text-cyan-400      { color: #0891b2 !important; } /* cyan mantiene su color, no rojo */
+
+/* Social hover colors → light adaptados */
+html.light .hover\:text-cyan-400:hover    { color: #0891b2 !important; }
+html.light .hover\:text-pink-400:hover    { color: #db2777 !important; }
+html.light .hover\:text-indigo-400:hover  { color: #6366f1 !important; }
+html.light .hover\:text-red-400:hover     { color: #ef4444 !important; }
 
 /* ── Variantes de opacidad de surface ── */
 html.light [class*="bg-surface-container-lowest\/"] { background-color: rgba(244,243,248,0.8) !important; }
 html.light [class*="bg-surface-container-low\/"]    { background-color: rgba(244,243,248,0.9) !important; }
 html.light [class*="bg-surface-container\/"]        { background-color: rgba(238,237,243,0.9) !important; }
-html.light [class*="bg-primary-container\/"]        { background-color: rgba(235,0,0,var(--tw-bg-opacity,1)) !important; }
 
-/* ── Gradients from/to tertiary/primary ── */
+/* ── Gradients — AdminDashboard "Dashboard" y otros ── */
+html.light [class*="from-primary-container"] {
+  --tw-gradient-from: #eb0000 var(--tw-gradient-from-position);
+  --tw-gradient-to: rgba(235,0,0,0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+html.light [class*="from-secondary-container"] {
+  --tw-gradient-from: #bc0100 var(--tw-gradient-from-position);
+  --tw-gradient-to: rgba(188,1,0,0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
 html.light [class*="from-tertiary-container"] {
   --tw-gradient-from: #eb0000 var(--tw-gradient-from-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
-html.light [class*="to-primary-container"] {
-  --tw-gradient-to: #7f0000 var(--tw-gradient-to-position);
+html.light [class*="to-primary-container"]   { --tw-gradient-to: #7f0000 var(--tw-gradient-to-position); }
+html.light [class*="to-tertiary-container"]  { --tw-gradient-to: #bc0100 var(--tw-gradient-to-position); }
+html.light [class*="to-secondary-container"] { --tw-gradient-to: #7f0000 var(--tw-gradient-to-position); }
+
+/* via-purple → near transparent en light */
+html.light [class*="via-purple"]  {
+  --tw-gradient-via: rgba(235,0,0,0.04);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-via) var(--tw-gradient-via-position), var(--tw-gradient-to);
 }
 
-/* ── Textos de colores neon → apagados en modo claro ── */
-html.light .text-tertiary-container { color: #5a5c5e !important; }
+/* ── Textos de colores neon → legibles en modo claro ── */
+html.light .text-tertiary-container { color: #0891b2 !important; }
 html.light .text-primary            { color: #7f0000 !important; }
+html.light .text-secondary-container { color: #bc0100 !important; }
 
-/* ── Admin: páginas internas ── */
-html.light .bg-\[\#080910\]    { background-color: #faf8fe !important; }
-html.light .bg-\[#080910\]     { background-color: #faf8fe !important; }
-html.light .bg-zinc-950         { background-color: #faf8fe !important; }
-html.light .bg-slate-950        { background-color: #faf8fe !important; }
-html.light .text-white          { color: #1a1b1f !important; }
-html.light .text-white\/80      { color: rgba(26,27,31,0.8) !important; }
-html.light .text-slate-500      { color: #6b7280 !important; }
-html.light .text-slate-400      { color: #9ca3af !important; }
-html.light .text-zinc-500       { color: #6b7280 !important; }
-html.light .text-zinc-400       { color: #9ca3af !important; }
-html.light .text-zinc-900       { color: #1a1b1f !important; }
+/* ── Texto blanco SOLO en contextos que se vuelven claros ──
+   NOTA: NO se hace override global de text-white para no romper
+   botones con fondo de color (CTAs, badges, etc.)
+   Se hace scoped a contenedores que cambian de fondo ── */
+html.light .bg-zinc-950,
+html.light .bg-slate-950 { background-color: #faf8fe !important; }
+html.light .bg-zinc-950 .text-white,
+html.light .bg-slate-950 .text-white { color: #1a1b1f !important; }
+
+/* ── Analytics pages — hardcoded dark backgrounds ── */
+html.light .bg-\[\#080812\] { background-color: #faf8fe !important; }
+html.light .bg-\[\#080910\] { background-color: #faf8fe !important; }
+html.light .bg-\[\#060709\] { background-color: #faf8fe !important; }
+
+/* KPI cards en analytics */
+html.light .bg-\[\#0f0f23\] {
+  background-color: #ffffff !important;
+  border-color: rgba(0,0,0,0.07) !important;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06) !important;
+}
+html.light .bg-\[\#0f0f23\] .text-white    { color: #1a1b1f !important; }
+html.light .bg-\[\#0f0f23\] .text-white\/40 { color: rgba(26,27,31,0.45) !important; }
+html.light .bg-\[\#0f0f23\] .text-white\/30 { color: rgba(26,27,31,0.38) !important; }
+html.light .bg-\[\#0f0f23\] .text-white\/20 { color: rgba(26,27,31,0.28) !important; }
+html.light .bg-\[\#0f0f23\] .border-white\/8 { border-color: rgba(0,0,0,0.06) !important; }
+
+/* Tooltips y otros dark en analytics */
+html.light .bg-\[\#0a0a1a\] { background-color: #ffffff !important; box-shadow: 0 4px 24px rgba(0,0,0,0.12) !important; }
+html.light .bg-\[\#0a0a1a\] .text-white\/40 { color: rgba(26,27,31,0.5) !important; }
+html.light .bg-\[\#0a0a1a\] .text-white\/30 { color: rgba(26,27,31,0.4) !important; }
+html.light .bg-\[\#0a0a1a\] .border-white\/12 { border-color: rgba(0,0,0,0.08) !important; }
+
+/* Chart grid lines helper */
+html.light .bg-\[\#080812\] svg line[stroke="rgba(255,255,255,0.04)"] { stroke: rgba(0,0,0,0.06); }
+
+/* ── Text colors que no son white pero sí claros/zinc ── */
+html.light .text-slate-500  { color: #6b7280 !important; }
+html.light .text-slate-400  { color: #9ca3af !important; }
+html.light .text-zinc-500   { color: #6b7280 !important; }
+html.light .text-zinc-400   { color: #9ca3af !important; }
+html.light .text-zinc-900   { color: #1a1b1f !important; }
+html.light .text-zinc-300   { color: #374151 !important; }
 
 /* ── Fondos de texto/etiquetas ── */
 html.light .bg-white\/10        { background-color: rgba(0,0,0,0.05) !important; }
@@ -328,8 +380,97 @@ html.light .hover\:bg-white\/6:hover  { background-color: rgba(0,0,0,0.04) !impo
 
 /* ── Dividers ── */
 html.light .divide-white\/8 > * + *  { border-color: rgba(0,0,0,0.07) !important; }
-html.light .border-white\/5          { border-color: rgba(0,0,0,0.05) !important; }
+html.light .border-white\/12         { border-color: rgba(0,0,0,0.08) !important; }
 
 /* ── Ring/focus colors ── */
 html.light .focus\:ring-primary-container\/40:focus { box-shadow: 0 0 0 2px rgba(235,0,0,0.2) !important; }
 html.light .focus\:border-primary-container:focus   { border-color: rgba(235,0,0,0.5) !important; }
+
+/* ── Status badges — mantener colores funcionales ── */
+/* yellow/green/red/blue status badges se mantienen igual en ambos modos */
+
+/* ── Chart containers en analytics (área/barra) — bg-[#0f0f23] children ── */
+html.light .bg-\[\#0f0f23\] .text-white\/25   { color: rgba(26,27,31,0.32) !important; }
+html.light .bg-\[\#0f0f23\] .border-white\/6  { border-color: rgba(0,0,0,0.05) !important; }
+html.light .bg-\[\#0f0f23\] .border-white\/5  { border-color: rgba(0,0,0,0.04) !important; }
+html.light .bg-\[\#080812\] .border-white\/6  { border-color: rgba(0,0,0,0.05) !important; }
+html.light .bg-\[\#080812\] .border-white\/8  { border-color: rgba(0,0,0,0.06) !important; }
+html.light .bg-\[\#080812\] .border-white\/10 { border-color: rgba(0,0,0,0.08) !important; }
+html.light .bg-\[\#080812\] .text-white\/40   { color: rgba(26,27,31,0.5)  !important; }
+html.light .bg-\[\#080812\] .text-white\/30   { color: rgba(26,27,31,0.4)  !important; }
+html.light .bg-\[\#080812\] .text-white\/25   { color: rgba(26,27,31,0.35) !important; }
+html.light .bg-\[\#080812\] .text-white\/20   { color: rgba(26,27,31,0.3)  !important; }
+html.light .bg-\[\#080812\] .text-white       { color: #1a1b1f !important; }
+
+/* Date inputs en analytics */
+html.light .bg-\[\#0f0f23\].border { border-color: rgba(0,0,0,0.1) !important; }
+html.light input.bg-\[\#0f0f23\] {
+  background-color: #f4f3f8 !important;
+  color: #1a1b1f !important;
+  border-color: rgba(0,0,0,0.12) !important;
+  color-scheme: light !important;
+}
+
+/* ── Ofertas hero — via-purple-950 ── */
+html.light .via-purple-950\/20 {
+  --tw-gradient-via: rgba(235,0,0,0.03) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-via) var(--tw-gradient-via-position), var(--tw-gradient-to) !important;
+}
+
+/* ── Corrección text-primary en light (CSS var fallback) ── */
+html.light .text-primary { color: #bc0100 !important; }
+html.light .text-secondary-container { color: #bc0100 !important; }
+
+/* ══════════════════════════════════════════════════════
+   HARDCODED DARK BACKGROUNDS — resto del sistema
+   ══════════════════════════════════════════════════════ */
+
+/* ProductCard + Navbar search thumbnail image area */
+html.light .bg-\[\#0b0c12\] { background-color: #f5f5f7 !important; }
+
+/* ImageGallery thumbnails */
+html.light .bg-\[\#0a0a10\] { background-color: #f4f3f8 !important; }
+html.light .bg-\[\#07080d\] { background-color: #f4f3f8 !important; }
+
+/* AdminSellersPage / inputs */
+html.light .bg-\[\#0d0e14\] {
+  background-color: #f4f3f8 !important;
+  border-color: rgba(0,0,0,0.1) !important;
+  color: #1a1b1f !important;
+}
+
+/* ProductsPage sort dropdown */
+html.light .bg-\[\#0f0f23\].shadow-2xl {
+  background-color: #ffffff !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
+}
+
+/* ResetPasswordPage card */
+html.light .bg-\[\#0e0f16\]\/95,
+html.light .bg-\[\#0e0f16\] {
+  background-color: rgba(255,255,255,0.98) !important;
+  border-color: rgba(235,0,0,0.12) !important;
+  box-shadow: 0 0 40px rgba(235,0,0,0.08) !important;
+}
+
+/* AdminEditorPage / AdminProductPage image areas */
+html.light .bg-\[\#07080d\] .text-white { color: #1a1b1f !important; }
+
+/* ── Hover text colors en componentes dark → legibles ── */
+html.light [class*="hover:text-purple-300"]:hover { color: #bc0100 !important; }
+html.light [class*="hover:text-primary-container"]:hover { color: #eb0000 !important; }
+
+/* ── ProductCard border en light mode ── */
+html.light .pc-card-inner { box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+
+/* ── Sort/filter buttons en light mode ── */
+html.light .bg-surface-container-high { background-color: #dddde3 !important; }
+
+/* ── Inputs de admin que tienen border-white/10 ── */
+html.light input.border-white\/10,
+html.light select.border-white\/10,
+html.light textarea.border-white\/10 {
+  border-color: rgba(0,0,0,0.12) !important;
+  color: #1a1b1f !important;
+}
+html.light input.focus\:border-purple-500\/60:focus { border-color: rgba(235,0,0,0.4) !important; }

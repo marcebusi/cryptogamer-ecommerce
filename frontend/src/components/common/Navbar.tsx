@@ -104,7 +104,7 @@ export default function Navbar() {
           {/* ── Logo ─────────────────────────────── */}
           <Link to="/" className="navbar-logo-glow flex items-center gap-2 flex-shrink-0">
             {/* Gamepad icon */}
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-600 to-purple-900 flex items-center justify-center shadow-[0_0_12px_rgba(138,43,226,0.5)] flex-shrink-0">
+            <div className="navbar-logo-icon w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0">
               <i className="fa-solid fa-gamepad text-white text-sm" />
             </div>
             <span className="navbar-logo-text font-black italic font-['Plus_Jakarta_Sans'] tracking-tight text-lg leading-none">
