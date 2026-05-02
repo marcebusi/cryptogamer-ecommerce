@@ -1,13 +1,97 @@
+/* ── Dark mode (default) ─────────────────────────── */
 .hero-section {
   background-color: #060709;
 }
 
-.hero-glass-card {
-  backdrop-filter: blur(20px);
-  background: rgba(18, 20, 29, 0.7);
+/* Gradient text */
+.hero-gradient-text {
+  background: linear-gradient(135deg, #39ff14 0%, #3af4ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-/* Scanline on hero glass card */
-.hero-glass-card.scanline::after {
-  z-index: 2;
+/* CTA buttons */
+.hero-btn-primary {
+  background: linear-gradient(135deg, #39ff14 0%, #2ae500 100%);
+  color: #053900;
+  box-shadow: 0 0 20px rgba(57, 255, 20, 0.35), 0 4px 14px rgba(0,0,0,0.3);
+}
+.hero-btn-primary:hover {
+  box-shadow: 0 0 32px rgba(57, 255, 20, 0.55), 0 6px 20px rgba(0,0,0,0.4);
+  transform: translateY(-1px);
+}
+.hero-btn-secondary {
+  border: 1.5px solid rgba(255, 74, 141, 0.6);
+  color: #ff4a8d;
+  background: rgba(255, 74, 141, 0.05);
+}
+.hero-btn-secondary:hover {
+  background: rgba(255, 74, 141, 0.12);
+  border-color: rgba(255, 74, 141, 0.9);
+}
+
+/* Product card */
+.hero-glass {
+  backdrop-filter: blur(20px);
+  background: rgba(18, 20, 29, 0.65);
+}
+.hero-product-border {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.hero-product-glow {
+  background: radial-gradient(circle, rgba(57,255,20,0.4) 0%, rgba(58,244,255,0.2) 100%);
+}
+.hero-badge {
+  background: rgba(57, 255, 20, 0.15);
+  border: 1px solid rgba(57, 255, 20, 0.35);
+  color: #39ff14;
+  backdrop-filter: blur(8px);
+}
+
+/* ── Light mode overrides ────────────────────────── */
+html.light .hero-section {
+  background-color: #ffffff;
+}
+
+html.light .hero-gradient-text {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+html.light .hero-btn-primary {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 18px rgba(220, 38, 38, 0.35), 0 2px 8px rgba(0,0,0,0.08);
+}
+html.light .hero-btn-primary:hover {
+  box-shadow: 0 6px 24px rgba(220, 38, 38, 0.5), 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-1px);
+}
+html.light .hero-btn-secondary {
+  border-color: rgba(220, 38, 38, 0.45);
+  color: #dc2626;
+  background: rgba(220, 38, 38, 0.04);
+}
+html.light .hero-btn-secondary:hover {
+  background: rgba(220, 38, 38, 0.09);
+  border-color: rgba(220, 38, 38, 0.8);
+}
+
+html.light .hero-glass {
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.8);
+}
+html.light .hero-product-border {
+  border-color: rgba(220, 38, 38, 0.12);
+}
+html.light .hero-product-glow {
+  background: radial-gradient(circle, rgba(220,38,38,0.2) 0%, rgba(185,28,28,0.08) 100%);
+}
+html.light .hero-badge {
+  background: rgba(220, 38, 38, 0.08);
+  border-color: rgba(220, 38, 38, 0.25);
+  color: #dc2626;
 }

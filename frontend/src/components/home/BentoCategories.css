@@ -14,3 +14,29 @@
     min-height: unset;
   }
 }
+
+/* ── Light mode overrides ────────────────────────── */
+html.light .bento-card-main,
+html.light .bento-card-sm {
+  border-color: rgba(0,0,0,0.07) !important;
+  background: #f4f4f6;
+}
+
+html.light .bento-card-main:hover {
+  border-color: rgba(220,38,38,0.25) !important;
+}
+html.light .bento-card-sm:hover {
+  border-color: rgba(220,38,38,0.2) !important;
+}
+
+/* The gradient overlay uses `from-background` which resolves to white in light mode — perfect */
+/* Category chip pills in mobile */
+html.light .scrollbar-hide button {
+  border-color: rgba(0,0,0,0.1);
+  color: #64748b;
+}
+html.light .scrollbar-hide button:hover {
+  color: #dc2626;
+  border-color: rgba(220,38,38,0.3);
+  background: rgba(220,38,38,0.04);
+}

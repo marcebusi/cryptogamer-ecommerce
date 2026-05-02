@@ -25,6 +25,7 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, { error: Error
 import { CartProvider }       from './context/CartContext'
 import { AuthProvider }       from './context/AuthContext'
 import { CategoriesProvider } from './context/CategoriesContext'
+import { ThemeProvider }      from './context/ThemeContext'
 import ScrollToTop            from './components/common/ScrollToTop'
 import Navbar                 from './components/common/Navbar'
 import Footer                 from './components/common/Footer'
@@ -52,6 +53,7 @@ import { Toaster }            from 'react-hot-toast'
 function App() {
   return (
     <AppErrorBoundary>
+    <ThemeProvider>
     <Router>
       <AuthProvider>
         <CategoriesProvider>
@@ -88,6 +90,7 @@ function App() {
         </CategoriesProvider>
       </AuthProvider>
     </Router>
+    </ThemeProvider>
     </AppErrorBoundary>
   )
 }

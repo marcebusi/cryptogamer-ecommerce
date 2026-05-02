@@ -5,12 +5,152 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Base ─────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════
+   DARK MODE (default) — valores originales sin cambios
+   ══════════════════════════════════════════════════════ */
+:root {
+  /* Colors that need opacity support → RGB channels (R G B) */
+  --color-bg:                   17 19 24;       /* #111318 */
+  --color-primary-container:    57 255 20;       /* #39ff14 neon green */
+  --color-secondary-container:  255 74 141;      /* #ff4a8d hot pink */
+  --color-tertiary-container:   58 244 255;      /* #3af4ff cyan */
+
+  /* Surface system */
+  --color-surface:                   #111318;
+  --color-surface-dim:               #111318;
+  --color-surface-bright:            #37393e;
+  --color-surface-variant:           #333539;
+  --color-surface-tint:              #2ae500;
+  --color-surface-container-lowest:  #0c0e12;
+  --color-surface-container-low:     #1a1c20;
+  --color-surface-container:         #1e2024;
+  --color-surface-container-high:    #282a2e;
+  --color-surface-container-highest: #333539;
+
+  /* On-surface */
+  --color-on-background:      #e2e2e8;
+  --color-on-surface:         #e2e2e8;
+  --color-on-surface-variant: #baccb0;
+  --color-inverse-surface:    #e2e2e8;
+  --color-inverse-on-surface: #2f3035;
+
+  /* Primary */
+  --color-primary:                  #efffe3;
+  --color-primary-fixed:            #79ff5b;
+  --color-primary-fixed-dim:        #2ae500;
+  --color-on-primary:               #053900;
+  --color-on-primary-container:     #107100;
+  --color-on-primary-fixed:         #022100;
+  --color-on-primary-fixed-variant: #095300;
+  --color-inverse-primary:          #106e00;
+
+  /* Secondary */
+  --color-secondary:                  #ffb1c4;
+  --color-secondary-fixed:            #ffd9e1;
+  --color-secondary-fixed-dim:        #ffb1c4;
+  --color-on-secondary:               #65002e;
+  --color-on-secondary-container:     #590028;
+  --color-on-secondary-fixed:         #3f001a;
+  --color-on-secondary-fixed-variant: #8f0044;
+
+  /* Tertiary */
+  --color-tertiary:                  #ebfeff;
+  --color-tertiary-fixed:            #6ff6ff;
+  --color-tertiary-fixed-dim:        #00dce6;
+  --color-on-tertiary:               #00373a;
+  --color-on-tertiary-container:     #006c72;
+  --color-on-tertiary-fixed:         #002022;
+  --color-on-tertiary-fixed-variant: #004f53;
+
+  /* Outline & error */
+  --color-outline:            #85967c;
+  --color-outline-variant:    #3c4b35;
+  --color-error:              #ffb4ab;
+  --color-error-container:    #93000a;
+  --color-on-error:           #690005;
+  --color-on-error-container: #ffdad6;
+}
+
+/* ══════════════════════════════════════════════════════
+   LIGHT MODE — blanco + rojo
+   ══════════════════════════════════════════════════════ */
+html.light {
+  /* Colors that need opacity support */
+  --color-bg:                   255 255 255;     /* white */
+  --color-primary-container:    220 38 38;        /* #dc2626 red */
+  --color-secondary-container:  185 28 28;        /* #b91c1c dark red */
+  --color-tertiary-container:   239 68 68;        /* #ef4444 lighter red */
+
+  /* Surface system */
+  --color-surface:                   #fafafa;
+  --color-surface-dim:               #f0f0f2;
+  --color-surface-bright:            #ffffff;
+  --color-surface-variant:           #e8eaee;
+  --color-surface-tint:              #dc2626;
+  --color-surface-container-lowest:  #ffffff;
+  --color-surface-container-low:     #f4f4f6;
+  --color-surface-container:         #eaeaee;
+  --color-surface-container-high:    #dddde3;
+  --color-surface-container-highest: #d0d0d8;
+
+  /* On-surface */
+  --color-on-background:      #0f172a;
+  --color-on-surface:         #111827;
+  --color-on-surface-variant: #6b7280;
+  --color-inverse-surface:    #111827;
+  --color-inverse-on-surface: #f9fafb;
+
+  /* Primary */
+  --color-primary:                  #7f1d1d;
+  --color-primary-fixed:            #ef4444;
+  --color-primary-fixed-dim:        #dc2626;
+  --color-on-primary:               #ffffff;
+  --color-on-primary-container:     #ffffff;
+  --color-on-primary-fixed:         #ffffff;
+  --color-on-primary-fixed-variant: #ffffff;
+  --color-inverse-primary:          #ef4444;
+
+  /* Secondary */
+  --color-secondary:                  #9f1239;
+  --color-secondary-fixed:            #fee2e2;
+  --color-secondary-fixed-dim:        #fecaca;
+  --color-on-secondary:               #ffffff;
+  --color-on-secondary-container:     #ffffff;
+  --color-on-secondary-fixed:         #450a0a;
+  --color-on-secondary-fixed-variant: #7f1d1d;
+
+  /* Tertiary */
+  --color-tertiary:                  #1e293b;
+  --color-tertiary-fixed:            #f97316;
+  --color-tertiary-fixed-dim:        #ea580c;
+  --color-on-tertiary:               #ffffff;
+  --color-on-tertiary-container:     #ffffff;
+  --color-on-tertiary-fixed:         #431407;
+  --color-on-tertiary-fixed-variant: #7c2d12;
+
+  /* Outline & error */
+  --color-outline:            #d1d5db;
+  --color-outline-variant:    #e5e7eb;
+  --color-error:              #dc2626;
+  --color-error-container:    #fee2e2;
+  --color-on-error:           #ffffff;
+  --color-on-error-container: #7f1d1d;
+}
+
+/* ══════════════════════════════════════════════════════
+   Base styles
+   ══════════════════════════════════════════════════════ */
 body {
   background-color: #060709;
   color: #e2e2e8;
   font-family: 'Plus Jakarta Sans', sans-serif;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html.light body {
+  background-color: #ffffff;
+  color: #111827;
 }
 
 /* ── Material Symbols ────────────────────────────── */
@@ -32,70 +172,65 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── Neon Glow Effects ───────────────────────────── */
-.neon-glow-primary {
-  box-shadow: 0 0 20px rgba(57, 255, 20, 0.3);
-}
+/* ── Neon Glow Effects (dark only) ───────────────── */
+.neon-glow-primary   { box-shadow: 0 0 20px rgba(57, 255, 20, 0.3); }
+.neon-glow-secondary { box-shadow: 0 0 20px rgba(255, 74, 141, 0.3); }
+.neon-glow-tertiary  { box-shadow: 0 0 20px rgba(58, 244, 255, 0.3); }
 
-.neon-glow-secondary {
-  box-shadow: 0 0 20px rgba(255, 74, 141, 0.3);
-}
-
-.neon-glow-tertiary {
-  box-shadow: 0 0 20px rgba(58, 244, 255, 0.3);
-}
+html.light .neon-glow-primary   { box-shadow: 0 4px 16px rgba(220, 38, 38, 0.25); }
+html.light .neon-glow-secondary { box-shadow: 0 4px 16px rgba(185, 28, 28, 0.25); }
+html.light .neon-glow-tertiary  { box-shadow: 0 4px 16px rgba(239, 68, 68, 0.20); }
 
 /* ── Glass Panel ─────────────────────────────────── */
 .glass-panel {
   backdrop-filter: blur(20px);
   background: rgba(18, 20, 29, 0.7);
 }
-
-/* ── Scanline Effect ─────────────────────────────── */
-.scanline {
-  position: relative;
+html.light .glass-panel {
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(220, 38, 38, 0.12);
 }
 
+/* ── Scanline Effect ─────────────────────────────── */
+.scanline { position: relative; }
 .scanline::after {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-      rgba(18, 16, 16, 0) 50%,
-      rgba(0, 0, 0, 0.1) 50%
-    ),
-    linear-gradient(
-      90deg,
-      rgba(255, 0, 0, 0.03),
-      rgba(0, 255, 0, 0.01),
-      rgba(0, 0, 255, 0.03)
-    );
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.1) 50%),
+    linear-gradient(90deg, rgba(255,0,0,0.03), rgba(0,255,0,0.01), rgba(0,0,255,0.03));
   background-size: 100% 3px, 3px 100%;
   pointer-events: none;
   z-index: 1;
 }
+html.light .scanline::after { opacity: 0; }
 
 /* ── Scanline Overlay ────────────────────────────── */
 .scanline-overlay {
-  background: linear-gradient(
-      rgba(18, 16, 16, 0) 50%,
-      rgba(0, 0, 0, 0.1) 50%
-    ),
-    linear-gradient(
-      90deg,
-      rgba(255, 0, 0, 0.03),
-      rgba(0, 255, 0, 0.01),
-      rgba(0, 0, 255, 0.03)
-    );
+  background:
+    linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.1) 50%),
+    linear-gradient(90deg, rgba(255,0,0,0.03), rgba(0,255,0,0.01), rgba(0,0,255,0.03));
   background-size: 100% 4px, 3px 100%;
   pointer-events: none;
 }
+html.light .scanline-overlay { opacity: 0; }
 
 /* ── Selection Color ────────────────────────────── */
-::selection {
-  background-color: #39ff14;
-  color: #107100;
+::selection { background-color: #39ff14; color: #107100; }
+html.light ::selection { background-color: #dc2626; color: #ffffff; }
+
+/* ── Smooth theme transition ────────────────────── */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+}
+/* Exclude transitions for transforms/opacity to avoid slowing animations */
+.group *,
+img,
+video,
+[style*="transition"] {
+  transition-property: none;
 }
