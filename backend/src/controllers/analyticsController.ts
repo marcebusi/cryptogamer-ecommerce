@@ -176,6 +176,34 @@ export const getAnalytics = async (req: Request, res: Response): Promise<void> =
       .map(([category, v]) => ({ category, ...v }))
       .sort((a, b) => b.orders - a.orders)
 
+    // ── Category → subcategory hierarchy ─────────────────────
+    type CatAccum = { orders:number; revenue:number; sub:Record<string,{orders:number;revenue:number}> }
+    const catSubcatNested: Record<string, CatAccum> = {}
+    for (const order of orders) {
+      for (const item of order.items) {
+        const cat    = item.product.category?.name ?? 'Sin categoría'
+        const subcat = item.product.subcategory
+        if (!catSubcatNested[cat]) catSubcatNested[cat] = { orders:0, revenue:0, sub:{} }
+        catSubcatNested[cat].orders  += item.quantity
+        catSubcatNested[cat].revenue += item.price * item.quantity
+        if (subcat && subcat !== cat) {
+          if (!catSubcatNested[cat].sub[subcat]) catSubcatNested[cat].sub[subcat] = { orders:0, revenue:0 }
+          catSubcatNested[cat].sub[subcat].orders  += item.quantity
+          catSubcatNested[cat].sub[subcat].revenue += item.price * item.quantity
+        }
+      }
+    }
+    const categorySubcatMap = Object.entries(catSubcatNested)
+      .map(([category, v]) => ({
+        category,
+        orders:   v.orders,
+        revenue:  v.revenue,
+        subcategories: Object.entries(v.sub)
+          .map(([name, c]) => ({ name, ...c }))
+          .sort((a, b) => b.orders - a.orders),
+      }))
+      .sort((a, b) => b.orders - a.orders)
+
     // ── WA contacts + avg ticket by seller ───────────────────
     const waEventsBySellerArr = await (async () => {
       try {
@@ -232,6 +260,7 @@ export const getAnalytics = async (req: Request, res: Response): Promise<void> =
       deadInventory,
       highValueProducts,
       categoryByOrders,
+      categorySubcatMap,
       avgTicketBySeller,
       cancellationRate,
       waContactsTotal,

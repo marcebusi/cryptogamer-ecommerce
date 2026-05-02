@@ -178,7 +178,6 @@ model ContactMessage {
   @@map("contact_messages")
 }
 
-<<<<<<< HEAD
 model AnalyticsEvent {
   id        String   @id @default(cuid())
   type      String   // 'wa_click'
@@ -187,7 +186,8 @@ model AnalyticsEvent {
 
   @@index([type, createdAt])
   @@map("analytics_events")
-=======
+}
+
 model StoreConfig {
   id                    String    @id @default(cuid())
   subscriptionActive    Boolean   @default(true)
@@ -199,5 +199,4 @@ model StoreConfig {
   updatedAt             DateTime  @updatedAt
 
   @@map("store_config")
->>>>>>> f978315c022390f644d5cf2e1c6bd5b1bbd68c96
 }

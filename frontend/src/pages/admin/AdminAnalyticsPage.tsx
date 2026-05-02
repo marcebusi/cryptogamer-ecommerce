@@ -19,6 +19,8 @@ export interface DeadProduct { id:string; name:string; image:string; price:numbe
 export interface HighValueProduct { id:string; name:string; image:string; price:number; category:string; qty:number; revenue:number; revenuePerUnit:number }
 export interface CatOrder   { category:string; orders:number; revenue:number }
 export interface SellerTicket { id:string; name:string; avatar:string; orderCount:number; revenue:number; avgTicket:number; waContacts:number }
+export interface SubcatOrder     { name:string; orders:number; revenue:number }
+export interface CatSubcatOrder  { category:string; orders:number; revenue:number; subcategories:SubcatOrder[] }
 
 export interface Analytics {
   summary:          Summary
@@ -33,6 +35,7 @@ export interface Analytics {
   deadInventory:    DeadProduct[]
   highValueProducts:HighValueProduct[]
   categoryByOrders: CatOrder[]
+  categorySubcatMap:CatSubcatOrder[]
   avgTicketBySeller:SellerTicket[]
   cancellationRate: number
   waContactsTotal:  number
@@ -545,11 +548,24 @@ export default function AdminAnalyticsPage() {
             </div>
           </div>
           <AreaChart key={chartKey} days={revenueByDay} color="#4ade80" gradId="rev-grad"/>
-          <div className="flex justify-between mt-2 text-[10px] text-white/20 px-1">
-            <span>{revenueByDay[0]?.date.slice(5)}</span>
-            <span>{revenueByDay[Math.floor(revenueByDay.length/2)]?.date.slice(5)}</span>
-            <span>{revenueByDay[revenueByDay.length-1]?.date.slice(5)}</span>
-          </div>
+          {revenueByDay.length > 1 && (() => {
+            const n = revenueByDay.length
+            const step = n<=7?1:n<=14?2:n<=21?3:n<=35?5:Math.ceil(n/5)
+            return (
+              <div className="relative h-4 mt-2 px-1">
+                {revenueByDay.map((d,i)=>{
+                  if(i%step!==0&&i!==n-1) return null
+                  const pct=(i/(n-1))*100
+                  return (
+                    <span key={i} className="absolute text-[9px] text-white/25 whitespace-nowrap"
+                      style={{left:i===n-1?'auto':`${pct}%`,right:i===n-1?'0':'auto',transform:i===0||i===n-1?'none':'translateX(-50%)'}}>
+                      {new Date(d.date+'T12:00:00').toLocaleDateString('es-AR',{day:'numeric',month:'short'})}
+                    </span>
+                  )
+                })}
+              </div>
+            )
+          })()}
         </div>
 
         <div className="bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
