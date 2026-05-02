@@ -1,3 +1,7 @@
 .latest-arrivals-grid {
   container-type: inline-size;
 }
+
+/* VER TODO link — tema aware */
+.latest-ver-todo { color: #ff4a8d; }
+html.light .latest-ver-todo { color: #eb0000; }

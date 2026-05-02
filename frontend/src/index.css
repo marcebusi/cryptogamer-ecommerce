@@ -4,9 +4,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ══════════════════════════════════════════════
-   DARK MODE — valores originales sin cambios
-   ══════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   DARK MODE CSS VARIABLES  (valores originales — no tocar)
+   ══════════════════════════════════════════════════════ */
 :root {
   --color-bg:                   17 19 24;
   --color-primary-container:    57 255 20;
@@ -63,75 +63,88 @@
   --color-on-error-container: #ffdad6;
 }
 
-/* ══════════════════════════════════════════════
-   LIGHT MODE — blanco + rojo
-   ══════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   LIGHT MODE CSS VARIABLES  (paleta code.html)
+   ══════════════════════════════════════════════════════ */
 html.light {
-  --color-bg:                   255 255 255;
-  --color-primary-container:    220 38 38;
-  --color-secondary-container:  185 28 28;
-  --color-tertiary-container:   239 68 68;
+  /* Opacity-capable colors — RGB channels */
+  --color-bg:                   250 248 254;   /* #faf8fe */
+  --color-primary-container:    235 0 0;        /* #eb0000 */
+  --color-secondary-container:  226 226 226;    /* #e2e2e2 */
+  --color-tertiary-container:   115 117 118;    /* #737576 */
 
-  --color-surface:                   #fafafa;
-  --color-surface-dim:               #f0f0f2;
-  --color-surface-bright:            #ffffff;
-  --color-surface-variant:           #e8eaee;
-  --color-surface-tint:              #dc2626;
+  /* Surfaces */
+  --color-surface:                   #faf8fe;
+  --color-surface-dim:               #dad9df;
+  --color-surface-bright:            #faf8fe;
+  --color-surface-variant:           #e3e2e7;
+  --color-surface-tint:              #c00100;
   --color-surface-container-lowest:  #ffffff;
-  --color-surface-container-low:     #f4f4f6;
-  --color-surface-container:         #eaeaee;
-  --color-surface-container-high:    #dddde3;
-  --color-surface-container-highest: #d0d0d8;
+  --color-surface-container-low:     #f4f3f8;
+  --color-surface-container:         #eeedf3;
+  --color-surface-container-high:    #e9e7ed;
+  --color-surface-container-highest: #e3e2e7;
 
-  --color-on-background:      #0f172a;
-  --color-on-surface:         #111827;
-  --color-on-surface-variant: #6b7280;
-  --color-inverse-surface:    #111827;
-  --color-inverse-on-surface: #f9fafb;
+  /* On-surface */
+  --color-on-background:      #1a1b1f;
+  --color-on-surface:         #1a1b1f;
+  --color-on-surface-variant: #603e39;
+  --color-inverse-surface:    #2f3034;
+  --color-inverse-on-surface: #f1f0f5;
 
-  --color-primary:                  #7f1d1d;
-  --color-primary-fixed:            #ef4444;
-  --color-primary-fixed-dim:        #dc2626;
+  /* Primary */
+  --color-primary:                  #bc0100;
+  --color-primary-fixed:            #ffdad4;
+  --color-primary-fixed-dim:        #ffb4a8;
   --color-on-primary:               #ffffff;
-  --color-on-primary-container:     #ffffff;
-  --color-on-primary-fixed:         #ffffff;
-  --color-on-primary-fixed-variant: #ffffff;
-  --color-inverse-primary:          #ef4444;
+  --color-on-primary-container:     #fffbff;
+  --color-on-primary-fixed:         #410000;
+  --color-on-primary-fixed-variant: #930100;
+  --color-inverse-primary:          #ffb4a8;
 
-  --color-secondary:                  #9f1239;
-  --color-secondary-fixed:            #fee2e2;
-  --color-secondary-fixed-dim:        #fecaca;
+  /* Secondary */
+  --color-secondary:                  #5e5e5e;
+  --color-secondary-fixed:            #e2e2e2;
+  --color-secondary-fixed-dim:        #c6c6c6;
   --color-on-secondary:               #ffffff;
-  --color-on-secondary-container:     #ffffff;
-  --color-on-secondary-fixed:         #450a0a;
-  --color-on-secondary-fixed-variant: #7f1d1d;
+  --color-on-secondary-container:     #646464;
+  --color-on-secondary-fixed:         #1b1b1b;
+  --color-on-secondary-fixed-variant: #474747;
 
-  --color-tertiary:                  #1e293b;
-  --color-tertiary-fixed:            #f97316;
-  --color-tertiary-fixed-dim:        #ea580c;
+  /* Tertiary */
+  --color-tertiary:                  #5a5c5e;
+  --color-tertiary-fixed:            #e2e2e4;
+  --color-tertiary-fixed-dim:        #c6c6c8;
   --color-on-tertiary:               #ffffff;
-  --color-on-tertiary-container:     #ffffff;
-  --color-on-tertiary-fixed:         #431407;
-  --color-on-tertiary-fixed-variant: #7c2d12;
+  --color-on-tertiary-container:     #fcfcfe;
+  --color-on-tertiary-fixed:         #1a1c1d;
+  --color-on-tertiary-fixed-variant: #454749;
 
-  --color-outline:            #d1d5db;
-  --color-outline-variant:    #e5e7eb;
-  --color-error:              #dc2626;
-  --color-error-container:    #fee2e2;
+  /* Outline */
+  --color-outline:            #956d67;
+  --color-outline-variant:    #ebbbb4;
+
+  /* Error */
+  --color-error:              #ba1a1a;
+  --color-error-container:    #ffdad6;
   --color-on-error:           #ffffff;
-  --color-on-error-container: #7f1d1d;
+  --color-on-error-container: #93000a;
 }
 
-/* ══════════════════════════════════════════════
-   Base
-   ══════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   BASE STYLES
+   ══════════════════════════════════════════════════════ */
 body {
   background-color: #060709;
   color: #e2e2e8;
   font-family: 'Plus Jakarta Sans', sans-serif;
   overflow-x: hidden;
 }
-html.light body { background-color: #ffffff; color: #111827; }
+
+html.light body {
+  background-color: #faf8fe;
+  color: #1a1b1f;
+}
 
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
@@ -143,16 +156,18 @@ html.light body { background-color: #ffffff; color: #111827; }
   -webkit-font-smoothing: antialiased;
 }
 
+/* ══════════════════════════════════════════════════════
+   EFFECTS (dark only — light mode neutralizes them)
+   ══════════════════════════════════════════════════════ */
 .neon-glow-primary   { box-shadow: 0 0 20px rgba(57,255,20,0.3); }
 .neon-glow-secondary { box-shadow: 0 0 20px rgba(255,74,141,0.3); }
 .neon-glow-tertiary  { box-shadow: 0 0 20px rgba(58,244,255,0.3); }
-
-html.light .neon-glow-primary   { box-shadow: 0 4px 16px rgba(220,38,38,0.25); }
-html.light .neon-glow-secondary { box-shadow: 0 4px 16px rgba(185,28,28,0.25); }
-html.light .neon-glow-tertiary  { box-shadow: 0 4px 16px rgba(239,68,68,0.20); }
+html.light .neon-glow-primary   { box-shadow: 0 4px 16px rgba(235,0,0,0.2); }
+html.light .neon-glow-secondary { box-shadow: 0 4px 16px rgba(188,1,0,0.2); }
+html.light .neon-glow-tertiary  { box-shadow: 0 4px 16px rgba(235,0,0,0.15); }
 
 .glass-panel { backdrop-filter: blur(20px); background: rgba(18,20,29,0.7); }
-html.light .glass-panel { backdrop-filter: blur(20px); background: rgba(255,255,255,0.85); }
+html.light .glass-panel { backdrop-filter: blur(20px); background: rgba(255,255,255,0.9); box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
 
 .scanline { position: relative; }
 .scanline::after {
@@ -173,4 +188,86 @@ html.light .scanline::after { opacity: 0; }
 html.light .scanline-overlay { opacity: 0; }
 
 ::selection { background-color: #39ff14; color: #107100; }
-html.light ::selection { background-color: #dc2626; color: #ffffff; }
+html.light ::selection { background-color: #eb0000; color: #ffffff; }
+
+/* ══════════════════════════════════════════════════════
+   LIGHT MODE — OVERRIDES DIRECTOS DE CLASES TAILWIND
+   Garantiza que todo funcione independientemente del
+   tailwind.config.js o del estado del servidor Vite
+   ══════════════════════════════════════════════════════ */
+
+/* ── Contenedor raíz de la app ── */
+html.light .min-h-screen.bg-background {
+  background-color: #faf8fe !important;
+  color: #1a1b1f !important;
+}
+
+/* ── Surface backgrounds ── */
+html.light .bg-background        { background-color: #faf8fe !important; }
+html.light .bg-surface           { background-color: #faf8fe !important; }
+html.light .bg-surface-container-lowest  { background-color: #ffffff    !important; }
+html.light .bg-surface-container-low     { background-color: #f4f3f8    !important; }
+html.light .bg-surface-container         { background-color: #eeedf3    !important; }
+html.light .bg-surface-container-high    { background-color: #e9e7ed    !important; }
+html.light .bg-surface-container-highest { background-color: #e3e2e7    !important; }
+
+/* ── Primary accent ── */
+html.light .bg-primary-container    { background-color: #eb0000 !important; }
+html.light .text-primary-container  { color: #eb0000 !important; }
+html.light .border-primary-container { border-color: #eb0000 !important; }
+html.light .text-on-primary         { color: #ffffff !important; }
+html.light .bg-on-primary           { background-color: #ffffff !important; }
+
+/* ── Secondary ── */
+html.light .bg-secondary-container  { background-color: #e2e2e2 !important; }
+html.light .text-secondary          { color: #5e5e5e !important; }
+html.light .text-secondary-container { color: #930100 !important; }
+
+/* ── Tertiary ── */
+html.light .text-tertiary           { color: #5a5c5e !important; }
+html.light .text-tertiary-fixed     { color: #454749 !important; }
+html.light .bg-tertiary-container   { background-color: #737576 !important; }
+
+/* ── On-surface text ── */
+html.light .text-on-background      { color: #1a1b1f !important; }
+html.light .text-on-surface         { color: #1a1b1f !important; }
+html.light .text-on-surface-variant { color: #603e39 !important; }
+
+/* ── Borders ── */
+html.light .border-outline-variant  { border-color: rgba(235,187,180,0.6) !important; }
+html.light .border-outline          { border-color: #956d67 !important; }
+
+/* White-opacity borders → dark-on-light equivalents */
+html.light .border-white\/5  { border-color: rgba(0,0,0,0.05) !important; }
+html.light .border-white\/8  { border-color: rgba(0,0,0,0.08) !important; }
+html.light .border-white\/10 { border-color: rgba(0,0,0,0.10) !important; }
+html.light .border-white\/15 { border-color: rgba(0,0,0,0.12) !important; }
+html.light .border-white\/20 { border-color: rgba(0,0,0,0.15) !important; }
+
+/* White-opacity backgrounds → neutral equivalents */
+html.light .bg-white\/5  { background-color: rgba(0,0,0,0.03) !important; }
+html.light .bg-white\/8  { background-color: rgba(0,0,0,0.04) !important; }
+html.light .bg-white\/10 { background-color: rgba(0,0,0,0.05) !important; }
+
+/* ── Gradient overrides: from-background ── */
+html.light [class*="from-background"] {
+  --tw-gradient-from: #faf8fe var(--tw-gradient-from-position);
+  --tw-gradient-to: rgba(250,248,254,0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+/* ── Gradient overrides: via-background (todos los opacities) ── */
+html.light [class*="via-background"] {
+  --tw-gradient-via: #faf8fe;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-via) var(--tw-gradient-via-position), var(--tw-gradient-to);
+}
+
+/* ── LatestArrivals: VER TODO link ── */
+html.light [class*="text-\[#ff4a8d\]"] { color: #eb0000 !important; }
+html.light a[href="/products"].text-\[#ff4a8d\] { color: #eb0000 !important; }
+
+/* ── Skeleton loaders ── */
+html.light .bg-white\/5.animate-pulse { background-color: rgba(0,0,0,0.05) !important; }
+
+/* ── Surface variant / outline areas ── */
+html.light .bg-surface-variant { background-color: #e3e2e7 !important; }

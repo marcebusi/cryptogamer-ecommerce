@@ -20,7 +20,7 @@ export default function LatestArrivals() {
         </div>
         <Link
           to="/products"
-          className="text-[#ff4a8d] font-bold text-sm hover:underline underline-offset-8 flex-shrink-0 ml-4 transition-opacity hover:opacity-80">
+          className="latest-ver-todo font-bold text-sm hover:underline underline-offset-8 flex-shrink-0 ml-4 transition-opacity hover:opacity-80">
           VER TODO
         </Link>
       </div>
