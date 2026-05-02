@@ -5,12 +5,12 @@
 }
 
 @keyframes checkout-slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(24px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+/* ── LIGHT MODE ───────────────────────────────────── */
+html.light .checkout-modal {
+  background: rgba(255, 255, 255, 0.99);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.14);
 }

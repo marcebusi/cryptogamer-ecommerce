@@ -248,3 +248,74 @@
   .pc-img-area::before,
   .pc-card-inner { transition: none !important; animation: none !important; }
 }
+
+/* ══════════════════════════════════════════════════
+   LIGHT MODE
+   ══════════════════════════════════════════════════ */
+html.light .pc-card-inner {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.07);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+html.light .pc-card:hover .pc-card-inner {
+  border-color: rgba(220,38,38,0.4);
+  box-shadow:
+    0 0 0 1px rgba(220,38,38,0.1),
+    0 12px 32px rgba(0,0,0,0.1),
+    0 0 32px rgba(220,38,38,0.08);
+}
+html.light .pc-img-area { background: #f4f4f6; }
+html.light .pc-img-area::before {
+  background: radial-gradient(ellipse 65% 60% at 50% 55%,
+    rgba(220,38,38,0.08) 0%, rgba(185,28,28,0.04) 40%, transparent 72%);
+}
+html.light .pc-card:hover .pc-img-area::before {
+  opacity: 1;
+  background: radial-gradient(ellipse 65% 60% at 50% 55%,
+    rgba(220,38,38,0.14) 0%, rgba(185,28,28,0.07) 45%, transparent 72%);
+}
+html.light .pc-img-area img { filter: none; }
+
+html.light .pc-badge {
+  background: #dc2626;
+  box-shadow: 0 2px 8px rgba(220,38,38,0.4);
+}
+@keyframes pc-badge-pulse-light {
+  0%, 100% { box-shadow: 0 0 6px rgba(220,38,38,0.4); }
+  50%       { box-shadow: 0 0 14px rgba(220,38,38,0.7); }
+}
+html.light .pc-badge { animation: pc-badge-pulse-light 2.5s ease-in-out infinite; }
+
+html.light .pc-overlay { background: rgba(255,255,255,0.55); }
+
+html.light .pc-info {
+  background: linear-gradient(180deg, rgba(0,0,0,0.02) 0%, transparent 100%);
+  border-top-color: rgba(0,0,0,0.06);
+}
+html.light .pc-name { color: rgba(17,24,39,0.8); }
+html.light .pc-card:hover .pc-name { color: #dc2626; }
+
+html.light .pc-price { color: #dc2626; }
+html.light .pc-card:hover .pc-price { text-shadow: 0 0 10px rgba(220,38,38,0.4); }
+html.light .pc-price-original { color: rgba(0,0,0,0.3); }
+html.light .pc-no-stock { color: rgba(0,0,0,0.3); }
+
+html.light .pc-arrow {
+  background: rgba(255,255,255,0.95);
+  border-color: rgba(0,0,0,0.1);
+  color: rgba(55,65,81,0.8);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+html.light .pc-arrow:hover {
+  border-color: rgba(220,38,38,0.5);
+  box-shadow: 0 0 18px rgba(220,38,38,0.25);
+  color: #dc2626;
+  background: rgba(255,255,255,1);
+  transform: translateY(-50%) scale(1.14);
+}
+html.light .pc-arrow-active {
+  background: rgba(254,242,242,1) !important;
+  border-color: rgba(220,38,38,0.9) !important;
+  box-shadow: 0 0 0 3px rgba(220,38,38,0.15), 0 0 20px rgba(220,38,38,0.3) !important;
+  color: #dc2626 !important;
+}

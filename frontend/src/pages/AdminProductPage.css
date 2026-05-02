@@ -14,3 +14,19 @@
   -webkit-box-shadow: 0 0 0 1000px #1e2024 inset !important;
   -webkit-text-fill-color: #e2e2e8 !important;
 }
+
+/* ── LIGHT MODE ───────────────────────────────────── */
+html.light .admin-card {
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+}
+html.light .admin-tips-card {
+  background: linear-gradient(135deg, rgba(220,38,38,0.04) 0%, rgba(255,255,255,0.95) 100%);
+}
+html.light .admin-input:-webkit-autofill,
+html.light .admin-input:-webkit-autofill:hover,
+html.light .admin-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #f4f4f6 inset !important;
+  -webkit-text-fill-color: #111827 !important;
+}

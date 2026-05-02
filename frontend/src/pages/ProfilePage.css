@@ -16,3 +16,18 @@
   background: rgba(14, 15, 22, 0.80);
   backdrop-filter: blur(20px);
 }
+
+/* ── LIGHT MODE ───────────────────────────────────── */
+html.light .profile-hero {
+  background: linear-gradient(135deg, #ffffff 0%, #fef2f2 50%, #ffffff 100%);
+}
+html.light .profile-grid {
+  background-image:
+    linear-gradient(rgba(220,38,38,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(220,38,38,0.05) 1px, transparent 1px);
+}
+html.light .profile-card {
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+}

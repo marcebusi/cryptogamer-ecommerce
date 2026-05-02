@@ -33,3 +33,18 @@ input[type='range']::-moz-range-thumb {
 input[type='range']:focus {
   outline: none;
 }
+
+/* ── LIGHT MODE ───────────────────────────────────── */
+html.light input[type='range']::-webkit-slider-thumb {
+  background: #dc2626;
+  border-color: #ffffff;
+  box-shadow: 0 0 8px rgba(220,38,38,0.4);
+}
+html.light input[type='range']::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 16px rgba(220,38,38,0.6);
+}
+html.light input[type='range']::-moz-range-thumb {
+  background: #dc2626;
+  border-color: #ffffff;
+  box-shadow: 0 0 8px rgba(220,38,38,0.4);
+}

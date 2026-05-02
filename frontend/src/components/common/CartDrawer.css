@@ -59,3 +59,18 @@
 .cart-panel .overflow-y-auto::-webkit-scrollbar-thumb:hover {
   background: rgba(57, 255, 20, 0.4);
 }
+
+/* ── LIGHT MODE ───────────────────────────────────── */
+html.light .cart-panel {
+  background: rgba(255, 255, 255, 0.99);
+  box-shadow: -4px 0 40px rgba(0,0,0,0.1);
+}
+html.light .cart-panel::before {
+  background: linear-gradient(to bottom, transparent, rgba(220,38,38,0.22) 30%, rgba(185,28,28,0.15) 70%, transparent);
+}
+html.light .cart-panel .overflow-y-auto::-webkit-scrollbar-thumb {
+  background: rgba(220,38,38,0.2);
+}
+html.light .cart-panel .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(220,38,38,0.4);
+}

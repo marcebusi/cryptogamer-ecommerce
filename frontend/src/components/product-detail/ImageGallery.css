@@ -32,3 +32,16 @@
 .thumb-btn:hover {
   transform: translateY(-2px);
 }
+
+/* ── LIGHT MODE ───────────────────────────────────── */
+html.light .gallery-main { background-color: #f4f4f6; }
+html.light .gallery-bg {
+  background: radial-gradient(ellipse 80% 70% at 50% 55%, rgba(220,38,38,0.08) 0%, rgba(255,255,255,0) 70%);
+}
+html.light .gallery-img { filter: drop-shadow(0 16px 32px rgba(0,0,0,0.15)); }
+html.light .condition-badge-preowned {
+  background: rgba(220,38,38,0.9);
+  color: #ffffff;
+  border-color: rgba(185,28,28,0.5);
+  box-shadow: 0 0 10px rgba(220,38,38,0.3);
+}

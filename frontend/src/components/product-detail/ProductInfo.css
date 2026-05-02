@@ -8,15 +8,16 @@
 .condition-card::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 0; left: 0; right: 0;
   height: 1px;
-  background: linear-gradient(
-    to right,
-    transparent,
-    rgba(58, 244, 255, 0.4) 40%,
-    rgba(138, 43, 226, 0.4) 70%,
-    transparent
-  );
+  background: linear-gradient(to right, transparent, rgba(58,244,255,0.4) 40%, rgba(138,43,226,0.4) 70%, transparent);
+}
+
+/* ── LIGHT MODE ───────────────────────────────────── */
+html.light .condition-card {
+  background: rgba(255,255,255,0.9);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+html.light .condition-card::before {
+  background: linear-gradient(to right, transparent, rgba(220,38,38,0.3) 40%, rgba(185,28,28,0.25) 70%, transparent);
 }

@@ -5,3 +5,50 @@
 .footer-newsletter input:focus {
   box-shadow: 0 0 0 2px rgba(57, 255, 20, 0.2);
 }
+
+/* ── LIGHT MODE ───────────────────────────────────── */
+html.light .footer-newsletter input::placeholder { color: #9ca3af; }
+html.light .footer-newsletter input:focus {
+  box-shadow: 0 0 0 2px rgba(220,38,38,0.25);
+}
+
+/* ── Footer full light mode ───────────────────────── */
+html.light #footer {
+  background-color: #f9fafb;
+  border-top-color: rgba(220,38,38,0.12);
+}
+html.light #footer .border-t { border-color: rgba(220,38,38,0.08); }
+
+/* Logo text */
+html.light #footer a[class*="text-purple-400"] { color: #dc2626; }
+
+/* Section headings */
+html.light #footer h5 { color: rgba(17,24,39,0.75); }
+
+/* Link text */
+html.light #footer .text-slate-500 { color: #6b7280; }
+html.light #footer a:hover { color: #dc2626 !important; }
+
+/* Social icons */
+html.light #footer button[class*="text-slate-400"] {
+  color: #9ca3af;
+  border-color: rgba(0,0,0,0.1);
+  background: transparent;
+}
+html.light #footer button:hover {
+  color: #dc2626 !important;
+  border-color: rgba(220,38,38,0.35) !important;
+}
+
+/* Newsletter submit */
+html.light #footer button[type="submit"] {
+  background: #dc2626;
+  color: #ffffff;
+}
+html.light #footer button[type="submit"]:hover {
+  background: #b91c1c;
+  box-shadow: 0 0 14px rgba(220,38,38,0.35);
+}
+
+/* Bottom bar text */
+html.light #footer .text-slate-500.text-xs { color: #9ca3af; }
