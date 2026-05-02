@@ -2,7 +2,35 @@ import { useState, useEffect, useRef } from 'react'
 import {
   Analytics, ARS, AnimBar, KpiCard,
   DayRevenue, AreaChart,
+  CatSubcatOrder,
 } from '../../pages/admin/AdminAnalyticsPage'
+
+/* ── Adaptive date-axis (day-by-day for week, sparse for month) */
+function DateAxis({ days }: { days: Array<{ date:string }> }) {
+  const n = days.length
+  if (n < 2) return null
+  const step = n <= 7 ? 1 : n <= 14 ? 2 : n <= 21 ? 3 : n <= 35 ? 5 : Math.ceil(n / 5)
+  return (
+    <div className="relative h-4 mt-1.5 select-none">
+      {days.map((d, i) => {
+        if (i % step !== 0 && i !== n - 1) return null
+        const pct  = (i / (n - 1)) * 100
+        const isFirst = i === 0
+        const isLast  = i === n - 1
+        return (
+          <span key={i} className="absolute text-[9px] text-white/20 whitespace-nowrap"
+            style={{
+              left:      isLast  ? 'auto' : `${pct}%`,
+              right:     isLast  ? '0'    : 'auto',
+              transform: isFirst || isLast ? 'none' : 'translateX(-50%)',
+            }}>
+            {new Date(d.date+'T12:00:00').toLocaleDateString('es-AR',{day:'numeric',month:'short'})}
+          </span>
+        )
+      })}
+    </div>
+  )
+}
 
 /* ── Alert types ─────────────────────────────────────────── */
 interface Alert {
@@ -145,6 +173,8 @@ function StatusLineChart({ data }: { data: Analytics['statusOverTime'] }) {
           </div>
         ))}
       </div>
+
+      <DateAxis days={data} />
     </div>
   )
 }
@@ -217,6 +247,152 @@ function ComparisonChart({ current, prev }: { current:DayRevenue[]; prev:DayReve
           <span className="text-[10px] text-white/40">Período anterior</span>
         </div>
       </div>
+      <DateAxis days={current} />
+    </div>
+  )
+}
+
+/* ── Revenue bar histogram (vertical) ───────────────────── */
+function RevenueBarChart({ days, color = '#ff4a8d' }: { days: DayRevenue[]; color?: string }) {
+  const [hovIdx, setHovIdx] = useState<number | null>(null)
+  const wrapRef = useRef<HTMLDivElement>(null)
+
+  if (!days.length) return (
+    <div className="h-28 flex items-center justify-center text-white/20 text-sm">Sin datos</div>
+  )
+
+  const maxRev   = Math.max(...days.map(d => d.revenue), 1)
+  const W = 600; const H = 110; const PX = 4; const PY = 8; const GAP = 2
+  const barStep  = (W - PX * 2) / days.length
+  const barW     = Math.max(2, barStep - GAP)
+  const available = H - PY * 2 - 6
+
+  const barX  = (i: number) => PX + i * barStep + (barStep - barW) / 2
+  const barHt = (rev: number) => Math.max(rev > 0 ? 3 : 0, (rev / maxRev) * available)
+  const barY  = (rev: number) => H - PY - barHt(rev)
+
+  const onMove = (e: React.MouseEvent) => {
+    if (!wrapRef.current) return
+    const r   = wrapRef.current.getBoundingClientRect()
+    const idx = Math.floor(((e.clientX - r.left) / r.width) * days.length)
+    setHovIdx(Math.max(0, Math.min(days.length - 1, idx)))
+  }
+
+  const tipPct = hovIdx !== null ? ((hovIdx + 0.5) / days.length) * 100 : 50
+
+  return (
+    <div ref={wrapRef} className="relative select-none" onMouseMove={onMove} onMouseLeave={() => setHovIdx(null)}>
+
+      {/* Tooltip */}
+      {hovIdx !== null && days[hovIdx] && (
+        <div className="absolute pointer-events-none z-10"
+          style={{
+            bottom: '100%',
+            left: `${tipPct}%`,
+            transform: `translateX(${tipPct < 12 ? '0' : tipPct > 88 ? '-100%' : '-50%'})`,
+          }}>
+          <div className="bg-[#0a0a1a] border border-white/15 rounded-xl px-3 py-2 shadow-xl mb-2 whitespace-nowrap">
+            <p className="text-[10px] text-white/40 mb-1">
+              {new Date(days[hovIdx].date + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' })}
+            </p>
+            <p className="text-xs font-bold" style={{ color }}>{ARS(days[hovIdx].revenue)}</p>
+            <p className="text-[10px] text-white/35 mt-0.5">{days[hovIdx].orders} orden{days[hovIdx].orders !== 1 ? 'es' : ''}</p>
+          </div>
+          <div className="w-1.5 h-1.5 rotate-45 bg-[#0a0a1a] border-b border-r border-white/15 mx-auto -mt-1" />
+        </div>
+      )}
+
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-28" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="rev-hist-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stopColor={color} stopOpacity="0.95" />
+            <stop offset="100%" stopColor={color} stopOpacity="0.25" />
+          </linearGradient>
+        </defs>
+        {[0.25, 0.5, 0.75, 1].map(f => (
+          <line key={f} x1={PX} x2={W - PX}
+            y1={H - PY - f * available} y2={H - PY - f * available}
+            stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+        ))}
+        {days.map((d, i) => (
+          <rect key={i}
+            x={barX(i)} y={barY(d.revenue)}
+            width={barW} height={barHt(d.revenue)}
+            rx="1.5" ry="1.5"
+            fill={hovIdx === i ? color : 'url(#rev-hist-grad)'}
+            opacity={hovIdx !== null && hovIdx !== i ? 0.35 : 1}
+            style={{ transition: 'opacity 0.08s, fill 0.08s' }}
+          />
+        ))}
+        <line x1={PX} x2={W - PX} y1={H - PY} y2={H - PY} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+      </svg>
+
+      <DateAxis days={days} />
+    </div>
+  )
+}
+
+/* ── Expandable category + subcategory card ──────────────── */
+function CategorySubcatCard({ cats }: { cats: CatSubcatOrder[] }) {
+  const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const maxOrders = cats[0]?.orders ?? 1
+
+  const toggle = (cat: string) =>
+    setExpanded(prev => { const n = new Set(prev); n.has(cat) ? n.delete(cat) : n.add(cat); return n })
+
+  if (!cats.length) return (
+    <div className="py-8 text-center text-white/20 text-sm">Sin datos en este período</div>
+  )
+
+  return (
+    <div className="space-y-2.5">
+      {cats.slice(0, 8).map(({ category, orders, revenue, subcategories }, i) => {
+        const isOpen   = expanded.has(category)
+        const hasSub   = subcategories.length > 0
+        const maxSub   = subcategories[0]?.orders ?? 1
+
+        return (
+          <div key={category}>
+            <div
+              className={`${hasSub ? 'cursor-pointer hover:bg-white/[0.03] rounded-lg -mx-1 px-1 py-0.5 transition-colors' : ''}`}
+              onClick={() => hasSub && toggle(category)}
+            >
+              <div className="flex justify-between text-xs mb-1">
+                <div className="flex items-center gap-1">
+                  {hasSub && (
+                    <span className={`material-symbols-outlined text-[13px] text-white/30 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}>
+                      chevron_right
+                    </span>
+                  )}
+                  <span className="text-white/75 font-semibold capitalize truncate max-w-[150px]">{category}</span>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <span className="text-white/25 tabular-nums text-[11px]">{ARS(revenue)}</span>
+                  <span className="font-bold tabular-nums" style={{ color:'#3af4ff' }}>{orders} uds.</span>
+                </div>
+              </div>
+              <AnimBar value={orders} max={maxOrders} color="#3af4ff" delay={i * 50} />
+            </div>
+
+            {isOpen && hasSub && (
+              <div className="mt-2 ml-3 pl-3 border-l border-white/8 space-y-2 pb-1">
+                {subcategories.map((sub, si) => (
+                  <div key={sub.name}>
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span className="text-white/50 capitalize truncate max-w-[130px]">{sub.name}</span>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span className="text-white/20 tabular-nums">{ARS(sub.revenue)}</span>
+                        <span className="font-semibold tabular-nums" style={{ color:'#3af4ff', opacity:0.7 }}>{sub.orders} uds.</span>
+                      </div>
+                    </div>
+                    <AnimBar value={sub.orders} max={maxSub} color="#3af4ff" delay={si * 35} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -255,10 +431,36 @@ export default function AdvancedAnalytics({ data, presetLabel }: Props) {
   })
 
   const maxHighValue = data.highValueProducts[0]?.revenuePerUnit ?? 1
-  const maxCatOrders = data.categoryByOrders[0]?.orders ?? 1
+
+  // Sparklines
+  const cancelSpark = data.statusOverTime.slice(-14).map(d => {
+    const total = d.PAID + d.PENDING + d.SHIPPED + d.DELIVERED + d.CANCELLED
+    return total > 0 ? (d.CANCELLED / total) * 100 : 0
+  })
+  const ticketSpark = data.revenueByDay.slice(-14).map(d =>
+    d.orders > 0 ? Math.round(d.revenue / d.orders) : 0
+  )
+
+  // Cancel rate trend vs prev period
+  const prevCancelRate = data.previousPeriod.totalOrders > 0
+    ? (data.previousPeriod.cancelledOrders / data.previousPeriod.totalOrders) * 100 : 0
+  const cancelTrend = prevCancelRate > 0
+    ? ((data.cancellationRate - prevCancelRate) / prevCancelRate) * 100 : 0
 
   return (
     <section className="space-y-6">
+
+      {/* Inject keyframes needed by KpiCard */}
+      <style>{`
+        @keyframes kpi-glow {
+          0%,100% { opacity:.10; transform:scale(1); }
+          50%      { opacity:.20; transform:scale(1.15); }
+        }
+        @keyframes bar-shimmer {
+          0%   { background-position:-200% center; }
+          100% { background-position: 200% center; }
+        }
+      `}</style>
 
       {/* Section header */}
       <div className="flex items-center gap-3">
@@ -340,12 +542,12 @@ export default function AdvancedAnalytics({ data, presetLabel }: Props) {
         )}
       </div>
 
-      {/* ── 4 Advanced KPI cards ──────────────────────────── */}
+      {/* ── 4 Advanced KPI cards ─────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard icon="cancel"         label="Tasa de cancelación" value={`${data.cancellationRate.toFixed(1)}%`}    color="#f87171" delay={0}/>
-        <KpiCard icon="mark_chat_read" label="Contactos WhatsApp"  value={String(data.waContactsTotal)}              color="#25D366" delay={80}/>
-        <KpiCard icon="inventory"      label="Inventario muerto"   value={`${data.deadInventory.length} productos`}  color="#fbbf24" delay={160}/>
-        <KpiCard icon="local_atm"      label="Ticket promedio"     value={ARS(data.summary.avgOrderValue)}           color="#a855f7" delay={240}/>
+        <KpiCard icon="cancel"         label="Tasa de cancelación" value={`${data.cancellationRate.toFixed(1)}%`}   color="#f87171" sparkData={cancelSpark} trend={cancelTrend} delay={0}/>
+        <KpiCard icon="mark_chat_read" label="Contactos WhatsApp"  value={String(data.waContactsTotal)}             color="#25D366" delay={80}/>
+        <KpiCard icon="inventory"      label="Inventario muerto"   value={`${data.deadInventory.length} prod.`}     color="#fbbf24" delay={160}/>
+        <KpiCard icon="local_atm"      label="Ticket promedio"     value={ARS(data.summary.avgOrderValue)}          color="#a855f7" sparkData={ticketSpark} delay={240}/>
       </div>
 
       {/* ── Heatmap ───────────────────────────────────────── */}
@@ -380,7 +582,66 @@ export default function AdvancedAnalytics({ data, presetLabel }: Props) {
         </div>
       </div>
 
-      {/* ── High value products + Category by orders ──────── */}
+      {/* ── Revenue histograms ────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <div className="bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
+          <h3 className="font-bold text-white text-sm mb-1 flex items-center gap-2">
+            <span className="material-symbols-outlined text-[#ff4a8d] text-base">bar_chart</span>
+            Histograma de ingresos totales
+          </h3>
+          <p className="text-[11px] text-white/25 mb-4">Ingresos diarios · {presetLabel}</p>
+          <RevenueBarChart days={data.revenueByDay} color="#ff4a8d" />
+          {/* Summary totals */}
+          <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/6">
+            <div className="bg-white/[0.03] rounded-xl px-3 py-2.5 border border-white/5">
+              <p className="text-[10px] text-white/30 uppercase tracking-wider mb-0.5">Total del período</p>
+              <p className="text-sm font-black" style={{ color:'#ff4a8d' }}>{ARS(data.summary.totalRevenue)}</p>
+            </div>
+            <div className="bg-white/[0.03] rounded-xl px-3 py-2.5 border border-white/5">
+              <p className="text-[10px] text-white/30 uppercase tracking-wider mb-0.5">Pico máximo</p>
+              <p className="text-sm font-black" style={{ color:'#ff4a8d' }}>
+                {ARS(Math.max(...data.revenueByDay.map(d => d.revenue), 0))}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
+          <h3 className="font-bold text-white text-sm mb-1 flex items-center gap-2">
+            <span className="material-symbols-outlined text-[#a855f7] text-base">leaderboard</span>
+            Histograma de ingresos por producto
+          </h3>
+          <p className="text-[11px] text-white/25 mb-4">Top productos · ordenados por ingresos</p>
+          {data.topProducts.length === 0
+            ? <div className="py-8 text-center text-white/20 text-sm">Sin datos en este período</div>
+            : (() => {
+              const sorted = [...data.topProducts].sort((a, b) => b.revenue - a.revenue)
+              const maxRev = sorted[0]?.revenue ?? 1
+              return (
+                <div className="space-y-2.5">
+                  {sorted.map((p, i) => (
+                    <div key={p.id} className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 bg-white/5 border border-white/8">
+                        <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[10px] text-white/55 truncate max-w-[130px]">{p.name}</span>
+                          <span className="text-[10px] font-bold flex-shrink-0 ml-2" style={{ color:'#a855f7' }}>{ARS(p.revenue)}</span>
+                        </div>
+                        <AnimBar value={p.revenue} max={maxRev} color="#a855f7" delay={i * 50} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            })()
+          }
+        </div>
+      </div>
+
+      {/* ── High value products + Category by orders (with subcats) ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         <div className="bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
@@ -415,27 +676,12 @@ export default function AdvancedAnalytics({ data, presetLabel }: Props) {
         </div>
 
         <div className="bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
-          <h3 className="font-bold text-white text-sm mb-5 flex items-center gap-2">
-            <span className="material-symbols-outlined text-[#3af4ff] text-base">bar_chart</span>
+          <h3 className="font-bold text-white text-sm mb-1 flex items-center gap-2">
+            <span className="material-symbols-outlined text-[#3af4ff] text-base">account_tree</span>
             Categorías por órdenes
           </h3>
-          {data.categoryByOrders.length===0
-            ? <div className="py-8 text-center text-white/20 text-sm">Sin datos en este período</div>
-            : <div className="space-y-3">
-              {data.categoryByOrders.slice(0,8).map(({ category,orders,revenue },i) => (
-                <div key={category}>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-white/70 font-medium capitalize truncate max-w-[160px]">{category}</span>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className="text-white/30 tabular-nums">{ARS(revenue)}</span>
-                      <span className="font-bold tabular-nums" style={{ color:'#3af4ff' }}>{orders} uds.</span>
-                    </div>
-                  </div>
-                  <AnimBar value={orders} max={maxCatOrders} color="#3af4ff" delay={i*50}/>
-                </div>
-              ))}
-            </div>
-          }
+          <p className="text-[11px] text-white/25 mb-4">Hacé click en una categoría para ver subcategorías</p>
+          <CategorySubcatCard cats={data.categorySubcatMap ?? []} />
         </div>
       </div>
 

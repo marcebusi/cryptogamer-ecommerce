@@ -3,7 +3,6 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import path from 'path'
 import helmet from 'helmet'
-import rateLimit from 'express-rate-limit'
 import productRoutes  from './routes/productRoutes'
 import categoryRoutes from './routes/categoryRoutes'
 import authRoutes     from './routes/authRoutes'
@@ -42,13 +41,6 @@ app.use(cors({
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-// Rate limiting para /api/auth
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 20, // 20 intentos por IP
-  message: { message: 'Demasiados intentos de inicio de sesión. Por favor, intenta de nuevo después de 15 minutos.' }
-})
-
 /* ── Static uploads ──────────────────────────────── */
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')))
 
@@ -57,7 +49,7 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
-app.use('/api/auth',       authLimiter, authRoutes)
+app.use('/api/auth',       authRoutes)
 app.use('/api/tracking',   trackingRoutes)
 app.use('/api/products',   productRoutes)
 app.use('/api/categories', categoryRoutes)
