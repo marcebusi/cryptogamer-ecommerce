@@ -22,9 +22,9 @@ export default function BentoCategories() {
           className="bento-card-main md:col-span-8 relative rounded-xl overflow-hidden group cursor-pointer border border-white/5 bg-surface-container-low transition-all hover:border-primary-container/30"
         >
           <img
-            className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition-transform duration-700"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzq048NNKTsZD-8uxPtS09zdOupyQ8K3WzUnJXkfYgsOyRvUxe7QQmvX2Ut5588Q6yUUs2LW6fkueqm1wgkOH816lZppO4AvzD1IwRxmef86J4NuCvN7Oxizr0otxbFzBDJgvPRqEuI35Yx33iJfLJUmq6MBQ4EeVYzfv_Hz0NmuyNvQtsV7tMmLO43d8xJnc65H9ORwr7_8YW6cnMOBZ-gcF7D_ZI5az2XhaaAq8yZus1v-DRY2R-jQ72Kz7d1IMU9hvBiBbvdFk"
-            alt="Setup gaming con iluminación neon"
+            className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-700"
+            src="/bento/consolas.jpg"
+            alt="PS5 Pro - Consolas Next-Gen"
             loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
@@ -51,9 +51,9 @@ export default function BentoCategories() {
             className="bento-card-sm md:flex-1 relative rounded-xl overflow-hidden group cursor-pointer border border-white/5 bg-surface-container-low transition-all hover:border-secondary-container/30"
           >
             <img
-              className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:scale-110 transition-transform duration-700"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoKHs6QcOQIsU2jl0DCUDuHQD3hOs4sbFQu1_I-98e7XhxcQ4hUA3X7tl4DjHEwiwhN2R_YPiJa31nQx2_Cp_Hsq9Hs2n-9VJdmmYJnP7z5ANRChD-im4vUXrPZ8J8mDB5EU2Jov9-zoHNh3aadGwlZj_MpoVV5KJLlAHgTX3mLTYUj3UD9a6OqjjqmDdz4owtBLoVg5ng4qPnelfjOfpBfMCAAIURUl8x49fsKcs5f3PqJ3M7MYXbvJQBG51divnmMKF7TZINkm0"
-              alt="Videojuegos"
+              className="absolute inset-0 w-full h-full object-cover opacity-55 group-hover:scale-110 transition-transform duration-700"
+              src="/bento/juegos.jpg"
+              alt="Clair Obscur Expedition 33 - PS5"
               loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
@@ -69,9 +69,9 @@ export default function BentoCategories() {
             className="bento-card-sm md:flex-1 relative rounded-xl overflow-hidden group cursor-pointer border border-white/5 bg-surface-container-low transition-all hover:border-tertiary-container/30"
           >
             <img
-              className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:scale-110 transition-transform duration-700"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuByrNkEEqFQBU-4PYlxQdktEEt10ecoR8tnu8OqVQ1c7oao6cHcsR_sJmW3JN7782jgvkNZCT2afi0QTmnJBMJm7LCbNh1n8MXkUYbnTU6KuImGjkXCjv91LSXsagk_Ry0DTfIoQuPsthPo04OaE29C2W7tsE-7CKISQH-YPU3wrpQQ-aZgVV-wmcB8Y9DsKv5jL1W9Nn1d5wpuN4zk97-AmoJ8R0CrbV6PWItyiUWUUL_Nmfs8xEGqrnlO5a9Pt6sR4KU0799yJYs"
-              alt="Joystick gaming con gatillos brillantes"
+              className="absolute inset-0 w-full h-full object-cover opacity-55 group-hover:scale-110 transition-transform duration-700"
+              src="/bento/accesorios.jpg"
+              alt="Xbox Elite Controller - Accesorios"
               loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />

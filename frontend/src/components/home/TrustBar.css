@@ -4,6 +4,7 @@
   border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 .trust-bar-icon { background: rgba(57,255,20,0.08); color: #39ff14; }
+.trust-bar-divider { background: rgba(255,255,255,0.08); }
 
 html.light .trust-bar-wrapper {
   background: #f9fafb;
@@ -11,3 +12,4 @@ html.light .trust-bar-wrapper {
   border-bottom-color: rgba(220,38,38,0.08);
 }
 html.light .trust-bar-icon { background: rgba(220,38,38,0.07); color: #dc2626; }
+html.light .trust-bar-divider { background: rgba(0,0,0,0.1); }

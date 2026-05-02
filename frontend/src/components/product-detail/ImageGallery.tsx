@@ -7,22 +7,38 @@ interface ImageGalleryProps {
   product: Product
 }
 
+const VISIBLE = 4 // thumbnails shown at once
+
 export default function ImageGallery({ product }: ImageGalleryProps) {
   const rawImgs = product.images && product.images.length > 0 ? product.images : [product.image]
   const thumbs  = rawImgs
-  const [activeIdx, setActiveIdx] = useState(0)
+
+  const [activeIdx,  setActiveIdx]  = useState(0)
+  const [thumbStart, setThumbStart] = useState(0) // carousel offset
 
   const activePos  = imgPosition(thumbs[activeIdx])
   const activeZoom = imgZoom(thumbs[activeIdx])
 
+  const canPrev = thumbStart > 0
+  const canNext = thumbStart + VISIBLE < thumbs.length
+
+  const handlePrev = () => setThumbStart(s => Math.max(0, s - 1))
+  const handleNext = () => setThumbStart(s => Math.min(thumbs.length - VISIBLE, s + 1))
+
+  // When clicking a thumb, also scroll the carousel window to include it
+  const handleThumbClick = (i: number) => {
+    setActiveIdx(i)
+    if (i < thumbStart) setThumbStart(i)
+    else if (i >= thumbStart + VISIBLE) setThumbStart(i - VISIBLE + 1)
+  }
+
+  const visibleThumbs = thumbs.slice(thumbStart, thumbStart + VISIBLE)
+
   return (
     <div className="lg:col-span-5 space-y-md">
-      {/* Main image — dark studio style */}
+      {/* Main image */}
       <div className="gallery-main relative rounded-xl overflow-hidden border border-white/5 shadow-2xl group">
-        {/* Scanline overlay */}
         <div className="scanline-overlay absolute inset-0 opacity-20 pointer-events-none z-10" />
-
-        {/* Gradient bg behind product */}
         <div className="gallery-bg absolute inset-0" />
 
         <img
@@ -32,7 +48,7 @@ export default function ImageGallery({ product }: ImageGalleryProps) {
           style={{ objectPosition: activePos }}
         />
 
-        {/* Condition badge top-left */}
+        {/* Condition badge */}
         {product.condition && product.condition !== 'new' && (
           <div className="absolute top-4 left-4 z-20">
             <span className="condition-badge-preowned px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest">
@@ -41,68 +57,79 @@ export default function ImageGallery({ product }: ImageGalleryProps) {
           </div>
         )}
 
-        {/* Spec pills bottom-right */}
-        <div className="absolute bottom-4 right-4 flex space-x-2 z-20">
-          <span className="bg-surface-container-highest/70 backdrop-blur-md px-3 py-1 rounded-full text-label-caps text-[10px] text-on-surface">
-            4K HDR
-          </span>
-          <span className="bg-surface-container-highest/70 backdrop-blur-md px-3 py-1 rounded-full text-label-caps text-[10px] text-on-surface">
-            825GB SSD
-          </span>
-        </div>
-      </div>
-
-      {/* Thumbnails */}
-      <div className="grid grid-cols-4 gap-sm">
-        {thumbs.slice(0, 3).map((src, i) => (
-          <button
-            key={i}
-            onClick={() => setActiveIdx(i)}
-            className={`thumb-btn aspect-square rounded-lg overflow-hidden bg-surface-container-high transition-all cursor-pointer ${
-              activeIdx === i
-                ? 'border-2 border-purple-500 shadow-[0_0_12px_rgba(138,43,226,0.4)]'
-                : 'border border-white/10 hover:border-purple-400/50'
-            }`}
-          >
-            {/* Dark bg for thumbnails */}
-            <div className="relative w-full h-full bg-[#0a0a10]">
-              <img
-                alt={`${product.name} vista ${i + 1}`}
-                className="w-full h-full object-contain p-2 transition-transform duration-300 hover:scale-110"
-                src={imgUrl(src)}
-              />
-            </div>
-          </button>
-        ))}
-
-        {/* +N overflow button */}
-        {thumbs.length > 3 ? (
-          <button
-            onClick={() => setActiveIdx(3)}
-            className={`thumb-btn aspect-square rounded-lg overflow-hidden bg-surface-container-high transition-all cursor-pointer ${
-              activeIdx >= 3
-                ? 'border-2 border-purple-500 shadow-[0_0_12px_rgba(138,43,226,0.4)]'
-                : 'border border-white/10 hover:border-purple-400/50'
-            }`}
-          >
-            <div className="relative w-full h-full bg-[#0a0a10]">
-              <img
-                alt="Más imágenes"
-                className="w-full h-full object-contain p-2 blur-[2px] opacity-40"
-                src={imgUrl(thumbs[3])}
-              />
-              <span className="absolute inset-0 flex items-center justify-center font-bold text-on-surface text-lg">
-                +{thumbs.length - 3}
+        {/* Spec pills — only shown if the product has specs */}
+        {product.specs && product.specs.length > 0 && (
+          <div className="absolute bottom-4 right-4 flex flex-wrap gap-1.5 z-20 max-w-[60%] justify-end">
+            {product.specs.slice(0, 2).map(s => (
+              <span key={s.label}
+                className="bg-surface-container-highest/70 backdrop-blur-md px-3 py-1 rounded-full text-label-caps text-[10px] text-on-surface">
+                {s.label}
               </span>
-            </div>
-          </button>
-        ) : (
-          /* Placeholder slot if fewer than 4 thumbs */
-          thumbs.length < 4 && (
-            <div className="aspect-square rounded-lg border border-white/5 bg-surface-container-low" />
-          )
+            ))}
+          </div>
+        )}
+
+        {/* Arrow nav on main image if multiple */}
+        {thumbs.length > 1 && (
+          <>
+            <button type="button"
+              onClick={() => handleThumbClick((activeIdx - 1 + thumbs.length) % thumbs.length)}
+              className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/50 border border-white/15 flex items-center justify-center hover:bg-black/70 transition-all cursor-pointer opacity-0 group-hover:opacity-100">
+              <span className="material-symbols-outlined text-white text-base">chevron_left</span>
+            </button>
+            <button type="button"
+              onClick={() => handleThumbClick((activeIdx + 1) % thumbs.length)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/50 border border-white/15 flex items-center justify-center hover:bg-black/70 transition-all cursor-pointer opacity-0 group-hover:opacity-100">
+              <span className="material-symbols-outlined text-white text-base">chevron_right</span>
+            </button>
+          </>
         )}
       </div>
+
+      {/* Thumbnails — only render if more than 1 image */}
+      {thumbs.length > 1 && (
+        <div className="flex items-center gap-2">
+          {/* Prev arrow */}
+          {thumbs.length > VISIBLE && (
+            <button type="button" onClick={handlePrev} disabled={!canPrev}
+              className="w-7 h-7 rounded-full border border-white/10 flex items-center justify-center flex-shrink-0 transition-all cursor-pointer disabled:opacity-20 disabled:cursor-default hover:bg-white/10">
+              <span className="material-symbols-outlined text-white/70 text-sm">chevron_left</span>
+            </button>
+          )}
+
+          {/* Thumb strip */}
+          <div className="flex gap-2 flex-1">
+            {visibleThumbs.map((src, vi) => {
+              const i = thumbStart + vi
+              const isActive = activeIdx === i
+              return (
+                <button key={i} type="button" onClick={() => handleThumbClick(i)}
+                  className={`flex-1 aspect-square rounded-lg overflow-hidden transition-all cursor-pointer ${
+                    isActive
+                      ? 'border-2 border-purple-500 shadow-[0_0_12px_rgba(138,43,226,0.4)]'
+                      : 'border border-white/10 hover:border-purple-400/50'
+                  }`}>
+                  <div className="relative w-full h-full">
+                    <img
+                      alt={`${product.name} vista ${i + 1}`}
+                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+                      src={imgUrl(src)}
+                    />
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Next arrow */}
+          {thumbs.length > VISIBLE && (
+            <button type="button" onClick={handleNext} disabled={!canNext}
+              className="w-7 h-7 rounded-full border border-white/10 flex items-center justify-center flex-shrink-0 transition-all cursor-pointer disabled:opacity-20 disabled:cursor-default hover:bg-white/10">
+              <span className="material-symbols-outlined text-white/70 text-sm">chevron_right</span>
+            </button>
+          )}
+        </div>
+      )}
     </div>
   )
 }

@@ -117,26 +117,30 @@ export default function ProductCard({ product, accent = 'secondary' }: ProductCa
           {product.description}
         </p>
 
-        <div className="flex items-center justify-between mt-1 pt-1 border-t border-white/5">
-          <div>
-            <span className={`font-black text-base ${product.inStock ? theme.price : 'text-on-surface-variant'}`}>
+        <div className="flex items-end justify-between mt-2 pt-2 border-t border-white/5 gap-2">
+          {/* Price */}
+          <div className="min-w-0">
+            <span className={`font-black text-base leading-none ${product.inStock ? theme.price : 'text-on-surface-variant'}`}>
               {product.inStock
                 ? new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(product.price)
                 : 'Sin stock'}
             </span>
             {product.originalPrice && product.inStock && (
-              <span className="text-on-surface-variant line-through text-xs ml-1">
+              <div className="text-on-surface-variant line-through text-[11px] mt-0.5">
                 {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(product.originalPrice)}
-              </span>
+              </div>
             )}
           </div>
+
+          {/* Add to cart pill */}
           <button
             onClick={() => addToCart(product)}
             disabled={!product.inStock}
-            className={`p-1.5 rounded-full transition-all active:scale-90 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${theme.btn}`}
+            className={`product-cart-btn flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold tracking-wide transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${theme.btn}`}
             aria-label="Agregar al carrito"
           >
-            <span className="material-symbols-outlined text-sm">add_shopping_cart</span>
+            <span className="material-symbols-outlined text-[15px]">add_shopping_cart</span>
+            <span>Agregar</span>
           </button>
         </div>
       </div>

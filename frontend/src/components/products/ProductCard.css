@@ -5,3 +5,31 @@
 .product-card-image:hover {
   transform: scale(1.1);
 }
+
+/* ── Add to cart pill button ──────────────────────────── */
+.product-cart-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Shine sweep on click */
+.product-cart-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.25) 50%, transparent 70%);
+  transform: translateX(-100%) skewX(-15deg);
+  transition: transform 0s;
+}
+.product-cart-btn:active::after {
+  transform: translateX(150%) skewX(-15deg);
+  transition: transform 0.4s ease;
+}
+
+.product-cart-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+.product-cart-btn:hover {
+  box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+}

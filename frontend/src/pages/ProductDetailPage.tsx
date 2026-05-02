@@ -107,68 +107,54 @@ export default function ProductDetailPage() {
         <ProductInfo product={p} />
       </div>
 
-      {/* Features section */}
-      <section className="mt-xl py-xl border-t border-white/5">
-        <h2 className="text-h2-headline font-h2-headline text-on-background mb-lg flex items-center space-x-4">
-          <span className="text-purple-500">#</span>
-          <span>Hyper-Immersive Tech</span>
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-md items-center">
-          <div className="md:col-span-4 bg-surface-container p-md rounded-2xl border border-white/5 shadow-xl relative overflow-hidden min-h-[300px] flex flex-col justify-end">
-            <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none">
-              <img
-                alt="Feature visual"
-                className="w-full h-full object-cover"
-                src={p.image}
-              />
+      {/* Features section — only shown if the product has specs */}
+      {p.specs && p.specs.length > 0 && (
+        <section className="mt-xl py-xl border-t border-white/5">
+          <h2 className="text-h2-headline font-h2-headline text-on-background mb-lg flex items-center space-x-4">
+            <span className="text-purple-500">#</span>
+            <span>Especificaciones</span>
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-md items-center">
+            <div className="md:col-span-4 bg-surface-container p-md rounded-2xl border border-white/5 shadow-xl relative overflow-hidden min-h-[300px] flex flex-col justify-end">
+              <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none">
+                <img alt="Feature visual" className="w-full h-full object-cover" src={p.image} />
+              </div>
+              <div className="relative z-10">
+                <h3 className="text-h3-title font-h3-title text-tertiary-container mb-2">{p.name}</h3>
+                <p className="text-on-surface-variant">{p.description?.slice(0, 80) || 'Especificaciones del producto.'}</p>
+              </div>
             </div>
-            <div className="relative z-10">
-              <h3 className="text-h3-title font-h3-title text-tertiary-container mb-2">Tecnología Premium</h3>
-              <p className="text-on-surface-variant">Diseñado para la máxima experiencia gaming.</p>
+
+            <div className="md:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-md">
+              {p.specs.slice(0, 2).map(s => (
+                <div key={s.label} className="bg-surface-container-low p-md rounded-2xl border border-white/5 flex items-start space-x-4">
+                  <div className="p-3 rounded-xl border bg-purple-500/10 border-purple-500/20">
+                    <span className={`material-symbols-outlined ${s.color ?? 'text-purple-400'} text-3xl`}>{s.icon ?? 'star'}</span>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-lg mb-1 text-on-surface">{s.label}</h4>
+                    <p className="text-sm text-on-surface-variant">{s.value}</p>
+                  </div>
+                </div>
+              ))}
+
+              {p.specs.length > 2 && (
+                <div className="bg-surface-container-low p-md rounded-2xl border border-white/5 sm:col-span-2">
+                  <div className="flex flex-wrap gap-sm">
+                    {p.specs.slice(2).map(s => (
+                      <div key={s.label} className="flex items-center gap-xs">
+                        <span className={`material-symbols-outlined text-sm ${s.color ?? 'text-primary-container'}`}>{s.icon}</span>
+                        <span className="text-xs text-on-surface-variant font-semibold uppercase tracking-wider">{s.label}:</span>
+                        <span className="text-xs text-on-surface">{s.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-
-          <div className="md:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-md">
-            {(p.specs && p.specs.length > 0
-              ? p.specs.slice(0, 2).map(s => ({
-                  icon: s.icon ?? 'star',
-                  color: s.color ?? 'text-purple-400',
-                  bg: 'bg-purple-500/10 border-purple-500/20',
-                  title: s.label,
-                  desc: s.value,
-                }))
-              : [
-                  { icon: 'surround_sound', color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20', title: 'Audio Envolvente', desc: 'Sonido 3D para máxima inmersión.' },
-                  { icon: 'speed',          color: 'text-cyan-400',   bg: 'bg-cyan-500/10 border-cyan-500/20',   title: 'Alto Rendimiento', desc: 'Potencia para los juegos más exigentes.' },
-                ]
-            ).map(f => (
-              <div key={f.title} className="bg-surface-container-low p-md rounded-2xl border border-white/5 flex items-start space-x-4">
-                <div className={`p-3 rounded-xl border ${f.bg}`}>
-                  <span className={`material-symbols-outlined ${f.color} text-3xl`}>{f.icon}</span>
-                </div>
-                <div>
-                  <h4 className="font-bold text-lg mb-1 text-on-surface">{f.title}</h4>
-                  <p className="text-sm text-on-surface-variant">{f.desc}</p>
-                </div>
-              </div>
-            ))}
-
-            {p.specs && p.specs.length > 2 && (
-              <div className="bg-surface-container-low p-md rounded-2xl border border-white/5 sm:col-span-2">
-                <div className="flex flex-wrap gap-sm">
-                  {p.specs.slice(2).map(s => (
-                    <div key={s.label} className="flex items-center gap-xs">
-                      <span className={`material-symbols-outlined text-sm ${s.color ?? 'text-primary-container'}`}>{s.icon}</span>
-                      <span className="text-xs text-on-surface-variant font-semibold uppercase tracking-wider">{s.label}:</span>
-                      <span className="text-xs text-on-surface">{s.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Related products */}
       <RelatedProducts />

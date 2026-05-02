@@ -328,6 +328,7 @@ export default function AdminProductPage() {
   const [editIsOffer,       setEditIsOffer]       = useState(false)
   const [editIsFeatured,    setEditIsFeatured]    = useState(false)
   const [editSortOrder,     setEditSortOrder]     = useState('0')
+  const [editSpecs,         setEditSpecs]         = useState<Spec[]>([{ ...EMPTY_SPEC }])
   const [editBusy,          setEditBusy]          = useState(false)
   const [editError,         setEditError]         = useState('')
 
@@ -337,8 +338,15 @@ export default function AdminProductPage() {
     setEditDescription(p.description); setEditBadge(p.badge ?? '')
     setEditBadgeColor((p.badgeColor as 'primary'|'secondary'|'tertiary') ?? 'primary')
     setEditIsOffer(p.isOffer ?? false); setEditIsFeatured(p.isFeatured ?? false)
-    setEditSortOrder(String(p.sortOrder ?? 0)); setEditError('')
+    setEditSortOrder(String(p.sortOrder ?? 0))
+    setEditSpecs(p.specs && p.specs.length > 0 ? p.specs : [{ ...EMPTY_SPEC }])
+    setEditError('')
   }
+
+  const addEditSpec    = () => setEditSpecs(s => [...s, { ...EMPTY_SPEC }])
+  const removeEditSpec = (i: number) => setEditSpecs(s => s.filter((_, idx) => idx !== i))
+  const updateEditSpec = (i: number, field: keyof Spec, val: string) =>
+    setEditSpecs(s => s.map((sp, idx) => idx === i ? { ...sp, [field]: val } : sp))
 
   const handleEditSave = async () => {
     if (!editingProduct) return
@@ -351,13 +359,15 @@ export default function AdminProductPage() {
         description: editDescription.trim(), badge: editBadge.trim() || null,
         badgeColor: editBadgeColor, isOffer: editIsOffer,
         isFeatured: editIsFeatured, sortOrder: parseInt(editSortOrder) || 0,
+        specs: editSpecs.filter(s => s.label && s.value),
       })
       setAllProducts(prev => prev.map(p => p.id === editingProduct.id
         ? { ...p, name: editName.trim(), price: parseFloat(editPrice),
             originalPrice: editOriginalPrice ? parseFloat(editOriginalPrice) : null,
             description: editDescription.trim(), badge: editBadge.trim() || null,
             badgeColor: editBadgeColor, isOffer: editIsOffer,
-            isFeatured: editIsFeatured, sortOrder: parseInt(editSortOrder) || 0 }
+            isFeatured: editIsFeatured, sortOrder: parseInt(editSortOrder) || 0,
+            specs: editSpecs.filter(s => s.label && s.value) }
         : p
       ))
       setEditingProduct(null)
@@ -607,6 +617,40 @@ export default function AdminProductPage() {
                   </div>
                 </div>
 
+                {/* Specs */}
+                <div>
+                  <label className="block text-xs text-on-surface-variant uppercase tracking-wider mb-1">Especificaciones técnicas</label>
+                  <div className="space-y-2">
+                    {editSpecs.map((s, i) => (
+                      <div key={i} className="flex gap-2 items-center">
+                        {/* Icon preview */}
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <div className="w-8 h-8 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                            <span className="material-symbols-outlined text-purple-400 text-base">{s.icon || 'star'}</span>
+                          </div>
+                          <input type="text" value={s.icon} onChange={e => updateEditSpec(i, 'icon', e.target.value)}
+                            placeholder="Ícono (ej: memory)" className={`${inp} w-24`} />
+                        </div>
+                        <input type="text" value={s.label} onChange={e => updateEditSpec(i, 'label', e.target.value)}
+                          placeholder="Etiqueta" className={inp} />
+                        <input type="text" value={s.value} onChange={e => updateEditSpec(i, 'value', e.target.value)}
+                          placeholder="Valor" className={inp} />
+                        {editSpecs.length > 1 && (
+                          <button type="button" onClick={() => removeEditSpec(i)}
+                            className="text-error hover:bg-error/10 p-1.5 rounded-lg transition-colors cursor-pointer flex-shrink-0">
+                            <span className="material-symbols-outlined text-base">delete</span>
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <button type="button" onClick={addEditSpec}
+                    className="mt-2 flex items-center gap-xs text-xs text-primary-container hover:text-on-surface transition-colors cursor-pointer">
+                    <span className="material-symbols-outlined text-sm">add_circle</span>
+                    Agregar especificación
+                  </button>
+                </div>
+
                 <div className="grid grid-cols-3 gap-sm items-end">
                   <div>
                     <label className="block text-xs text-on-surface-variant uppercase tracking-wider mb-1">sortOrder</label>
@@ -840,7 +884,7 @@ export default function AdminProductPage() {
                 <div>
                   {lbl('Badge (etiqueta opcional)')}
                   <input type="text" value={badge} onChange={e => setBadge(e.target.value)}
-                    placeholder="Ej: HOT, NEW, SALE" className={inp} />
+                    placeholder="Ej: HOT, NUEVO, OFERTA" className={inp} />
                 </div>
                 <div>
                   {lbl('Color del badge')}
@@ -858,8 +902,14 @@ export default function AdminProductPage() {
                 <div className="space-y-2">
                   {specs.map((s, i) => (
                     <div key={i} className="flex gap-2 items-center">
-                      <input type="text" value={s.icon} onChange={e => updateSpec(i, 'icon', e.target.value)}
-                        placeholder="Ícono (ej: memory)" className={`${inp} w-28 flex-shrink-0`} />
+                      {/* Icon preview */}
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <div className="w-8 h-8 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                          <span className="material-symbols-outlined text-purple-400 text-base">{s.icon || 'star'}</span>
+                        </div>
+                        <input type="text" value={s.icon} onChange={e => updateSpec(i, 'icon', e.target.value)}
+                          placeholder="Ícono (ej: memory)" className={`${inp} w-28`} />
+                      </div>
                       <input type="text" value={s.label} onChange={e => updateSpec(i, 'label', e.target.value)}
                         placeholder="Etiqueta" className={inp} />
                       <input type="text" value={s.value} onChange={e => updateSpec(i, 'value', e.target.value)}
