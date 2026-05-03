@@ -1,0 +1,67 @@
+version: '3.9'
+
+services:
+
+  # ── Backend ───────────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cryptogamer-backend
+    restart: unless-stopped
+    env_file: ./backend/.env
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+    volumes:
+      # Persistir la base de datos SQLite en un volumen nombrado
+      - db_data:/app/prisma
+      # Persistir uploads locales (si no usa Cloudinary)
+      - uploads_data:/app/uploads
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    # No exponer el puerto directamente al host en producción
+    # El frontend hace proxy a través de nginx
+    expose:
+      - "3001"
+
+  # ── Frontend ──────────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # En producción: reemplazar con tu dominio
+        VITE_API_URL: /api
+    container_name: cryptogamer-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      # Para HTTPS descomentar cuando tengas certificado
+      # - "443:443"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  db_data:
+    name: cryptogamer_db
+  uploads_data:
+    name: cryptogamer_uploads
