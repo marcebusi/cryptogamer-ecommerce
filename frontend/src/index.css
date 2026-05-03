@@ -558,10 +558,7 @@ html.light .bg-tertiary-container\/20 { background-color: rgba(127,29,29,0.08) !
 html.light .hover\:text-pink-400:hover  { color: #b91c1c !important; }
 html.light .hover\:text-cyan-400:hover  { color: #0891b2 !important; }
 
-/* ── Variantes opacity de secondary-container ── */
-html.light [class*="bg-secondary-container\/"] {
-  background-color: rgba(185,28,28,var(--tw-bg-opacity, 1)) !important;
-}
+/* NOTA: NO usar wildcard para bg-secondary-container/ → rompe opacidades */
 html.light .text-secondary-container { color: #b91c1c !important; }
 
 /* ── Footer: corregir links y texto ── */

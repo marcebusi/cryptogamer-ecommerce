@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { api } from '../../lib/api'
 import toast from 'react-hot-toast'
+import './AdminSellersPage.css'
 
 interface Seller {
   id: string
@@ -94,7 +95,7 @@ export default function AdminSellersPage() {
         </div>
         <button
           onClick={openCreate}
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-bold transition-all cursor-pointer hover:shadow-[0_0_20px_rgba(138,43,226,0.4)]"
+          className="sellers-btn-primary flex items-center gap-2 px-4 py-2 text-white rounded-xl text-sm font-bold transition-all cursor-pointer"
         >
           <i className="fa-solid fa-plus" />
           Nuevo vendedor
@@ -103,8 +104,8 @@ export default function AdminSellersPage() {
 
       {/* Form modal */}
       {(creating || editing) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}>
-          <div className="w-full max-w-lg rounded-2xl overflow-hidden" style={{ background: 'rgba(10,9,20,0.98)', border: '1px solid rgba(138,43,226,0.2)', boxShadow: '0 24px 80px rgba(0,0,0,0.8)' }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sellers-modal-overlay">
+          <div className="w-full max-w-lg rounded-2xl overflow-hidden sellers-modal-panel">
             <div className="px-6 py-4 border-b border-white/8 flex items-center justify-between">
               <h2 className="font-black text-on-surface font-['Plus_Jakarta_Sans']">
                 {creating ? 'Nuevo vendedor' : `Editar: ${editing?.name}`}
@@ -152,7 +153,7 @@ export default function AdminSellersPage() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-bold cursor-pointer transition-all disabled:opacity-60"
+                className="sellers-btn-primary px-6 py-2 text-white rounded-xl text-sm font-bold cursor-pointer transition-all disabled:opacity-60"
               >
                 {saving ? 'Guardando...' : creating ? 'Crear vendedor' : 'Guardar cambios'}
               </button>
@@ -178,8 +179,7 @@ export default function AdminSellersPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {sellers.map(s => (
-            <div key={s.id} className="relative rounded-2xl overflow-hidden group"
-              style={{ background: 'rgba(12,11,22,0.8)', border: '1px solid rgba(138,43,226,0.15)', boxShadow: '0 4px 24px rgba(0,0,0,0.3)' }}>
+            <div key={s.id} className="seller-card relative rounded-2xl overflow-hidden group">
 
               {!s.active && (
                 <div className="absolute top-3 right-3 z-10 px-2 py-0.5 bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 text-[10px] font-bold rounded-full uppercase">
@@ -190,9 +190,9 @@ export default function AdminSellersPage() {
               <div className="p-5">
                 <div className="flex items-center gap-4 mb-4">
                   {s.avatar ? (
-                    <img src={s.avatar} alt={s.name} className="w-14 h-14 rounded-2xl object-cover border-2 border-purple-500/30 flex-shrink-0" onError={e => (e.target as HTMLImageElement).style.display = 'none'} />
+                    <img src={s.avatar} alt={s.name} className="w-14 h-14 rounded-2xl object-cover border-2 border-purple-500/30 seller-avatar-border flex-shrink-0" onError={e => (e.target as HTMLImageElement).style.display = 'none'} />
                   ) : (
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-600 to-violet-900 flex items-center justify-center text-xl font-black text-white flex-shrink-0">
+                    <div className="seller-avatar-initials w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black text-white flex-shrink-0">
                       {s.name.charAt(0)}
                     </div>
                   )}
