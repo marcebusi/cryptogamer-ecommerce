@@ -1,3 +1,4 @@
+/* ── Tamaños mínimos ─────────────────────────── */
 .bento-card-main { min-height: 260px; }
 .bento-card-sm   { min-height: 140px; }
 
@@ -5,11 +6,38 @@
   .bento-card-main, .bento-card-sm { min-height: unset; }
 }
 
-/* ── Light mode ──────────────────────────────────── */
+/* ── Opacidad de imagen (dark mode) ─────────── */
+.bento-img-opacity { opacity: 0.65; }
+
+/* ── Mobile chip pills ───────────────────────── */
+.bento-chip {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(186,204,176,0.9);
+}
+.bento-chip:hover { color: #3af4ff; border-color: rgba(58,244,255,0.3); }
+
+/* ── LIGHT MODE ───────────────────────────────── */
+
+/* En light: imagen más visible (menos opacidad de overlay) */
+html.light .bento-img-opacity { opacity: 0.85; }
+
+/* Bordes de cards en light */
 html.light .bento-card-main,
 html.light .bento-card-sm {
-  border-color: rgba(0,0,0,0.07) !important;
-  background: #f4f4f6;
+  border-color: rgba(0,0,0,0.12) !important;
+  /* El fondo bg-zinc-900 se mantiene porque la imagen cubre todo */
 }
-html.light .bento-card-main:hover { border-color: rgba(220,38,38,0.25) !important; }
-html.light .bento-card-sm:hover   { border-color: rgba(220,38,38,0.2)  !important; }
+html.light .bento-card-main:hover { border-color: rgba(235,0,0,0.3) !important; }
+html.light .bento-card-sm:hover   { border-color: rgba(235,0,0,0.25) !important; }
+
+/* VER COLECCIÓN link: rojo en light */
+html.light .bento-card-main .text-primary-container { color: #eb0000 !important; }
+
+/* Mobile chips en light */
+html.light .bento-chip {
+  background: rgba(0,0,0,0.04);
+  border-color: rgba(0,0,0,0.1);
+  color: #374151;
+}
+html.light .bento-chip:hover { color: #eb0000; border-color: rgba(235,0,0,0.25); background: rgba(235,0,0,0.04); }
