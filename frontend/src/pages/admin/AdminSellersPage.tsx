@@ -177,53 +177,88 @@ export default function AdminSellersPage() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {sellers.map(s => (
-            <div key={s.id} className="seller-card relative rounded-2xl overflow-hidden group">
+            <div key={s.id} className="seller-card relative rounded-2xl overflow-hidden flex flex-col">
 
+              {/* Status badge */}
               {!s.active && (
-                <div className="absolute top-3 right-3 z-10 px-2 py-0.5 bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 text-[10px] font-bold rounded-full uppercase">
+                <div className="absolute top-3 right-3 z-10 px-2.5 py-1 bg-yellow-500/15 border border-yellow-500/25 text-yellow-400 text-[10px] font-bold rounded-full uppercase tracking-wide">
                   Inactivo
                 </div>
               )}
 
-              <div className="p-5">
-                <div className="flex items-center gap-4 mb-4">
+              {/* Card body */}
+              <div className="p-6 flex-1">
+                {/* Header: avatar + name */}
+                <div className="flex items-center gap-4 mb-5">
                   {s.avatar ? (
-                    <img src={s.avatar} alt={s.name} className="w-14 h-14 rounded-2xl object-cover border-2 border-purple-500/30 seller-avatar-border flex-shrink-0" onError={e => (e.target as HTMLImageElement).style.display = 'none'} />
+                    <img
+                      src={s.avatar} alt={s.name}
+                      className="w-14 h-14 rounded-2xl object-cover seller-avatar-border flex-shrink-0"
+                      onError={e => (e.target as HTMLImageElement).style.display = 'none'}
+                    />
                   ) : (
-                    <div className="seller-avatar-initials w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black text-white flex-shrink-0">
-                      {s.name.charAt(0)}
+                    <div className="seller-avatar-initials w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-black text-white flex-shrink-0 shadow-lg">
+                      {s.name.charAt(0).toUpperCase()}
                     </div>
                   )}
-                  <div>
-                    <p className="font-bold text-on-surface">{s.name}</p>
-                    <p className="text-xs text-on-surface-variant line-clamp-2">{s.bio}</p>
+                  <div className="min-w-0">
+                    <p className="font-bold text-on-surface text-base leading-tight truncate">{s.name}</p>
+                    {s.bio && <p className="text-xs text-on-surface-variant mt-0.5 line-clamp-2 leading-relaxed">{s.bio}</p>}
+                    {/* Active dot */}
+                    <div className="flex items-center gap-1.5 mt-1.5">
+                      <span className={`w-1.5 h-1.5 rounded-full ${s.active ? 'bg-green-400' : 'bg-yellow-400'}`} />
+                      <span className="text-[10px] text-on-surface-variant font-medium">{s.active ? 'Activo' : 'Inactivo'}</span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="space-y-2 text-xs">
+                {/* Contact info chips */}
+                <div className="space-y-2">
                   {s.whatsapp && (
-                    <div className="flex items-center gap-2 text-green-400">
-                      <i className="fa-brands fa-whatsapp" />
-                      <span className="text-on-surface-variant">{s.whatsapp}</span>
+                    <div className="seller-info-chip flex items-center gap-2.5">
+                      <div className="seller-chip-icon seller-chip-wa">
+                        <i className="fa-brands fa-whatsapp text-xs" />
+                      </div>
+                      <span className="text-xs text-on-surface-variant font-medium truncate">{s.whatsapp}</span>
                     </div>
                   )}
-                  {s.alias && (
-                    <div className="flex items-center gap-2 text-cyan-400">
-                      <i className="fa-solid fa-building-columns" />
-                      <span className="text-on-surface-variant">{s.bank} · {s.alias}</span>
+                  {(s.bank || s.alias) && (
+                    <div className="seller-info-chip flex items-center gap-2.5">
+                      <div className="seller-chip-icon seller-chip-bank">
+                        <i className="fa-solid fa-building-columns text-xs" />
+                      </div>
+                      <span className="text-xs text-on-surface-variant font-medium truncate">
+                        {[s.bank, s.alias].filter(Boolean).join(' · ')}
+                      </span>
+                    </div>
+                  )}
+                  {s.mpAlias && (
+                    <div className="seller-info-chip flex items-center gap-2.5">
+                      <div className="seller-chip-icon seller-chip-mp">
+                        <i className="fa-solid fa-credit-card text-xs" />
+                      </div>
+                      <span className="text-xs text-on-surface-variant font-medium truncate">MP: {s.mpAlias}</span>
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="px-5 py-3 border-t border-white/8 flex gap-2">
-                <button onClick={() => openEdit(s)} className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-semibold text-on-surface-variant hover:text-purple-300 hover:bg-purple-600/10 rounded-lg transition-all cursor-pointer">
-                  <i className="fa-solid fa-pen-to-square" /> Editar
+              {/* Footer actions */}
+              <div className="seller-card-footer px-4 py-3 flex gap-2">
+                <button
+                  onClick={() => openEdit(s)}
+                  className="seller-btn-edit flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer"
+                >
+                  <i className="fa-solid fa-pen-to-square" />
+                  Editar
                 </button>
-                <button onClick={() => handleDelete(s.id, s.name)} className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-semibold text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all cursor-pointer">
-                  <i className="fa-solid fa-trash" /> Eliminar
+                <button
+                  onClick={() => handleDelete(s.id, s.name)}
+                  className="seller-btn-delete flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer"
+                >
+                  <i className="fa-solid fa-trash" />
                 </button>
               </div>
             </div>
