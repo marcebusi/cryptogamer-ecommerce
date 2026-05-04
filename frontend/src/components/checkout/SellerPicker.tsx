@@ -9,26 +9,30 @@ interface Seller {
   alias: string
   bank: string
   mpAlias: string
+  cryptoAlias: string
 }
 
 interface Props {
   selected: Seller | null
   onSelect: (seller: Seller) => void
+  /** Optional pre-fetched sellers — if provided, skips internal fetch */
+  sellers?: Seller[]
 }
 
 const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3001'
 
-export default function SellerPicker({ selected, onSelect }: Props) {
-  const [sellers, setSellers] = useState<Seller[]>([])
-  const [loading, setLoading] = useState(true)
+export default function SellerPicker({ selected, onSelect, sellers: propSellers }: Props) {
+  const [sellers, setSellers] = useState<Seller[]>(propSellers ?? [])
+  const [loading, setLoading] = useState(!propSellers)
 
   useEffect(() => {
+    if (propSellers) { setSellers(propSellers); setLoading(false); return }
     fetch(`${BASE}/api/sellers`)
       .then(r => r.json())
       .then(d => setSellers(Array.isArray(d) ? d : []))
       .catch(() => setSellers([]))
       .finally(() => setLoading(false))
-  }, [])
+  }, [propSellers])
 
   if (loading) return (
     <div className="grid grid-cols-1 gap-3">

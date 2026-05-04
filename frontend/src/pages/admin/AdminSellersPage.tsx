@@ -12,13 +12,14 @@ interface Seller {
   alias: string
   bank: string
   mpAlias: string
+  cryptoAlias: string
   active: boolean
   sortOrder: number
 }
 
 const EMPTY: Omit<Seller, 'id'> = {
   name: '', bio: '', avatar: '', whatsapp: '',
-  alias: '', bank: '', mpAlias: '', active: true, sortOrder: 0,
+  alias: '', bank: '', mpAlias: '', cryptoAlias: '', active: true, sortOrder: 0,
 }
 
 export default function AdminSellersPage() {
@@ -42,7 +43,7 @@ export default function AdminSellersPage() {
   useEffect(() => { load() }, [])
 
   const openCreate = () => { setForm(EMPTY); setCreating(true); setEditing(null) }
-  const openEdit   = (s: Seller) => { setForm({ name: s.name, bio: s.bio, avatar: s.avatar, whatsapp: s.whatsapp, alias: s.alias, bank: s.bank, mpAlias: s.mpAlias, active: s.active, sortOrder: s.sortOrder }); setEditing(s); setCreating(false) }
+  const openEdit   = (s: Seller) => { setForm({ name: s.name, bio: s.bio, avatar: s.avatar, whatsapp: s.whatsapp, alias: s.alias, bank: s.bank, mpAlias: s.mpAlias, cryptoAlias: s.cryptoAlias ?? '', active: s.active, sortOrder: s.sortOrder }); setEditing(s); setCreating(false) }
   const closeForm  = () => { setCreating(false); setEditing(null) }
 
   const handleSave = async () => {
@@ -133,6 +134,7 @@ export default function AdminSellersPage() {
                 {f('bank', 'Banco / Billetera', 'text', 'Ej: Mercado Pago, Brubank, Uala...')}
                 {f('alias', 'CBU o Alias', 'text', 'Ej: MARTIN.GARCIA.MP')}
                 {f('mpAlias', 'Alias Mercado Pago (opcional)', 'text', 'Ej: martin.gamer')}
+                {f('cryptoAlias', 'Alias / Dirección Crypto (opcional)', 'text', 'Ej: TRX1abc...xyz (USDT TRC-20)')}
               </div>
 
               <div className="flex items-center gap-2">
@@ -240,6 +242,14 @@ export default function AdminSellersPage() {
                         <i className="fa-solid fa-credit-card text-xs" />
                       </div>
                       <span className="text-xs text-on-surface-variant font-medium truncate">MP: {s.mpAlias}</span>
+                    </div>
+                  )}
+                  {s.cryptoAlias && (
+                    <div className="seller-info-chip flex items-center gap-2.5">
+                      <div className="seller-chip-icon seller-chip-crypto">
+                        <i className="fa-brands fa-bitcoin text-xs" />
+                      </div>
+                      <span className="text-xs text-on-surface-variant font-medium truncate">Crypto: {s.cryptoAlias}</span>
                     </div>
                   )}
                 </div>

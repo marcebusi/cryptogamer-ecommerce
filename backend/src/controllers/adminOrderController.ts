@@ -121,7 +121,7 @@ export const trackOrder = async (req: Request, res: Response): Promise<void> => 
     const orders = await prisma.order.findMany({
       where: { id: { endsWith: suffix } },
       include: {
-        seller: { select: { name: true, whatsapp: true } },
+        seller: { select: { name: true, whatsapp: true, alias: true, bank: true, mpAlias: true, cryptoAlias: true } },
         items:  { include: { product: { select: { name: true, image: true, slug: true } } } },
       },
       take: 1,

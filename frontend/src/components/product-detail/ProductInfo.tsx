@@ -216,7 +216,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         {/* CTA buttons */}
         <div className="space-y-2.5">
           <button
-            onClick={product.inStock ? openModal : undefined}
+            onClick={product.inStock ? () => { addToCart(product); openCart() } : undefined}
             disabled={!product.inStock}
             className={`w-full py-3 px-5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
               product.inStock
@@ -225,7 +225,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             }`}
           >
             <span className="material-symbols-outlined text-base">{product.inStock ? 'shopping_bag' : 'remove_shopping_cart'}</span>
-            {product.inStock ? 'Comprar / Consultar' : 'Sin Stock'}
+            {product.inStock ? 'Comprar' : 'Sin Stock'}
           </button>
 
           <button
@@ -242,8 +242,8 @@ export default function ProductInfo({ product }: ProductInfoProps) {
           <div className="flex items-center gap-3 px-4 py-3.5 bg-surface-container rounded-xl border border-white/5 flex-1">
             <span className="material-symbols-outlined text-tertiary-container text-2xl flex-shrink-0">local_shipping</span>
             <div>
-              <p className="text-sm font-bold text-on-surface leading-tight">Envío Gratis</p>
-              <p className="text-xs text-on-surface-variant mt-0.5">Llega en 2–3 días</p>
+              <p className="text-sm font-bold text-on-surface leading-tight">Tipos de envío</p>
+              <p className="text-xs text-on-surface-variant mt-0.5">Andreani, Correo Argentino y Retiro en sucursal</p>
             </div>
           </div>
           <div className="flex items-center gap-3 px-4 py-3.5 bg-surface-container rounded-xl border border-white/5 flex-1">

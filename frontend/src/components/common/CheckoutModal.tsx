@@ -5,12 +5,13 @@ import SellerPicker from '../checkout/SellerPicker'
 import ShippingRatePicker, { type ShippingRate } from '../checkout/ShippingRatePicker'
 import './CheckoutModal.css'
 
-type Step      = 'seller' | 'summary' | 'shipping' | 'payment' | 'success'
-type PayMethod = 'transfer' | 'cash' | 'usdt'
+type Step          = 'seller' | 'summary' | 'shipping' | 'payment' | 'success'
+type PayMethod     = 'transfer' | 'cash' | 'usdt'
+type SellerSubStep = 'choose' | 'list'
 
 interface Seller {
   id: string; name: string; bio: string; avatar: string
-  whatsapp: string; alias: string; bank: string; mpAlias: string
+  whatsapp: string; alias: string; bank: string; mpAlias: string; cryptoAlias: string
 }
 
 const PROVINCES = [
@@ -36,9 +37,12 @@ const VISIBLE: Step[] = ['seller', 'summary', 'shipping', 'payment']
 export default function CheckoutModal() {
   const { items, totalPrice, clearCart, isCheckoutOpen, closeCheckout } = useCart()
 
-  const [step,        setStep]        = useState<Step>('seller')
-  const [seller,      setSeller]      = useState<Seller | null>(null)
-  const [shipping,    setShipping]    = useState<ShippingRate | null>(null)
+  const [step,          setStep]          = useState<Step>('seller')
+  const [sellerSubStep, setSellerSubStep] = useState<SellerSubStep>('choose')
+  const [allSellers,    setAllSellers]    = useState<Seller[]>([])
+  const [loadingSellers,setLoadingSellers]= useState(false)
+  const [seller,        setSeller]        = useState<Seller | null>(null)
+  const [shipping,      setShipping]      = useState<ShippingRate | null>(null)
   const [payMethod,   setPayMethod]   = useState<PayMethod | null>(null)
   const [orderNumber, setOrderNumber] = useState('')
   const [orderId,     setOrderId]     = useState('')
@@ -56,15 +60,26 @@ export default function CheckoutModal() {
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  const tax          = totalPrice * 0.1
   const shippingCost = shipping?.price ?? 0
-  const total        = totalPrice + tax + shippingCost
+  const total        = totalPrice + shippingCost
   const totalItems   = items.reduce((s, i) => s + i.quantity, 0)
 
   /* ── Scroll lock ── */
   useEffect(() => {
     document.body.style.overflow = isCheckoutOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
+  }, [isCheckoutOpen])
+
+  /* ── Fetch sellers on open ── */
+  useEffect(() => {
+    if (!isCheckoutOpen || allSellers.length > 0) return
+    setLoadingSellers(true)
+    const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001'
+    fetch(`${BASE_URL}/api/sellers`)
+      .then(r => r.json())
+      .then(d => setAllSellers(Array.isArray(d) ? d : []))
+      .catch(() => setAllSellers([]))
+      .finally(() => setLoadingSellers(false))
   }, [isCheckoutOpen])
 
   /* ── ESC to close ── */
@@ -82,7 +97,7 @@ export default function CheckoutModal() {
     if (step === 'success') {
       clearCart()
       setTimeout(() => {
-        setStep('seller'); setSeller(null); setShipping(null)
+        setStep('seller'); setSellerSubStep('choose'); setSeller(null); setShipping(null)
         setPayMethod(null); setOrderNumber(''); setOrderId('')
         setComprState('idle'); setComprUrl('')
         setForm({ name:'', email:'', phone:'', address:'', city:'', province:'Buenos Aires', postal:'' })
@@ -170,6 +185,16 @@ export default function CheckoutModal() {
     }
   }
 
+  /* ── Random round-robin seller pick ── */
+  const pickRandomSeller = () => {
+    if (allSellers.length === 0) return
+    const lastIdx = parseInt(localStorage.getItem('lastSellerIdx') ?? '-1', 10)
+    const nextIdx = (lastIdx + 1) % allSellers.length
+    localStorage.setItem('lastSellerIdx', String(nextIdx))
+    setSeller(allSellers[nextIdx])
+    setStep('summary')
+  }
+
   /* ── Field helper ── */
   const field = (key: keyof typeof form, label: string, type = 'text', ph = '') => (
     <div>
@@ -244,24 +269,114 @@ export default function CheckoutModal() {
         {/* ════════ STEP 1 — Seller ════════ */}
         {step === 'seller' && (
           <div className="p-md space-y-md">
-            <p className="text-sm text-on-surface-variant">
-              Elegí con qué vendedor querés realizar tu compra. Cada uno tiene sus propios datos de pago.
-            </p>
-            <SellerPicker selected={seller} onSelect={setSeller} />
-            <button type="button"
-              onClick={() => { if (seller) setStep('summary') }}
-              disabled={!seller}
-              className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{
-                background: seller ? 'linear-gradient(135deg,#7c3aed,#5b21b6)' : 'rgba(255,255,255,0.05)',
-                color:      seller ? 'white' : 'rgba(255,255,255,0.4)',
-                boxShadow:  seller ? '0 0 24px rgba(138,43,226,0.4)' : 'none',
-              }}
-            >
-              {seller
-                ? <><span>Continuar con {seller.name}</span><i className="fa-solid fa-arrow-right" /></>
-                : 'Seleccioná un vendedor para continuar'}
-            </button>
+
+            {/* ── Sub-step A: choose mode ── */}
+            {sellerSubStep === 'choose' && (
+              <div className="space-y-5">
+                {/* Hero icon */}
+                <div className="text-center space-y-3 pt-1">
+                  <div className="relative inline-flex items-center justify-center">
+                    <div className="absolute inset-0 bg-purple-600/20 rounded-2xl blur-xl" />
+                    <div className="relative w-16 h-16 rounded-2xl bg-purple-600/15 border border-purple-500/30 flex items-center justify-center">
+                      <i className="fa-solid fa-store text-purple-400 text-2xl" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="font-black text-on-surface text-base font-['Plus_Jakarta_Sans']">
+                      ¿Conocés a algún vendedor?
+                    </h3>
+                    <p className="text-sm text-on-surface-variant mt-1 leading-relaxed">
+                      Podés elegir uno directamente o te asignamos el próximo disponible.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Option 1 — Random */}
+                <button
+                  type="button"
+                  onClick={pickRandomSeller}
+                  disabled={loadingSellers || allSellers.length === 0}
+                  className="w-full group flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(57,255,20,0.08), rgba(57,255,20,0.04))',
+                    border: '1.5px solid rgba(57,255,20,0.25)',
+                  }}
+                >
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
+                    style={{ background: 'rgba(57,255,20,0.12)', border: '1px solid rgba(57,255,20,0.25)' }}>
+                    <i className="fa-solid fa-shuffle text-lg" style={{ color: '#39ff14' }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm" style={{ color: '#39ff14' }}>Elegir al azar</p>
+                    <p className="text-xs text-on-surface-variant mt-0.5">Te asignamos el próximo vendedor disponible</p>
+                  </div>
+                  <i className="fa-solid fa-arrow-right text-xs flex-shrink-0" style={{ color: 'rgba(57,255,20,0.6)' }} />
+                </button>
+
+                {/* Option 2 — Manual */}
+                <button
+                  type="button"
+                  onClick={() => setSellerSubStep('list')}
+                  disabled={loadingSellers || allSellers.length === 0}
+                  className="w-full group flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                  style={{
+                    background: 'rgba(138,43,226,0.08)',
+                    border: '1.5px solid rgba(138,43,226,0.25)',
+                  }}
+                >
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
+                    style={{ background: 'rgba(138,43,226,0.15)', border: '1px solid rgba(168,85,247,0.3)' }}>
+                    <i className="fa-solid fa-users text-lg text-purple-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm text-purple-300">Elegir un vendedor</p>
+                    <p className="text-xs text-on-surface-variant mt-0.5">
+                      {loadingSellers ? 'Cargando vendedores...' : `Ver los ${allSellers.length} vendedores disponibles`}
+                    </p>
+                  </div>
+                  <i className="fa-solid fa-arrow-right text-xs text-purple-500/60 flex-shrink-0" />
+                </button>
+
+                {allSellers.length === 0 && !loadingSellers && (
+                  <p className="text-xs text-on-surface-variant/50 text-center">
+                    No hay vendedores disponibles en este momento.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* ── Sub-step B: seller list ── */}
+            {sellerSubStep === 'list' && (
+              <div className="space-y-md">
+                <button
+                  type="button"
+                  onClick={() => setSellerSubStep('choose')}
+                  className="flex items-center gap-2 text-xs text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
+                >
+                  <i className="fa-solid fa-arrow-left text-[10px]" />
+                  Volver
+                </button>
+                <p className="text-sm text-on-surface-variant">
+                  Elegí con qué vendedor querés realizar tu compra.
+                </p>
+                <SellerPicker selected={seller} onSelect={setSeller} sellers={allSellers} />
+                <button type="button"
+                  onClick={() => { if (seller) setStep('summary') }}
+                  disabled={!seller}
+                  className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{
+                    background: seller ? 'linear-gradient(135deg,#7c3aed,#5b21b6)' : 'rgba(255,255,255,0.05)',
+                    color:      seller ? 'white' : 'rgba(255,255,255,0.4)',
+                    boxShadow:  seller ? '0 0 24px rgba(138,43,226,0.4)' : 'none',
+                  }}
+                >
+                  {seller
+                    ? <><span>Continuar con {seller.name}</span><i className="fa-solid fa-arrow-right" /></>
+                    : 'Seleccioná un vendedor para continuar'}
+                </button>
+              </div>
+            )}
+
           </div>
         )}
 
@@ -281,7 +396,7 @@ export default function CheckoutModal() {
                   <p className="text-xs text-purple-300 font-semibold uppercase tracking-wider">Vendedor seleccionado</p>
                   <p className="text-sm font-bold text-white truncate">{seller.name}</p>
                 </div>
-                <button type="button" onClick={() => setStep('seller')}
+                <button type="button" onClick={() => { setStep('seller'); setSellerSubStep('choose') }}
                   className="text-xs text-purple-400 hover:text-purple-300 cursor-pointer transition-colors font-semibold">
                   Cambiar
                 </button>
@@ -308,12 +423,9 @@ export default function CheckoutModal() {
                 <span>Subtotal</span><span className="text-on-surface">{ARS(totalPrice)}</span>
               </div>
               <div className="flex justify-between text-sm text-on-surface-variant">
-                <span>Impuesto (10%)</span><span className="text-on-surface">{ARS(tax)}</span>
-              </div>
-              <div className="flex justify-between text-sm text-on-surface-variant">
                 <span>Envío</span>
                 <span className={shipping ? 'text-on-surface' : 'text-on-surface-variant/50 italic text-xs'}>
-                  {shipping ? ARS(shipping.price) : 'Se calcula en el paso siguiente'}
+                  {shipping ? ARS(shipping.price) : 'Se calcula según código postal'}
                 </span>
               </div>
               <div className="flex justify-between items-center pt-xs border-t border-white/10">
@@ -325,7 +437,7 @@ export default function CheckoutModal() {
             </div>
 
             <div className="flex gap-sm">
-              <button type="button" onClick={() => setStep('seller')}
+              <button type="button" onClick={() => { setStep('seller'); setSellerSubStep('choose') }}
                 className="flex-1 border border-outline-variant text-on-surface-variant py-3 rounded-xl font-semibold text-sm hover:bg-white/5 cursor-pointer transition-all">
                 Volver
               </button>
@@ -383,9 +495,6 @@ export default function CheckoutModal() {
               <div className="rounded-xl border border-purple-500/20 bg-purple-500/5 px-4 py-3 space-y-1.5">
                 <div className="flex justify-between text-xs text-white/50">
                   <span>Productos</span><span>{ARS(totalPrice)}</span>
-                </div>
-                <div className="flex justify-between text-xs text-white/50">
-                  <span>Impuesto (10%)</span><span>{ARS(tax)}</span>
                 </div>
                 <div className="flex justify-between text-xs text-white/50">
                   <span>Envío · {shipping.serviceName}</span><span>{ARS(shipping.price)}</span>
@@ -718,14 +827,14 @@ export default function CheckoutModal() {
                   <i className="fa-brands fa-ethereum" /> Pago con USDT
                 </p>
 
-                {/* Wallet address from seller (stored in mpAlias field for now) */}
-                {seller?.mpAlias ? (
+                {/* Wallet address from seller cryptoAlias field */}
+                {seller?.cryptoAlias ? (
                   <div className="space-y-2 text-xs mb-4">
                     <p className="text-white/60">Enviá el monto equivalente en USDT a esta dirección de wallet:</p>
                     <div className="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2 border border-[#26a17b]/20">
-                      <span className="font-mono text-[#26a17b] text-[11px] flex-1 break-all">{seller.mpAlias}</span>
+                      <span className="font-mono text-[#26a17b] text-[11px] flex-1 break-all">{seller.cryptoAlias}</span>
                       <button type="button"
-                        onClick={() => navigator.clipboard.writeText(seller!.mpAlias)}
+                        onClick={() => navigator.clipboard.writeText(seller!.cryptoAlias)}
                         className="flex-shrink-0 text-white/40 hover:text-white/80 transition-colors cursor-pointer"
                         title="Copiar dirección">
                         <i className="fa-regular fa-copy text-xs" />

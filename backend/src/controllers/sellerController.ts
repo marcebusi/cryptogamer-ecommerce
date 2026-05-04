@@ -30,10 +30,10 @@ export const getSellerById = async (req: Request, res: Response): Promise<void> 
 // POST /api/admin/sellers — admin only
 export const createSeller = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, bio, avatar, whatsapp, alias, bank, mpAlias, sortOrder } = req.body
+    const { name, bio, avatar, whatsapp, alias, bank, mpAlias, cryptoAlias, sortOrder } = req.body
     if (!name) { res.status(400).json({ message: 'El nombre es requerido' }); return }
     const seller = await prisma.seller.create({
-      data: { name, bio, avatar, whatsapp, alias, bank, mpAlias, sortOrder: sortOrder ?? 0 },
+      data: { name, bio, avatar, whatsapp, alias, bank, mpAlias, cryptoAlias, sortOrder: sortOrder ?? 0 },
     })
     res.status(201).json(seller)
   } catch (err) {
@@ -45,10 +45,10 @@ export const createSeller = async (req: Request, res: Response): Promise<void> =
 // PUT /api/admin/sellers/:id — admin only
 export const updateSeller = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, bio, avatar, whatsapp, alias, bank, mpAlias, active, sortOrder } = req.body
+    const { name, bio, avatar, whatsapp, alias, bank, mpAlias, cryptoAlias, active, sortOrder } = req.body
     const seller = await prisma.seller.update({
       where: { id: req.params.id },
-      data: { name, bio, avatar, whatsapp, alias, bank, mpAlias, active, sortOrder },
+      data: { name, bio, avatar, whatsapp, alias, bank, mpAlias, cryptoAlias, active, sortOrder },
     })
     res.json(seller)
   } catch (err) {

@@ -34,10 +34,11 @@ model Seller {
   bio       String  @default("")
   avatar    String  @default("")
   whatsapp  String  @default("")
-  alias     String  @default("")   // CBU o alias bancario
-  bank      String  @default("")   // Banco / billetera virtual
-  mpAlias   String  @default("")   // Alias Mercado Pago (opcional)
-  active    Boolean @default(true)
+  alias       String  @default("")   // CBU o alias bancario
+  bank        String  @default("")   // Banco / billetera virtual
+  mpAlias     String  @default("")   // Alias Mercado Pago (opcional)
+  cryptoAlias String  @default("")   // Dirección o alias crypto (USDT, BTC, etc.)
+  active      Boolean @default(true)
   sortOrder Int     @default(0)
 
   createdAt DateTime @default(now())

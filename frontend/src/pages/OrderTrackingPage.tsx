@@ -20,7 +20,7 @@ interface TrackingOrder {
   shippingPostalCode: string | null
   customerName: string | null
   customerEmail: string | null
-  seller: { name: string; whatsapp: string } | null
+  seller: { name: string; whatsapp: string; alias: string; bank: string; mpAlias: string; cryptoAlias: string } | null
   items: {
     id: string
     quantity: number
@@ -635,6 +635,86 @@ function PaymentCard({
           </span>
         )}
       </div>
+
+      {/* ── Payment details (transfer / usdt / cash) ── */}
+      {method === 'transfer' && order.seller?.alias && (
+        <div className="rounded-xl p-4 space-y-2 border"
+          style={{ background: 'rgba(58,244,255,0.06)', borderColor: 'rgba(58,244,255,0.2)' }}>
+          <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5" style={{ color: '#3af4ff' }}>
+            <i className="fa-solid fa-building-columns text-[10px]" /> Datos para tu transferencia
+          </p>
+          <div className="space-y-1 text-xs">
+            {order.seller.bank && (
+              <p className="text-white/60">
+                <span className="text-white font-semibold">Banco / Billetera:</span> {order.seller.bank}
+              </p>
+            )}
+            <div className="flex items-center gap-2">
+              <p className="text-white/60 flex-1">
+                <span className="text-white font-semibold">Alias / CBU:</span>{' '}
+                <span className="font-mono" style={{ color: '#3af4ff' }}>{order.seller.alias}</span>
+              </p>
+              <button type="button"
+                onClick={() => navigator.clipboard.writeText(order.seller!.alias)}
+                className="text-white/30 hover:text-white/70 transition-colors cursor-pointer flex-shrink-0"
+                title="Copiar alias">
+                <i className="fa-regular fa-copy text-xs" />
+              </button>
+            </div>
+            {order.seller.mpAlias && (
+              <p className="text-white/60">
+                <span className="text-white font-semibold">MP Alias:</span>{' '}
+                <span className="font-mono text-purple-300">{order.seller.mpAlias}</span>
+              </p>
+            )}
+            <p className="font-bold pt-1" style={{ color: '#3af4ff' }}>
+              Monto: <span className="font-mono">{ars(order.totalAmount)}</span>
+            </p>
+          </div>
+        </div>
+      )}
+
+      {method === 'usdt' && order.seller?.cryptoAlias && (
+        <div className="rounded-xl p-4 space-y-2 border"
+          style={{ background: 'rgba(38,161,123,0.06)', borderColor: 'rgba(38,161,123,0.25)' }}>
+          <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5" style={{ color: '#26a17b' }}>
+            <i className="fa-brands fa-ethereum text-[10px]" /> Dirección de wallet USDT
+          </p>
+          <div className="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2 border border-[#26a17b]/20">
+            <span className="font-mono text-[11px] flex-1 break-all" style={{ color: '#26a17b' }}>
+              {order.seller.cryptoAlias}
+            </span>
+            <button type="button"
+              onClick={() => navigator.clipboard.writeText(order.seller!.cryptoAlias)}
+              className="text-white/30 hover:text-white/70 transition-colors cursor-pointer flex-shrink-0"
+              title="Copiar dirección">
+              <i className="fa-regular fa-copy text-xs" />
+            </button>
+          </div>
+          <p className="text-xs text-white/40 leading-relaxed">
+            Red: <span className="text-white font-semibold">TRC-20 (Tron)</span> o{' '}
+            <span className="text-white font-semibold">ERC-20 (Ethereum)</span>.
+            Confirmá la red antes de enviar.
+          </p>
+          <p className="text-xs font-bold" style={{ color: '#26a17b' }}>
+            Monto: <span className="font-mono">{ars(order.totalAmount)}</span>
+          </p>
+        </div>
+      )}
+
+      {method === 'cash' && (
+        <div className="rounded-xl p-4 border"
+          style={{ background: 'rgba(168,85,247,0.06)', borderColor: 'rgba(168,85,247,0.2)' }}>
+          <p className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 mb-2" style={{ color: '#a855f7' }}>
+            <i className="fa-solid fa-money-bill-wave text-[10px]" /> Pago en efectivo
+          </p>
+          <p className="text-xs text-white/55 leading-relaxed">
+            Coordiná con el vendedor el pago de{' '}
+            <span className="font-bold text-white">{ars(order.totalAmount)}</span>.
+            {order.seller?.whatsapp && ' Podés contactarlo por WhatsApp.'}
+          </p>
+        </div>
+      )}
 
       {/* Comprobante upload section */}
       {needsComprobante && !isPaymentConfirmed && (
