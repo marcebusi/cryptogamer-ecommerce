@@ -1,0 +1,145 @@
+/* ══════════════════════════════════════════════════
+   SELLER CARDS — DARK MODE (default)
+   ══════════════════════════════════════════════════ */
+
+.seller-card {
+  background: rgba(18, 17, 32, 0.85);
+  border: 1px solid rgba(138, 43, 226, 0.18);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.seller-card:hover {
+  border-color: rgba(138, 43, 226, 0.35);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  transform: translateY(-2px);
+}
+
+/* Avatar */
+.seller-avatar-initials {
+  background: linear-gradient(135deg, #7c3aed, #4c1d95);
+  box-shadow: 0 0 16px rgba(138, 43, 226, 0.45);
+}
+.seller-avatar-border { border: 2px solid rgba(138, 43, 226, 0.3); }
+
+/* Info chips */
+.seller-info-chip {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 0.625rem;
+  padding: 6px 10px;
+}
+.seller-chip-icon {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.seller-chip-wa   { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+.seller-chip-bank { background: rgba(58, 244, 255, 0.12); color: #3af4ff; }
+.seller-chip-mp   { background: rgba(138, 43, 226, 0.15); color: #a78bfa; }
+
+/* Card footer */
+.seller-card-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* Action buttons */
+.seller-btn-edit {
+  background: rgba(138, 43, 226, 0.12);
+  border: 1px solid rgba(138, 43, 226, 0.25);
+  color: #c084fc;
+}
+.seller-btn-edit:hover {
+  background: rgba(138, 43, 226, 0.22);
+  border-color: rgba(168, 85, 247, 0.5);
+  color: #e9d5ff;
+}
+.seller-btn-delete {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+.seller-btn-delete:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+}
+
+/* Top-level buttons */
+.sellers-btn-primary {
+  background: #7c3aed;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.sellers-btn-primary:hover {
+  background: #6d28d9;
+  box-shadow: 0 0 20px rgba(138, 43, 226, 0.4);
+}
+
+/* Modal */
+.sellers-modal-overlay { background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); }
+.sellers-modal-panel {
+  background: rgba(10, 9, 20, 0.98);
+  border: 1px solid rgba(138, 43, 226, 0.2);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.8);
+}
+
+/* ══════════════════════════════════════════════════
+   LIGHT MODE
+   ══════════════════════════════════════════════════ */
+
+html.light .seller-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.07);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+}
+html.light .seller-card:hover {
+  border-color: rgba(235, 0, 0, 0.2);
+  box-shadow: 0 6px 28px rgba(235, 0, 0, 0.08);
+}
+
+html.light .seller-avatar-initials {
+  background: linear-gradient(135deg, #eb0000, #7f0000);
+  box-shadow: 0 4px 12px rgba(235, 0, 0, 0.3);
+}
+html.light .seller-avatar-border { border-color: rgba(235, 0, 0, 0.25); }
+
+html.light .seller-info-chip { background: rgba(0, 0, 0, 0.03); }
+html.light .seller-chip-wa   { background: rgba(22, 163, 74, 0.1); color: #16a34a; }
+html.light .seller-chip-bank { background: rgba(14, 116, 144, 0.1); color: #0e7490; }
+html.light .seller-chip-mp   { background: rgba(235, 0, 0, 0.08);  color: #eb0000; }
+
+html.light .seller-card-footer {
+  border-top-color: rgba(0, 0, 0, 0.06);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+html.light .seller-btn-edit {
+  background: rgba(235, 0, 0, 0.06);
+  border-color: rgba(235, 0, 0, 0.18);
+  color: #b91c1c;
+}
+html.light .seller-btn-edit:hover {
+  background: rgba(235, 0, 0, 0.12);
+  border-color: rgba(235, 0, 0, 0.35);
+  color: #7f1d1d;
+}
+html.light .seller-btn-delete {
+  background: rgba(220, 38, 38, 0.06);
+  border-color: rgba(220, 38, 38, 0.18);
+  color: #dc2626;
+}
+html.light .seller-btn-delete:hover {
+  background: rgba(220, 38, 38, 0.12);
+  border-color: rgba(220, 38, 38, 0.35);
+  color: #991b1b;
+}
+
+html.light .sellers-btn-primary { background: #eb0000; }
+html.light .sellers-btn-primary:hover { background: #b91c1c; box-shadow: 0 4px 16px rgba(235,0,0,0.3); }
+
+html.light .sellers-modal-overlay { background: rgba(0,0,0,0.4); }
+html.light .sellers-modal-panel {
+  background: rgba(255, 255, 255, 0.99);
+  border-color: rgba(235, 0, 0, 0.12);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.15);
+}

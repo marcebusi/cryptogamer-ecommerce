@@ -69,9 +69,9 @@
 html.light {
   /* Opacity-capable colors — RGB channels */
   --color-bg:                   250 248 254;   /* #faf8fe */
-  --color-primary-container:    235 0 0;        /* #eb0000 */
-  --color-secondary-container:  226 226 226;    /* #e2e2e2 */
-  --color-tertiary-container:   115 117 118;    /* #737576 */
+  --color-primary-container:    235 0 0;        /* #eb0000  rojo brillante */
+  --color-secondary-container:  185 28 28;      /* #b91c1c  rojo oscuro (botones, switches) */
+  --color-tertiary-container:   127 29 29;      /* #7f1d1d  rojo muy oscuro (accent terciario) */
 
   /* Surfaces */
   --color-surface:                   #faf8fe;
@@ -218,10 +218,10 @@ html.light .border-primary-container { border-color: #eb0000 !important; }
 html.light .text-on-primary         { color: #ffffff !important; }
 html.light .bg-on-primary           { background-color: #ffffff !important; }
 
-/* ── Secondary ── */
-html.light .bg-secondary-container  { background-color: #e2e2e2 !important; }
-html.light .text-secondary          { color: #5e5e5e !important; }
-html.light .text-secondary-container { color: #930100 !important; }
+/* ── Secondary (rojo oscuro en light mode) ── */
+html.light .bg-secondary-container  { background-color: #b91c1c !important; }
+html.light .text-secondary          { color: #7f1d1d !important; }
+html.light .text-secondary-container { color: #b91c1c !important; }
 
 /* ── Tertiary ── */
 html.light .text-tertiary           { color: #5a5c5e !important; }
@@ -324,9 +324,9 @@ html.light [class*="via-purple"]  {
 }
 
 /* ── Textos de colores neon → legibles en modo claro ── */
-html.light .text-tertiary-container { color: #0891b2 !important; }
-html.light .text-primary            { color: #7f0000 !important; }
-html.light .text-secondary-container { color: #bc0100 !important; }
+html.light .text-tertiary-container  { color: #7f1d1d !important; }
+html.light .text-primary             { color: #bc0100 !important; }
+html.light .text-secondary-container { color: #b91c1c !important; }
 
 /* ── Texto blanco SOLO en contextos que se vuelven claros ──
    NOTA: NO se hace override global de text-white para no romper
@@ -474,3 +474,94 @@ html.light textarea.border-white\/10 {
   color: #1a1b1f !important;
 }
 html.light input.focus\:border-purple-500\/60:focus { border-color: rgba(235,0,0,0.4) !important; }
+
+/* ══════════════════════════════════════════════════════
+   FIXES ADICIONALES — v3
+   ══════════════════════════════════════════════════════ */
+
+/* ── Logo icono: forzar rojo en light mode ── */
+html.light .navbar-logo-icon {
+  background: linear-gradient(135deg, #eb0000, #7f0000) !important;
+  box-shadow: 0 0 10px rgba(235,0,0,0.3) !important;
+}
+html.light .navbar-logo-text .text-purple-400 { color: #eb0000 !important; }
+html.light .navbar-logo-text .text-purple-300 { color: #b91c1c !important; }
+
+/* ── Range input track (precio) ── */
+input[type='range']::-webkit-slider-runnable-track {
+  height: 4px;
+  background: rgba(255,74,141,0.25);
+  border-radius: 2px;
+}
+html.light input[type='range']::-webkit-slider-runnable-track {
+  background: rgba(185,28,28,0.2);
+}
+input[type='range']::-moz-range-track {
+  height: 4px;
+  background: rgba(255,74,141,0.25);
+  border-radius: 2px;
+}
+html.light input[type='range']::-moz-range-track {
+  background: rgba(185,28,28,0.2);
+}
+
+/* ── ProductCard: on-secondary debe ser blanco en light ── */
+html.light .bg-secondary-container { color: #ffffff; }
+html.light .text-on-secondary { color: #ffffff !important; }
+
+/* ── Offer/Feature switches en AdminProductPage ── */
+html.light [class*="bg-secondary-container\/20"][class*="border-secondary-container"] {
+  background-color: rgba(185,28,28,0.12) !important;
+  border-color: rgba(185,28,28,0.35) !important;
+}
+html.light [class*="bg-primary-container\/15"][class*="border-primary-container"] {
+  background-color: rgba(235,0,0,0.1) !important;
+  border-color: rgba(235,0,0,0.3) !important;
+}
+
+/* ── AdminSellersPage — seller list cards ── */
+html.light [class*="bg-\[#0c0d14\]"],
+html.light [class*="bg-\[#090916\]"],
+html.light [class*="bg-\[#0a0b16\]"] {
+  background-color: #ffffff !important;
+  border-color: rgba(0,0,0,0.07) !important;
+}
+
+/* ── AdminOrdersPage — status badges ── */
+html.light .bg-\[\#07080d\].rounded-lg {
+  background-color: #f4f3f8 !important;
+}
+
+/* ── AdminCategoryPage — botones y etiquetas ── */
+html.light [class*="border-purple-500"],
+html.light [class*="border-purple-400"] { border-color: rgba(235,0,0,0.25) !important; }
+html.light [class*="text-purple-500"]   { color: #eb0000 !important; }
+html.light [class*="bg-purple-500"]     { background-color: #eb0000 !important; }
+html.light [class*="bg-purple-600"]     { background-color: #b91c1c !important; }
+html.light [class*="bg-purple-900"]     { background-color: #7f1d1d !important; }
+
+/* ── ProductCard: on-secondary-container text ── */
+html.light .text-on-secondary-container { color: #ffffff !important; }
+
+/* ── Etiquetas de categoría en modo blanco ── */
+html.light .bg-secondary-container\/20  { background-color: rgba(185,28,28,0.1) !important; }
+html.light .bg-secondary-container\/30  { background-color: rgba(185,28,28,0.15) !important; }
+html.light .border-secondary-container\/40 { border-color: rgba(185,28,28,0.3) !important; }
+html.light .border-secondary-container\/30 { border-color: rgba(185,28,28,0.25) !important; }
+html.light .border-secondary-container\/20 { border-color: rgba(185,28,28,0.18) !important; }
+
+/* ── Tertiary container text ── */
+html.light .text-tertiary  { color: #7f1d1d !important; }
+html.light .bg-tertiary-container\/20 { background-color: rgba(127,29,29,0.08) !important; }
+
+/* ── Hover text neon → rojo en light ── */
+html.light .hover\:text-pink-400:hover  { color: #b91c1c !important; }
+html.light .hover\:text-cyan-400:hover  { color: #0891b2 !important; }
+
+/* NOTA: NO usar wildcard para bg-secondary-container/ → rompe opacidades */
+html.light .text-secondary-container { color: #b91c1c !important; }
+
+/* ── Footer: corregir links y texto ── */
+html.light #footer a { color: #374151; }
+html.light #footer a:hover { color: #eb0000 !important; }
+html.light #footer .text-purple-400 { color: #eb0000 !important; }
