@@ -18,7 +18,7 @@ const infoLinks = [
 ]
 
 const socials = [
-  { fa: 'fa-brands fa-facebook', label: 'Facebook', href: 'https://www.facebook.com/groups/840438795976507', color: 'hover:text-blue-500 hover:border-blue-500/40' },
+  { fa: 'fa-brands fa-facebook', label: 'Facebook', href: 'https://www.facebook.com/gabriel.diosquez.31', color: 'hover:text-blue-500 hover:border-blue-500/40' },
   { fa: 'fa-brands fa-whatsapp', label: 'WhatsApp', href: 'https://wa.me/541140000000',                     color: 'hover:text-green-400 hover:border-green-400/40' },
 ]
 
