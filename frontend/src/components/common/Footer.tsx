@@ -18,9 +18,8 @@ const infoLinks = [
 ]
 
 const socials = [
-  { icon: 'public',       label: 'Web',       color: 'hover:text-cyan-400   hover:border-cyan-400/40'   },
-  { icon: 'forum',        label: 'Discord',   color: 'hover:text-indigo-400 hover:border-indigo-400/40' },
-  { icon: 'photo_camera', label: 'Instagram', color: 'hover:text-pink-400   hover:border-pink-400/40'   },
+  { fa: 'fa-brands fa-facebook', label: 'Facebook', href: 'https://www.facebook.com/groups/840438795976507', color: 'hover:text-blue-500 hover:border-blue-500/40' },
+  { fa: 'fa-brands fa-whatsapp', label: 'WhatsApp', href: 'https://wa.me/541140000000',                     color: 'hover:text-green-400 hover:border-green-400/40' },
 ]
 
 export default function Footer() {
@@ -40,15 +39,15 @@ export default function Footer() {
           </p>
           <div className="flex gap-xs">
             {socials.map(s => (
-              <button key={s.label} aria-label={s.label}
-                className={`material-symbols-outlined text-slate-400 cursor-pointer
+              <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label}
+                className={`social-btn text-slate-400 cursor-pointer
                   w-9 h-9 rounded-lg border border-white/10
                   flex items-center justify-center
                   transition-all duration-200
                   hover:-translate-y-0.5
                   ${s.color}`}>
-                {s.icon}
-              </button>
+                <i className={s.fa} />
+              </a>
             ))}
           </div>
         </div>

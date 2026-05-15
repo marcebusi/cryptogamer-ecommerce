@@ -162,19 +162,20 @@ export default function ContactPage() {
               <p className="text-xs text-on-surface-variant uppercase tracking-widest mb-sm">También en redes</p>
               <div className="flex gap-sm">
                 {[
-                  { icon: 'language', label: 'Web', color: 'hover:text-cyan-400 hover:border-cyan-400/40' },
-                  { icon: 'photo_camera', label: 'Instagram', color: 'hover:text-pink-400 hover:border-pink-400/40' },
-                  { icon: 'forum', label: 'Discord', color: 'hover:text-indigo-400 hover:border-indigo-400/40' },
-                  { icon: 'smart_display', label: 'YouTube', color: 'hover:text-red-400 hover:border-red-400/40' },
+                  { fa: 'fa-brands fa-facebook', label: 'Facebook', href: 'https://www.facebook.com/groups/840438795976507', color: 'hover:text-blue-500 hover:border-blue-500/40' },
+                  { fa: 'fa-brands fa-whatsapp', label: 'WhatsApp', href: 'https://wa.me/541140000000',                     color: 'hover:text-green-400 hover:border-green-400/40' },
                 ].map(s => (
-                  <button
+                  <a
                     key={s.label}
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className={`flex flex-col items-center gap-1 p-sm rounded-xl border border-white/10 bg-surface-container text-on-surface-variant transition-all cursor-pointer ${s.color}`}
                     aria-label={s.label}
                   >
-                    <span className="material-symbols-outlined text-xl">{s.icon}</span>
+                    <i className={`${s.fa} text-xl`} />
                     <span className="text-[10px] font-semibold">{s.label}</span>
-                  </button>
+                  </a>
                 ))}
               </div>
             </div>
