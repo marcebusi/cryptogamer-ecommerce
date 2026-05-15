@@ -19,7 +19,7 @@ const contactInfo = [
     color: 'text-tertiary-container',
     bg: 'bg-tertiary-container/10 border-tertiary-container/20',
     title: 'Email',
-    value: 'hola@cryptogamer.ar',
+    value: 'gabrieldiosvazquez.25@gmail.com',
     sub: 'Respondemos en menos de 24 hs',
   },
   {
@@ -27,7 +27,7 @@ const contactInfo = [
     color: 'text-primary-container',
     bg: 'bg-primary-container/10 border-primary-container/20',
     title: 'WhatsApp',
-    value: '+54 11 4000-0000',
+    value: '+54 9 11 6650-6985',
     sub: 'Lun – Sáb · 9 a 21 hs',
   },
   {
