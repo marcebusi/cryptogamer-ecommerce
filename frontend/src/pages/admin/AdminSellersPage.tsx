@@ -3,6 +3,8 @@ import { api } from '../../lib/api'
 import toast from 'react-hot-toast'
 import './AdminSellersPage.css'
 
+const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3001'
+
 interface Seller {
   id: string
   name: string
@@ -33,7 +35,7 @@ export default function AdminSellersPage() {
   const load = async () => {
     setLoading(true)
     try {
-      const res = await fetch('http://localhost:3001/api/sellers')
+      const res = await fetch(`${BASE}/api/sellers`)
       const data = await res.json()
       setSellers(Array.isArray(data) ? data : [])
     } catch { toast.error('Error al cargar vendedores') }

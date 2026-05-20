@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import './Footer.css'
 
@@ -11,10 +12,10 @@ const shopLinks = [
 ]
 
 const infoLinks = [
-  { label: 'Sobre nosotros', to: '/'        },
-  { label: 'Ofertas',        to: '/ofertas' },
-  { label: 'Soporte',        to: '/'        },
-  { label: 'Privacidad',     to: '/'        },
+  { label: 'Sobre nosotros', to: '/'         },
+  { label: 'Ofertas',        to: '/ofertas'  },
+  { label: 'Soporte',        to: '/contacto' },
+  { label: 'Privacidad',     to: '/contacto' },
 ]
 
 const socials = [
@@ -23,6 +24,8 @@ const socials = [
 ]
 
 export default function Footer() {
+  const [newsletterDone, setNewsletterDone] = useState(false)
+
   return (
     <footer id="footer" className="bg-slate-950 w-full border-t border-purple-500/20">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 px-4 sm:px-6 py-10 md:py-12 max-w-7xl mx-auto">
@@ -92,22 +95,29 @@ export default function Footer() {
           <p className="text-slate-500 text-xs mb-sm leading-relaxed">
             Suscribite para recibir ofertas exclusivas y lanzamientos.
           </p>
-          <form onSubmit={e => { e.preventDefault(); (e.currentTarget.querySelector('input') as HTMLInputElement).value = '' }}
-            className="flex gap-xs">
-            <input type="email" placeholder="tu@email.com" required
-              className="bg-surface-container border border-outline-variant
-                text-sm rounded-lg w-full px-3 py-2
-                focus:ring-2 focus:ring-primary-container/40 focus:border-primary-container
-                outline-none text-on-surface placeholder:text-slate-500
-                transition-all duration-200"/>
-            <button type="submit" aria-label="Suscribirse"
-              className="bg-purple-600 text-white p-2 rounded-lg cursor-pointer flex-shrink-0
-                hover:bg-primary-container hover:text-on-primary
-                hover:shadow-[0_0_16px_rgba(57,255,20,0.35)]
-                active:scale-90 transition-all duration-200">
-              <span className="material-symbols-outlined text-sm">send</span>
-            </button>
-          </form>
+          {newsletterDone ? (
+            <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-primary-container/10 border border-primary-container/20">
+              <span className="material-symbols-outlined text-primary-container text-sm">check_circle</span>
+              <p className="text-xs text-primary-container font-semibold">¡Gracias! Te avisamos de las mejores ofertas.</p>
+            </div>
+          ) : (
+            <form onSubmit={e => { e.preventDefault(); setNewsletterDone(true) }}
+              className="flex gap-xs">
+              <input type="email" placeholder="tu@email.com" required
+                className="bg-surface-container border border-outline-variant
+                  text-sm rounded-lg w-full px-3 py-2
+                  focus:ring-2 focus:ring-primary-container/40 focus:border-primary-container
+                  outline-none text-on-surface placeholder:text-slate-500
+                  transition-all duration-200"/>
+              <button type="submit" aria-label="Suscribirse"
+                className="bg-purple-600 text-white p-2 rounded-lg cursor-pointer flex-shrink-0
+                  hover:bg-primary-container hover:text-on-primary
+                  hover:shadow-[0_0_16px_rgba(57,255,20,0.35)]
+                  active:scale-90 transition-all duration-200">
+                <span className="material-symbols-outlined text-sm">send</span>
+              </button>
+            </form>
+          )}
         </div>
       </div>
 

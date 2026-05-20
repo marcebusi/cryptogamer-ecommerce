@@ -5,7 +5,8 @@ import './CartDrawer.css'
 export default function CartDrawer() {
   const { items, isCartOpen, closeCart, openCheckout, removeFromCart, updateQuantity, totalPrice } = useCart()
 
-  const tax = totalPrice * 0.1
+  const ars = (n: number) =>
+    new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n)
 
   /* Lock body scroll when cart is open */
   useEffect(() => {
@@ -119,7 +120,7 @@ export default function CartDrawer() {
                       </div>
 
                       <span className="text-primary-container font-bold text-base">
-                        ${(product.price * quantity).toFixed(2)}
+                        {ars(product.price * quantity)}
                       </span>
                     </div>
                   </div>
@@ -137,16 +138,12 @@ export default function CartDrawer() {
             <div className="space-y-xs">
               <div className="flex justify-between text-sm text-on-surface-variant">
                 <span>Subtotal</span>
-                <span className="font-semibold text-on-surface">${totalPrice.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-sm text-on-surface-variant">
-                <span>Impuesto estimado</span>
-                <span className="font-semibold text-on-surface">${tax.toFixed(2)}</span>
+                <span className="font-semibold text-on-surface">{ars(totalPrice)}</span>
               </div>
               <div className="flex justify-between items-center pt-xs border-t border-white/10">
                 <span className="font-bold text-base uppercase tracking-wider text-on-surface">Total</span>
                 <span className="text-xl font-black text-primary-container drop-shadow-[0_0_8px_rgba(57,255,20,0.4)]">
-                  ${(totalPrice + tax).toFixed(2)}
+                  {ars(totalPrice)}
                 </span>
               </div>
             </div>
@@ -160,8 +157,9 @@ export default function CartDrawer() {
               Finalizar Compra
             </button>
 
-            <p className="text-center text-on-surface-variant text-[11px]">
-              Pago seguro vía <span className="text-primary-container font-bold">NeonPay</span>
+            <p className="text-center text-on-surface-variant text-[11px] flex items-center justify-center gap-1">
+              <span className="material-symbols-outlined text-xs text-primary-container">lock</span>
+              Pago 100% seguro · Coordinás directo con el vendedor
             </p>
           </div>
         )}

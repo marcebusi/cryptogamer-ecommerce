@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 interface Seller { id: string; name: string; bio: string; avatar: string; whatsapp: string }
 
 const API = import.meta.env.VITE_API_URL ?? 'http://localhost:3001'
+const FALLBACK_WA = '5491166506985'
 type ModalStep = 'choose' | 'list' | 'selected'
 
 function getRRSeller(sellers: Seller[]): Seller {
@@ -50,9 +51,15 @@ export default function WhatsAppButton() {
   const closeModal = () => setModal(null)
 
   const handleRandom = () => {
-    if (!sellers.length) return
-    setSelected(getRRSeller(sellers))
-    setModal('selected')
+    if (sellers.length > 0) {
+      setSelected(getRRSeller(sellers))
+      setModal('selected')
+    } else {
+      // Fallback: open main contact number directly
+      const msg = encodeURIComponent('¡Hola! Quisiera hacer una consulta sobre un producto.')
+      window.open(`https://wa.me/${FALLBACK_WA}?text=${msg}`, '_blank', 'noopener,noreferrer')
+      closeModal()
+    }
   }
 
   const handlePickSeller = (seller: Seller) => {
@@ -122,7 +129,7 @@ export default function WhatsAppButton() {
               <div className="px-5 py-5 space-y-3">
                 <p className="text-xs text-white/35 text-center mb-4">Elegí cómo querés continuar</p>
 
-                <button onClick={handleRandom} disabled={loading || sellers.length === 0}
+                <button onClick={handleRandom} disabled={loading}
                   className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-[#25D366]/10 border border-[#25D366]/25 hover:bg-[#25D366]/18 hover:border-[#25D366]/45 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed group">
                   <div className="w-9 h-9 rounded-xl bg-[#25D366]/15 border border-[#25D366]/25 flex items-center justify-center flex-shrink-0 group-hover:bg-[#25D366]/25 transition-colors">
                     {loading

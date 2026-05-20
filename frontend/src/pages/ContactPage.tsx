@@ -13,7 +13,7 @@ const SUBJECTS = [
   'Otro',
 ]
 
-const contactInfo = [
+const contactInfo: { icon: string; color: string; bg: string; title: string; value: string; sub: string; href?: string }[] = [
   {
     icon: 'mail',
     color: 'text-tertiary-container',
@@ -21,6 +21,7 @@ const contactInfo = [
     title: 'Email',
     value: 'gabrieldiosvazquez.25@gmail.com',
     sub: 'Respondemos en menos de 24 hs',
+    href: 'mailto:hola@cryptogamer.ar',
   },
   {
     icon: 'chat',
@@ -29,6 +30,7 @@ const contactInfo = [
     title: 'WhatsApp',
     value: '+54 9 11 6650-6985',
     sub: 'Lun – Sáb · 9 a 21 hs',
+    href: 'https://wa.me/5491166506985?text=' + encodeURIComponent('¡Hola! Quisiera hacer una consulta.'),
   },
   {
     icon: 'storefront',
@@ -138,23 +140,32 @@ export default function ContactPage() {
             </div>
 
             <div className="space-y-sm">
-              {contactInfo.map(c => (
-                <div
-                  key={c.title}
-                  className={`contact-info-card flex items-start gap-sm p-sm rounded-2xl border ${c.bg} transition-all duration-200 hover:scale-[1.02] cursor-default`}
-                >
-                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${c.bg} border`}>
-                    <span className={`material-symbols-outlined ${c.color} text-2xl`}>{c.icon}</span>
+              {contactInfo.map(c => {
+                const inner = (
+                  <>
+                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${c.bg} border`}>
+                      <span className={`material-symbols-outlined ${c.color} text-2xl`}>{c.icon}</span>
+                    </div>
+                    <div>
+                      <p className="text-xs text-on-surface-variant uppercase tracking-widest font-semibold mb-0.5">
+                        {c.title}
+                      </p>
+                      <p className={`font-bold text-on-surface ${c.color}`}>{c.value}</p>
+                      <p className="text-xs text-on-surface-variant mt-0.5">{c.sub}</p>
+                    </div>
+                  </>
+                )
+                const cls = `contact-info-card flex items-start gap-sm p-sm rounded-2xl border ${c.bg} transition-all duration-200 hover:scale-[1.02]`
+                return c.href ? (
+                  <a key={c.title} href={c.href} target="_blank" rel="noopener noreferrer" className={`${cls} cursor-pointer`}>
+                    {inner}
+                  </a>
+                ) : (
+                  <div key={c.title} className={`${cls} cursor-default`}>
+                    {inner}
                   </div>
-                  <div>
-                    <p className="text-xs text-on-surface-variant uppercase tracking-widest font-semibold mb-0.5">
-                      {c.title}
-                    </p>
-                    <p className={`font-bold text-on-surface ${c.color}`}>{c.value}</p>
-                    <p className="text-xs text-on-surface-variant mt-0.5">{c.sub}</p>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
 
             {/* Social */}
