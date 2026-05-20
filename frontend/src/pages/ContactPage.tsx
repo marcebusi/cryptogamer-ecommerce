@@ -21,7 +21,7 @@ const contactInfo: { icon: string; color: string; bg: string; title: string; val
     title: 'Email',
     value: 'gabrieldiosvazquez.25@gmail.com',
     sub: 'Respondemos en menos de 24 hs',
-    href: 'mailto:hola@cryptogamer.ar',
+    href: 'mailto:gabrieldiosvazquez.25@gmail.com',
   },
   {
     icon: 'chat',
