@@ -150,3 +150,105 @@ export const getEnabledSections = async (_req: Request, res: Response): Promise<
     res.json({ sections: ['orders', 'analytics', 'sellers', 'contact'] })
   }
 }
+
+// ─── Billing ────────────────────────────────────────────────
+
+export const getBillingConfig = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    let config = await prisma.storeConfig.findFirst()
+    if (!config) config = await prisma.storeConfig.create({ data: {} })
+    res.json({
+      monthlyAmount: config.monthlyAmount,
+      billingAlias:  config.billingAlias,
+      billingDay:    config.billingDay,
+    })
+  } catch {
+    res.status(500).json({ message: 'Error al obtener config de facturación' })
+  }
+}
+
+export const updateBillingConfig = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { monthlyAmount, billingAlias, billingDay } = req.body as {
+      monthlyAmount: number
+      billingAlias:  string
+      billingDay:    number
+    }
+    let config = await prisma.storeConfig.findFirst()
+    if (!config) {
+      config = await prisma.storeConfig.create({ data: { monthlyAmount, billingAlias, billingDay } })
+    } else {
+      config = await prisma.storeConfig.update({
+        where: { id: config.id },
+        data:  { monthlyAmount, billingAlias, billingDay },
+      })
+    }
+    res.json(config)
+  } catch {
+    res.status(500).json({ message: 'Error al guardar config de facturación' })
+  }
+}
+
+export const getServicePayments = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const payments = await prisma.servicePayment.findMany({ orderBy: { period: 'desc' } })
+    res.json(payments)
+  } catch {
+    res.status(500).json({ message: 'Error al obtener pagos' })
+  }
+}
+
+export const createServicePayment = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { period, dueDate, amount, note } = req.body as {
+      period: string; dueDate: string; amount: number; note?: string
+    }
+    const existing = await prisma.servicePayment.findFirst({ where: { period } })
+    if (existing) {
+      res.status(409).json({ message: `Ya existe un registro para ${period}` })
+      return
+    }
+    const payment = await prisma.servicePayment.create({
+      data: { period, dueDate: new Date(dueDate), amount, status: 'PENDING', note: note ?? '' },
+    })
+    res.status(201).json(payment)
+  } catch {
+    res.status(500).json({ message: 'Error al crear pago' })
+  }
+}
+
+export const markPaymentStatus = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params
+    const { status, note } = req.body as { status: 'PAID' | 'OVERDUE' | 'PENDING'; note?: string }
+    const authReq = req as import('../middleware/auth').AuthRequest
+    const updated = await prisma.servicePayment.update({
+      where: { id },
+      data: {
+        status,
+        ...(note !== undefined ? { note } : {}),
+        paidAt:        status === 'PAID' ? new Date() : null,
+        markedByEmail: status === 'PAID' ? (authReq.userId ?? null) : null,
+      },
+    })
+    res.json(updated)
+  } catch {
+    res.status(500).json({ message: 'Error al actualizar pago' })
+  }
+}
+
+export const getBillingStatus = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const config  = await prisma.storeConfig.findFirst()
+    const latest  = await prisma.servicePayment.findFirst({ orderBy: { dueDate: 'desc' } })
+    res.json({
+      hasPendingPayment: latest ? latest.status !== 'PAID' : false,
+      status:            latest?.status ?? null,
+      amount:            latest?.amount ?? config?.monthlyAmount ?? 0,
+      dueDate:           latest?.dueDate ?? null,
+      alias:             config?.billingAlias ?? '',
+    })
+  } catch {
+    res.status(500).json({ message: 'Error al obtener estado de pago' })
+  }
+}
