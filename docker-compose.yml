@@ -42,7 +42,7 @@ services:
     container_name: cryptogamer-frontend
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "8080:80"
       # Para HTTPS descomentar cuando tengas certificado
       # - "443:443"
     depends_on:
