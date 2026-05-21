@@ -140,7 +140,7 @@ export default function ProductCard({ product, accent = 'secondary' }: ProductCa
             aria-label="Agregar al carrito"
           >
             <span className="material-symbols-outlined text-[15px]">add_shopping_cart</span>
-            <span>Agregar</span>
+            <span className="product-cart-label">Agregar</span>
           </button>
         </div>
       </div>

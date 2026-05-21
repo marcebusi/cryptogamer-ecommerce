@@ -93,9 +93,10 @@ export default function BentoCategories() {
               key={cat.id}
               onClick={() => navigate(`/products?cat=${cat.id}`)}
               className="bento-chip flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer whitespace-nowrap active:scale-95 flex-shrink-0"
+              title={cat.label}
             >
               <span className="material-symbols-outlined text-sm">{cat.icon}</span>
-              {cat.label}
+              <span className="hidden sm:inline">{cat.label}</span>
             </button>
           ))}
         </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { imgUrl, imgPosition, imgZoom } from '../../types'
 import type { Product } from '../../types'
 import './ImageGallery.css'
@@ -15,6 +15,9 @@ export default function ImageGallery({ product }: ImageGalleryProps) {
 
   const [activeIdx,  setActiveIdx]  = useState(0)
   const [thumbStart, setThumbStart] = useState(0) // carousel offset
+
+  // Touch swipe tracking
+  const touchStartX = useRef<number>(0)
 
   const activePos  = imgPosition(thumbs[activeIdx])
   const activeZoom = imgZoom(thumbs[activeIdx])
@@ -37,7 +40,17 @@ export default function ImageGallery({ product }: ImageGalleryProps) {
   return (
     <div className="lg:col-span-5 space-y-md">
       {/* Main image */}
-      <div className="gallery-main relative rounded-xl overflow-hidden border border-white/5 shadow-2xl group">
+      <div
+        className="gallery-main relative rounded-xl overflow-hidden border border-white/5 shadow-2xl group"
+        onTouchStart={e => { touchStartX.current = e.touches[0].clientX }}
+        onTouchEnd={e => {
+          const dx = e.changedTouches[0].clientX - touchStartX.current
+          if (Math.abs(dx) > 40) {
+            if (dx < 0) handleThumbClick((activeIdx + 1) % thumbs.length)
+            else handleThumbClick((activeIdx - 1 + thumbs.length) % thumbs.length)
+          }
+        }}
+      >
         <div className="scanline-overlay absolute inset-0 opacity-20 pointer-events-none z-10" />
         <div className="gallery-bg absolute inset-0" />
 
@@ -46,6 +59,7 @@ export default function ImageGallery({ product }: ImageGalleryProps) {
           className="gallery-img relative z-[5] w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           src={imgUrl(thumbs[activeIdx])}
           style={{ objectPosition: activePos }}
+          onError={e => { (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIHZpZXdCb3g9IjAgMCAyNTAgMjUwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWYyMTI4Ii8+PC9zdmc+' }}
         />
 
         {/* Condition badge */}
@@ -69,19 +83,32 @@ export default function ImageGallery({ product }: ImageGalleryProps) {
           </div>
         )}
 
-        {/* Arrow nav on main image if multiple */}
+        {/* Arrow nav on main image if multiple — always visible on mobile, hover-only on desktop */}
         {thumbs.length > 1 && (
           <>
             <button type="button"
               onClick={() => handleThumbClick((activeIdx - 1 + thumbs.length) % thumbs.length)}
-              className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/50 border border-white/15 flex items-center justify-center hover:bg-black/70 transition-all cursor-pointer opacity-0 group-hover:opacity-100">
+              className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-black/60 border border-white/20 flex items-center justify-center hover:bg-black/80 transition-all cursor-pointer md:opacity-0 md:group-hover:opacity-100 active:scale-90">
               <span className="material-symbols-outlined text-white text-base">chevron_left</span>
             </button>
             <button type="button"
               onClick={() => handleThumbClick((activeIdx + 1) % thumbs.length)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/50 border border-white/15 flex items-center justify-center hover:bg-black/70 transition-all cursor-pointer opacity-0 group-hover:opacity-100">
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-black/60 border border-white/20 flex items-center justify-center hover:bg-black/80 transition-all cursor-pointer md:opacity-0 md:group-hover:opacity-100 active:scale-90">
               <span className="material-symbols-outlined text-white text-base">chevron_right</span>
             </button>
+            {/* Dot indicators on mobile */}
+            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-20 md:hidden">
+              {thumbs.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => handleThumbClick(i)}
+                  className={`w-1.5 h-1.5 rounded-full transition-all cursor-pointer ${
+                    activeIdx === i ? 'bg-white w-4' : 'bg-white/40'
+                  }`}
+                />
+              ))}
+            </div>
           </>
         )}
       </div>

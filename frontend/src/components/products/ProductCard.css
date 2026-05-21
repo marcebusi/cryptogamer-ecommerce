@@ -43,3 +43,10 @@
     transform: none;
   }
 }
+
+/* ── Mobile: compact bottom row so button doesn't overflow ── */
+@media (max-width: 400px) {
+  .product-cart-label {
+    display: none; /* hide "Agregar" text on very small screens, keep icon */
+  }
+}

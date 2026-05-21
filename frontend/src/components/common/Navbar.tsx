@@ -13,7 +13,7 @@ const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3001'
 
 export default function Navbar() {
   const { totalItems, openCart } = useCart()
-  const { isAuthenticated, user } = useAuth()
+  const { isAuthenticated, user, isAdmin } = useAuth()
   const { isDark, toggleTheme } = useTheme()
   const { categories } = useCategories()
   const navigate = useNavigate()
@@ -524,14 +524,14 @@ export default function Navbar() {
           {/* User account */}
           {isAuthenticated ? (
             <button
-              onClick={() => { navigate('/profile'); setMobileOpen(false) }}
+              onClick={() => { navigate(isAdmin ? '/admin' : '/perfil'); setMobileOpen(false) }}
               className="w-full drawer-footer-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer">
               <div className="w-8 h-8 rounded-full bg-purple-600/30 flex items-center justify-center text-purple-300 text-xs font-black flex-shrink-0">
                 {(user?.name ?? user?.email ?? 'U').charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 text-left min-w-0">
                 <p className="text-on-surface text-sm font-semibold truncate">{user?.name ?? user?.email}</p>
-                <p className="text-on-surface-variant text-xs">Mi cuenta</p>
+                <p className="text-on-surface-variant text-xs">{isAdmin ? 'Panel de Admin' : 'Mi cuenta'}</p>
               </div>
               <span className="material-symbols-outlined text-sm text-on-surface-variant/50 flex-shrink-0">chevron_right</span>
             </button>

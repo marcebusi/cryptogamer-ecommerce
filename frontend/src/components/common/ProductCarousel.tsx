@@ -36,12 +36,13 @@ export default function ProductCarousel({ products }: Props) {
     const third = el.scrollWidth / 3
     if (el.scrollLeft < third * 0.15) {
       isJumping.current = true
-      el.scrollLeft += third
-      requestAnimationFrame(() => { isJumping.current = false })
+      el.scrollTo({ left: el.scrollLeft + third, behavior: 'instant' as ScrollBehavior })
+      // Double RAF: wait two frames so the browser paints before re-enabling
+      requestAnimationFrame(() => requestAnimationFrame(() => { isJumping.current = false }))
     } else if (el.scrollLeft > third * 1.85) {
       isJumping.current = true
-      el.scrollLeft -= third
-      requestAnimationFrame(() => { isJumping.current = false })
+      el.scrollTo({ left: el.scrollLeft - third, behavior: 'instant' as ScrollBehavior })
+      requestAnimationFrame(() => requestAnimationFrame(() => { isJumping.current = false }))
     }
   }, [])
 

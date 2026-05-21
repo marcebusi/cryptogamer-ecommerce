@@ -2,9 +2,9 @@ import { useNavigate } from 'react-router-dom'
 import './HeroSection.css'
 
 const STATS = [
-  { value: '+5.000',  label: 'Productos'   },
-  { value: '+12.000', label: 'Clientes'    },
-  { value: '4.9★',   label: 'Calificación' },
+  { value: '10',    label: 'Años en el mercado' },
+  { value: '4.9★',  label: 'Calificación'       },
+  { value: '+500',  label: 'Ventas realizadas'  },
 ]
 
 const SPEC_PILLS = [
@@ -93,11 +93,11 @@ export default function HeroSection() {
           </div>
 
           {/* Stats */}
-          <div className="hero-entry-4 flex gap-6 pt-2">
+          <div className="hero-entry-4 flex justify-center md:justify-start gap-8 pt-2">
             {STATS.map(s => (
-              <div key={s.label} className="group cursor-default">
+              <div key={s.label} className="group cursor-default text-center md:text-left">
                 <p className="text-xl font-black text-on-background font-['Plus_Jakarta_Sans'] transition-colors group-hover:text-primary-container">{s.value}</p>
-                <p className="text-xs text-on-surface-variant mt-0.5">{s.label}</p>
+                <p className="text-xs text-on-surface-variant mt-0.5 leading-tight">{s.label}</p>
               </div>
             ))}
           </div>
