@@ -3,6 +3,14 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../lib/api'
 
+interface BillingStatus {
+  hasPendingPayment: boolean
+  status: 'PENDING' | 'PAID' | 'OVERDUE' | null
+  amount: number
+  dueDate: string | null
+  alias: string
+}
+
 /* ── All possible cards ──────────────────────────────────────── */
 // sectionKey = null means always shown (core feature)
 const ALL_CARDS = [
@@ -27,6 +35,7 @@ export default function AdminDashboard() {
   const { isAdmin, isLoading } = useAuth()
   const navigate = useNavigate()
   const [enabledSections, setEnabledSections] = useState<string[] | null>(null)
+  const [billingStatus,   setBillingStatus]   = useState<BillingStatus | null>(null)
 
   useEffect(() => {
     if (!isLoading && !isAdmin) navigate('/')
@@ -36,6 +45,12 @@ export default function AdminDashboard() {
     api.get<{ sections: string[] }>('/api/superadmin/sections')
       .then(d => setEnabledSections(d.sections))
       .catch(() => setEnabledSections(['orders', 'analytics', 'sellers', 'contact']))
+  }, [])
+
+  useEffect(() => {
+    api.get<BillingStatus>('/api/superadmin/billing-status')
+      .then(d => setBillingStatus(d))
+      .catch(() => { /* no mostrar nada si falla */ })
   }, [])
 
   if (isLoading) return null
@@ -60,6 +75,42 @@ export default function AdminDashboard() {
         </h1>
         <p className="text-on-surface-variant">Desde acá podés gestionar todo el contenido de la tienda.</p>
       </div>
+
+      {/* ── Banner de pago pendiente ─────────────────────────── */}
+      {billingStatus?.hasPendingPayment && (
+        <div className={`mb-lg rounded-2xl border p-md flex items-start gap-md ${
+          billingStatus.status === 'OVERDUE'
+            ? 'bg-red-500/10 border-red-500/30'
+            : 'bg-yellow-500/10 border-yellow-500/30'
+        }`}>
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+            billingStatus.status === 'OVERDUE'
+              ? 'bg-red-500/20 border border-red-500/30'
+              : 'bg-yellow-500/20 border border-yellow-500/30'
+          }`}>
+            <span className={`material-symbols-outlined ${billingStatus.status === 'OVERDUE' ? 'text-red-400' : 'text-yellow-400'}`}>
+              {billingStatus.status === 'OVERDUE' ? 'error' : 'payment'}
+            </span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className={`font-bold text-sm ${billingStatus.status === 'OVERDUE' ? 'text-red-300' : 'text-yellow-300'}`}>
+              {billingStatus.status === 'OVERDUE' ? 'Pago vencido' : 'Pago pendiente'}
+            </p>
+            <p className="text-sm text-on-surface-variant mt-0.5">
+              {billingStatus.dueDate
+                ? `Vencimiento: ${new Date(billingStatus.dueDate).toLocaleDateString('es-AR')}`
+                : 'Tenés un pago pendiente con Atenea Techs.'}
+              {billingStatus.amount > 0 && ` · $${billingStatus.amount.toLocaleString('es-AR')}`}
+            </p>
+            {billingStatus.alias && (
+              <p className="text-xs text-on-surface-variant mt-1 flex items-center gap-xs">
+                <span className="material-symbols-outlined text-xs">account_balance</span>
+                Transferir a: <span className="font-bold text-on-surface ml-1">{billingStatus.alias}</span>
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-gutter">
         {visibleCards.map(card => {
