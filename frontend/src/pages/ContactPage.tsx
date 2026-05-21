@@ -36,9 +36,9 @@ const contactInfo: { icon: string; color: string; bg: string; title: string; val
     icon: 'storefront',
     color: 'text-secondary-container',
     bg: 'bg-secondary-container/10 border-secondary-container/20',
-    title: 'Tienda física',
-    value: 'Av. Corrientes 1234, CABA',
-    sub: 'Lun – Vie · 10 a 19 hs',
+    title: 'Retiro en domicilio',
+    value: 'CABA y GBA',
+    sub: 'Coordinamos lugar y horario por WhatsApp',
   },
   {
     icon: 'schedule',

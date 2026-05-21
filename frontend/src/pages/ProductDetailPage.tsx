@@ -54,14 +54,19 @@ function mapApi(p: ApiProduct): Product {
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>()
   const [product, setProduct] = useState<Product | null>(null)
+  const [notFound, setNotFound] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!id) { setProduct(featuredProduct); setLoading(false); return }
+    if (!id) { setLoading(false); setNotFound(true); return }
     setLoading(true)
+    setNotFound(false)
     api.get<{ success: boolean; data: ApiProduct }>(`/api/products/${id}`)
       .then(res => setProduct(mapApi(res.data)))
-      .catch(() => setProduct(staticMap[id] ?? featuredProduct))
+      .catch(() => {
+        const fallback = staticMap[id]
+        if (fallback) { setProduct(fallback) } else { setNotFound(true) }
+      })
       .finally(() => setLoading(false))
   }, [id])
 
@@ -82,7 +87,22 @@ export default function ProductDetailPage() {
     )
   }
 
-  const p = product!
+  if (notFound || !product) {
+    return (
+      <main className="max-w-screen-2xl mx-auto px-4 md:px-margin py-xl flex flex-col items-center justify-center text-center gap-md">
+        <span className="material-symbols-outlined text-6xl text-on-surface-variant opacity-20">search_off</span>
+        <h2 className="text-2xl font-black text-on-surface font-['Plus_Jakarta_Sans']">Producto no encontrado</h2>
+        <p className="text-on-surface-variant text-sm max-w-sm">
+          El producto que buscás no existe o fue eliminado. Revisá el catálogo completo.
+        </p>
+        <Link to="/products" className="mt-sm px-lg py-sm bg-primary-container text-on-primary rounded-xl font-bold text-sm hover:brightness-110 transition-all cursor-pointer">
+          Ver catálogo
+        </Link>
+      </main>
+    )
+  }
+
+  const p = product
   const catDef = navCategories.find(c => c.id === p.category)
   const catLabel = catDef?.label ?? p.category ?? 'Productos'
 

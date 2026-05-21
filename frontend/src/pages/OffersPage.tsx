@@ -98,7 +98,7 @@ export default function OffersPage() {
           <div className="flex flex-col items-center justify-center py-xl text-on-surface-variant">
             <span className="material-symbols-outlined text-5xl mb-md opacity-30">local_offer</span>
             <p className="text-lg font-semibold">Sin ofertas disponibles</p>
-            <p className="text-sm mt-1 mb-md">El admin puede marcar productos como oferta desde el panel.</p>
+            <p className="text-sm mt-1 mb-md">Volvé pronto, cargamos nuevas ofertas regularmente.</p>
             <Link to="/products" className="text-sm text-primary-container hover:underline">Ver todos los productos</Link>
           </div>
         )}

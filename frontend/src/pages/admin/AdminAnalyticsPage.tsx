@@ -14,7 +14,7 @@ interface RecentOrder { id:string; status:string; totalAmount:number; createdAt:
 
 export interface PrevPeriod { totalRevenue:number; totalOrders:number; paidOrders:number; cancelledOrders:number }
 export interface HeatCell   { day:number; block:number; count:number }
-export interface StatusDay  { date:string; PAID:number; PENDING:number; SHIPPED:number; DELIVERED:number; CANCELLED:number }
+export interface StatusDay  { date:string; CONFIRMED:number; PENDING:number; SHIPPED:number; COMPLETED:number; CANCELLED:number }
 export interface DeadProduct { id:string; name:string; image:string; price:number; category:string }
 export interface HighValueProduct { id:string; name:string; image:string; price:number; category:string; qty:number; revenue:number; revenuePerUnit:number }
 export interface CatOrder   { category:string; orders:number; revenue:number }
@@ -66,9 +66,9 @@ export const ARS = (n:number) => new Intl.NumberFormat('es-AR',{style:'currency'
 
 const STATUS_MAP: Record<string,{label:string;dot:string;badge:string}> = {
   PENDING:   {label:'Pendiente', dot:'bg-yellow-400', badge:'bg-yellow-400/10 text-yellow-400 border-yellow-400/20'},
-  PAID:      {label:'Pagado',    dot:'bg-emerald-400',badge:'bg-emerald-400/10 text-emerald-400 border-emerald-400/20'},
+  CONFIRMED: {label:'Confirmado', dot:'bg-emerald-400',badge:'bg-emerald-400/10 text-emerald-400 border-emerald-400/20'},
   SHIPPED:   {label:'Enviado',   dot:'bg-sky-400',    badge:'bg-sky-400/10 text-sky-400 border-sky-400/20'},
-  DELIVERED: {label:'Entregado', dot:'bg-purple-400', badge:'bg-purple-400/10 text-purple-400 border-purple-400/20'},
+  COMPLETED: {label:'Completado',dot:'bg-purple-400', badge:'bg-purple-400/10 text-purple-400 border-purple-400/20'},
   CANCELLED: {label:'Cancelado', dot:'bg-red-400',    badge:'bg-red-400/10 text-red-400 border-red-400/20'},
 }
 

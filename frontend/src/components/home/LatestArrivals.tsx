@@ -47,8 +47,8 @@ export default function LatestArrivals() {
       {!isLoading && products.length === 0 && (
         <div className="text-center py-xl text-on-surface-variant">
           <span className="material-symbols-outlined text-5xl opacity-20 block mb-sm">star_border</span>
-          <p className="text-sm">Aún no hay productos destacados.</p>
-          <p className="text-xs mt-1">Activá "Destacado" en un producto desde el panel de admin.</p>
+          <p className="text-sm">Próximamente nuevos productos.</p>
+          <p className="text-xs mt-1">Seguí nuestras redes para enterarte primero.</p>
         </div>
       )}
     </section>

@@ -30,7 +30,7 @@ export const getAnalytics = async (req: Request, res: Response): Promise<void> =
     const totalOrders     = orders.length
     const avgOrderValue   = totalOrders ? totalRevenue / totalOrders : 0
     const pendingOrders   = orders.filter(o => o.status === 'PENDING').length
-    const paidOrders      = orders.filter(o => o.status === 'PAID').length
+    const paidOrders      = orders.filter(o => o.status === 'CONFIRMED').length
     const cancelledOrders = orders.filter(o => o.status === 'CANCELLED').length
 
     // ── Previous period ──────────────────────────────────────
@@ -44,7 +44,7 @@ export const getAnalytics = async (req: Request, res: Response): Promise<void> =
     const previousPeriod = {
       totalRevenue:    prevOrders.reduce((s, o) => s + o.totalAmount, 0),
       totalOrders:     prevOrders.length,
-      paidOrders:      prevOrders.filter(o => o.status === 'PAID').length,
+      paidOrders:      prevOrders.filter(o => o.status === 'CONFIRMED').length,
       cancelledOrders: prevOrders.filter(o => o.status === 'CANCELLED').length,
     }
 
@@ -135,10 +135,10 @@ export const getAnalytics = async (req: Request, res: Response): Promise<void> =
       const dOrders = orders.filter(o => new Date(o.createdAt).toISOString().slice(0, 10) === day.date)
       return {
         date:      day.date,
-        PAID:      dOrders.filter(o => o.status === 'PAID').length,
+        CONFIRMED: dOrders.filter(o => o.status === 'CONFIRMED').length,
         PENDING:   dOrders.filter(o => o.status === 'PENDING').length,
         SHIPPED:   dOrders.filter(o => o.status === 'SHIPPED').length,
-        DELIVERED: dOrders.filter(o => o.status === 'DELIVERED').length,
+        COMPLETED: dOrders.filter(o => o.status === 'COMPLETED').length,
         CANCELLED: dOrders.filter(o => o.status === 'CANCELLED').length,
       }
     })

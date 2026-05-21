@@ -60,16 +60,16 @@ function saveAlerts(alerts: Alert[]) {
 
 /* ── Status line chart (replaces stacked area) ───────────── */
 const STATUS_COLORS: Record<string, string> = {
-  PAID:      '#34d399',
-  DELIVERED: '#a78bfa',
+  CONFIRMED: '#34d399',
+  COMPLETED: '#a78bfa',
   SHIPPED:   '#60a5fa',
   PENDING:   '#fbbf24',
   CANCELLED: '#f87171',
 }
 const STATUS_LABELS: Record<string, string> = {
-  PAID:'Pagado', DELIVERED:'Entregado', SHIPPED:'Enviado', PENDING:'Pendiente', CANCELLED:'Cancelado',
+  CONFIRMED:'Confirmado', COMPLETED:'Completado', SHIPPED:'Enviado', PENDING:'Pendiente', CANCELLED:'Cancelado',
 }
-const STATUS_ORDER = ['PAID','DELIVERED','SHIPPED','PENDING','CANCELLED'] as const
+const STATUS_ORDER = ['CONFIRMED','COMPLETED','SHIPPED','PENDING','CANCELLED'] as const
 
 function StatusLineChart({ data }: { data: Analytics['statusOverTime'] }) {
   const [hovIdx, setHovIdx] = useState<number|null>(null)
@@ -434,7 +434,7 @@ export default function AdvancedAnalytics({ data, presetLabel }: Props) {
 
   // Sparklines
   const cancelSpark = data.statusOverTime.slice(-14).map(d => {
-    const total = d.PAID + d.PENDING + d.SHIPPED + d.DELIVERED + d.CANCELLED
+    const total = d.CONFIRMED + d.PENDING + d.SHIPPED + d.COMPLETED + d.CANCELLED
     return total > 0 ? (d.CANCELLED / total) * 100 : 0
   })
   const ticketSpark = data.revenueByDay.slice(-14).map(d =>

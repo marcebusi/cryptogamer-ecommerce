@@ -840,8 +840,7 @@ export default function OrderTrackingPage() {
 
   return (
     <div
-      className="min-h-screen"
-      style={{ background: '#080910' }}
+      className="min-h-screen bg-background"
     >
       <div className="max-w-4xl mx-auto px-4 md:px-8 py-10 space-y-8">
 

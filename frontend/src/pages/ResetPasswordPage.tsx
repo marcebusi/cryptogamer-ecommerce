@@ -37,7 +37,7 @@ export default function ResetPasswordPage() {
     <main className="min-h-screen flex items-center justify-center px-4 py-xl">
       <div className="w-full max-w-md">
         {/* Card */}
-        <div className="bg-[#0e0f16]/95 backdrop-blur-2xl rounded-2xl border border-purple-500/25 shadow-[0_0_60px_rgba(138,43,226,0.2)] overflow-hidden">
+        <div className="bg-surface-container/95 backdrop-blur-2xl rounded-2xl border border-purple-500/25 shadow-[0_0_60px_rgba(138,43,226,0.2)] overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent pointer-events-none" />
 
           <div className="p-lg text-center mb-sm">
