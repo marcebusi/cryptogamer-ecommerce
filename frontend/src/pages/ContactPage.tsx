@@ -33,14 +33,6 @@ const contactInfo: { icon: string; color: string; bg: string; title: string; val
     href: 'https://wa.me/5491166506985?text=' + encodeURIComponent('¡Hola! Quisiera hacer una consulta.'),
   },
   {
-    icon: 'storefront',
-    color: 'text-secondary-container',
-    bg: 'bg-secondary-container/10 border-secondary-container/20',
-    title: 'Retiro en domicilio',
-    value: 'CABA y GBA',
-    sub: 'Coordinamos lugar y horario por WhatsApp',
-  },
-  {
     icon: 'schedule',
     color: 'text-yellow-400',
     bg: 'bg-yellow-400/10 border-yellow-400/20',
