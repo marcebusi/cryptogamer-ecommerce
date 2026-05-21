@@ -172,6 +172,45 @@ app.use(notFound)
 app.use(errorHandler)
 
 // ════════════════════════════════════════════════════
+//  APPLY MISSING SCHEMA COLUMNS (idempotent on startup)
+// ════════════════════════════════════════════════════
+import { PrismaClient as _PC } from '@prisma/client'
+const _prismaInit = new _PC()
+
+const _schemaMigrations = [
+  // orders — shipping, payment, and tracking columns added to schema after initial migration
+  'ALTER TABLE "orders" ADD COLUMN "shippingCarrier"    TEXT',
+  'ALTER TABLE "orders" ADD COLUMN "shippingService"    TEXT',
+  'ALTER TABLE "orders" ADD COLUMN "shippingCost"       REAL',
+  'ALTER TABLE "orders" ADD COLUMN "shippingPostalCode" TEXT',
+  'ALTER TABLE "orders" ADD COLUMN "shippingAddress"    TEXT',
+  'ALTER TABLE "orders" ADD COLUMN "shippingCity"       TEXT',
+  'ALTER TABLE "orders" ADD COLUMN "shippingProvince"   TEXT',
+  'ALTER TABLE "orders" ADD COLUMN "customerName"       TEXT',
+  'ALTER TABLE "orders" ADD COLUMN "customerEmail"      TEXT',
+  'ALTER TABLE "orders" ADD COLUMN "customerPhone"      TEXT',
+  'ALTER TABLE "orders" ADD COLUMN "paymentMethod"      TEXT',
+  'ALTER TABLE "orders" ADD COLUMN "comprovanteUrl"     TEXT',
+  'ALTER TABLE "orders" ADD COLUMN "trackingCode"       TEXT',
+  // sellers — cryptoAlias added to schema without a migration
+  'ALTER TABLE "sellers" ADD COLUMN "cryptoAlias" TEXT NOT NULL DEFAULT \'\'',
+]
+
+;(async () => {
+  for (const sql of _schemaMigrations) {
+    try {
+      await _prismaInit.$executeRawUnsafe(sql)
+    } catch (e: any) {
+      if (!e.message?.includes('duplicate column name')) {
+        console.warn('[schema-patch]', sql.slice(0, 60), '—', e.message)
+      }
+    }
+  }
+  await _prismaInit.$disconnect()
+  console.log('✅  Schema patches applied')
+})()
+
+// ════════════════════════════════════════════════════
 //  INICIAR SERVIDOR
 // ════════════════════════════════════════════════════
 const server = app.listen(PORT, () => {
