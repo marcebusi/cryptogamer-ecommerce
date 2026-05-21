@@ -5,12 +5,16 @@ import {
   resetUserPassword, deleteUser,
   getStoreConfig, updateStoreConfig,
   getEnabledSections,
+  getBillingConfig, updateBillingConfig,
+  getServicePayments, createServicePayment,
+  markPaymentStatus, getBillingStatus,
 } from '../controllers/superAdminController'
 
 const router = Router()
 
-// Public for any authenticated admin — reads which sections are enabled
-router.get('/sections', authenticate, getEnabledSections)
+// Accessible by any authenticated admin
+router.get('/sections',       authenticate, getEnabledSections)
+router.get('/billing-status', authenticate, getBillingStatus)
 
 // Everything else requires superadmin
 router.use(authenticate, requireSuperAdmin)
@@ -22,5 +26,12 @@ router.put('/users/:id/password',    resetUserPassword)
 router.delete('/users/:id',          deleteUser)
 router.get('/store',                 getStoreConfig)
 router.put('/store',                 updateStoreConfig)
+
+// Billing
+router.get('/billing',                        getBillingConfig)
+router.put('/billing',                        updateBillingConfig)
+router.get('/billing/payments',               getServicePayments)
+router.post('/billing/payments',              createServicePayment)
+router.patch('/billing/payments/:id/status',  markPaymentStatus)
 
 export default router
