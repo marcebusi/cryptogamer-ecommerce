@@ -216,7 +216,26 @@ model StoreConfig {
   notes                 String    @default("")
   // JSON array of enabled section keys, e.g. ["orders","analytics","sellers"]
   enabledSections       String    @default("[\"orders\",\"analytics\",\"sellers\",\"contact\"]")
+  // Billing
+  monthlyAmount         Float     @default(0)
+  billingAlias          String    @default("")
+  billingDay            Int       @default(1)
   updatedAt             DateTime  @updatedAt
 
   @@map("store_config")
+}
+
+model ServicePayment {
+  id            String    @id @default(cuid())
+  period        String    // "2026-06"
+  dueDate       DateTime
+  amount        Float
+  status        String    @default("PENDING") // PENDING | PAID | OVERDUE
+  paidAt        DateTime?
+  markedByEmail String?
+  note          String    @default("")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("service_payments")
 }
