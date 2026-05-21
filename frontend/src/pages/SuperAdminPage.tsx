@@ -83,6 +83,7 @@ export default function SuperAdminPage() {
 
   // Billing state
   const [billingConfig,  setBillingConfig]  = useState<BillingConfig>({ monthlyAmount: 0, billingAlias: '', billingDay: 1 })
+  const [amountInput,    setAmountInput]    = useState('')
   const [payments,       setPayments]       = useState<ServicePayment[]>([])
   const [billingLoading, setBillingLoading] = useState(false)
   const [markingId,      setMarkingId]      = useState<string | null>(null)
@@ -123,6 +124,7 @@ export default function SuperAdminPage() {
         api.get<ServicePayment[]>('/api/superadmin/billing/payments'),
       ])
       setBillingConfig(cfg)
+      setAmountInput(cfg.monthlyAmount > 0 ? String(cfg.monthlyAmount) : '')
       setPayments(pays)
     } catch { /* ignore */ }
     finally { setBillingLoading(false) }
@@ -426,9 +428,9 @@ export default function SuperAdminPage() {
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/40 to-transparent" />
                 <div>
                   <label className="block text-xs text-on-surface-variant uppercase tracking-wider mb-1">Monto mensual ($)</label>
-                  <input type="number" min="0" value={billingConfig.monthlyAmount}
-                    onChange={e => setBillingConfig(f => ({ ...f, monthlyAmount: Number(e.target.value) }))}
-                    className="w-full bg-surface-container-high border border-outline-variant rounded-xl px-sm py-xs text-sm text-on-surface outline-none focus:border-purple-400" />
+                  <input type="number" min="0" value={amountInput} placeholder="Ej: 15000"
+                    onChange={e => { setAmountInput(e.target.value); setBillingConfig(f => ({ ...f, monthlyAmount: Number(e.target.value) || 0 })) }}
+                    className="w-full bg-surface-container-high border border-outline-variant rounded-xl px-sm py-xs text-sm text-on-surface placeholder:text-on-surface-variant/40 outline-none focus:border-purple-400" />
                 </div>
                 <div>
                   <label className="block text-xs text-on-surface-variant uppercase tracking-wider mb-1">Alias / CBU</label>
