@@ -19,6 +19,9 @@ RUN npm run build
 # ── Stage 2: Runtime ─────────────────────────────────────────────────────────
 FROM node:20-alpine AS runner
 
+# OpenSSL requerido por el motor de Prisma en Alpine
+RUN apk add --no-cache openssl
+
 # Crear usuario no-root para seguridad
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
