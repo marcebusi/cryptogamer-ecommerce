@@ -112,7 +112,7 @@ function StatusLineChart({ data }: { data: Analytics['statusOverTime'] }) {
       {hovIdx !== null && (
         <div className="absolute -top-1 z-10 pointer-events-none"
           style={{ left:`${tipPct}%`, transform:`translateX(${tipPct<15?'0':tipPct>85?'-100%':'-50%'})` }}>
-          <div className="bg-[#0a0a1a] border border-white/12 rounded-xl px-3 py-2.5 shadow-xl whitespace-nowrap"
+          <div className="admin-tooltip-bg border border-white/12 rounded-xl px-3 py-2.5 shadow-xl whitespace-nowrap"
             style={{ boxShadow:'0 4px 24px rgba(0,0,0,0.7)' }}>
             <p className="text-[10px] text-white/40 uppercase tracking-wider mb-2">
               {new Date(data[hovIdx].date+'T12:00:00').toLocaleDateString('es-AR',{weekday:'short',day:'numeric',month:'short'})}
@@ -130,7 +130,7 @@ function StatusLineChart({ data }: { data: Analytics['statusOverTime'] }) {
               )}
             </div>
           </div>
-          <div className="w-2 h-2 rotate-45 border-b border-r border-white/12 bg-[#0a0a1a] mx-auto -mt-1"/>
+          <div className="w-2 h-2 rotate-45 border-b border-r border-white/12 admin-tooltip-bg mx-auto -mt-1"/>
         </div>
       )}
 
@@ -211,7 +211,7 @@ function Heatmap({ cells }: { cells: Analytics['heatmap'] }) {
                     <span className="text-[10px] font-bold" style={{ color:`rgba(255,255,255,${0.3+ratio*0.7})` }}>{count}</span>
                   )}
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-20 whitespace-nowrap">
-                    <div className="bg-[#0a0a1a] border border-white/15 rounded-lg px-2.5 py-1.5 text-[10px] shadow-xl">
+                    <div className="admin-tooltip-bg border border-white/15 rounded-lg px-2.5 py-1.5 text-[10px] shadow-xl">
                       <span className="text-white/50">{DAY_LABELS[day]} {bl}</span>
                       <span className="font-bold ml-1.5" style={{ color:'#4ade80' }}>{count} orden{count!==1?'es':''}</span>
                     </div>
@@ -291,14 +291,14 @@ function RevenueBarChart({ days, color = '#ff4a8d' }: { days: DayRevenue[]; colo
             left: `${tipPct}%`,
             transform: `translateX(${tipPct < 12 ? '0' : tipPct > 88 ? '-100%' : '-50%'})`,
           }}>
-          <div className="bg-[#0a0a1a] border border-white/15 rounded-xl px-3 py-2 shadow-xl mb-2 whitespace-nowrap">
+          <div className="admin-tooltip-bg border border-white/15 rounded-xl px-3 py-2 shadow-xl mb-2 whitespace-nowrap">
             <p className="text-[10px] text-white/40 mb-1">
               {new Date(days[hovIdx].date + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' })}
             </p>
             <p className="text-xs font-bold" style={{ color }}>{ARS(days[hovIdx].revenue)}</p>
             <p className="text-[10px] text-white/35 mt-0.5">{days[hovIdx].orders} orden{days[hovIdx].orders !== 1 ? 'es' : ''}</p>
           </div>
-          <div className="w-1.5 h-1.5 rotate-45 bg-[#0a0a1a] border-b border-r border-white/15 mx-auto -mt-1" />
+          <div className="w-1.5 h-1.5 rotate-45 admin-tooltip-bg border-b border-r border-white/15 mx-auto -mt-1" />
         </div>
       )}
 
@@ -491,7 +491,7 @@ export default function AdvancedAnalytics({ data, presetLabel }: Props) {
       )}
 
       {/* ── Alerts config ─────────────────────────────────── */}
-      <div className="bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
+      <div className="admin-card-bg border border-white/6 rounded-2xl p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-bold text-white text-sm flex items-center gap-2">
             <span className="material-symbols-outlined text-white/40 text-base">notifications</span>
@@ -523,7 +523,7 @@ export default function AdvancedAnalytics({ data, presetLabel }: Props) {
                   <span className="text-[10px] text-white/30">{alert.operator==='gt'?'>':'<'}</span>
                   <input type="number" value={alert.threshold}
                     onChange={e => setAlerts(prev => prev.map((a,i)=>i===idx?{...a,threshold:Number(e.target.value)}:a))}
-                    className="w-16 bg-[#080812] border border-white/10 rounded-lg px-2 py-1 text-xs text-white text-center focus:outline-none focus:border-[#a855f7]/50 transition-colors"/>
+                    className="w-16 bg-background border border-white/10 rounded-lg px-2 py-1 text-xs text-white text-center focus:outline-none focus:border-[#a855f7]/50 transition-colors"/>
                   {alert.metric==='cancellationRate' && <span className="text-[10px] text-white/30">%</span>}
                 </div>
                 <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
@@ -551,7 +551,7 @@ export default function AdvancedAnalytics({ data, presetLabel }: Props) {
       </div>
 
       {/* ── Heatmap ───────────────────────────────────────── */}
-      <div className="bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
+      <div className="admin-card-bg border border-white/6 rounded-2xl p-5">
         <h3 className="font-bold text-white text-sm mb-5 flex items-center gap-2">
           <span className="material-symbols-outlined text-[#4ade80] text-base">grid_on</span>
           ¿Cuándo se vende más?
@@ -563,7 +563,7 @@ export default function AdvancedAnalytics({ data, presetLabel }: Props) {
       {/* ── Status lines + Comparison side by side ───────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        <div className="bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
+        <div className="admin-card-bg border border-white/6 rounded-2xl p-5">
           <h3 className="font-bold text-white text-sm mb-5 flex items-center gap-2">
             <span className="material-symbols-outlined text-[#60a5fa] text-base">stacked_line_chart</span>
             Órdenes por estado
@@ -572,7 +572,7 @@ export default function AdvancedAnalytics({ data, presetLabel }: Props) {
           <StatusLineChart data={data.statusOverTime}/>
         </div>
 
-        <div className="bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
+        <div className="admin-card-bg border border-white/6 rounded-2xl p-5">
           <h3 className="font-bold text-white text-sm mb-5 flex items-center gap-2">
             <span className="material-symbols-outlined text-[#a855f7] text-base">compare_arrows</span>
             Este período vs anterior
@@ -585,7 +585,7 @@ export default function AdvancedAnalytics({ data, presetLabel }: Props) {
       {/* ── Revenue histograms ────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        <div className="bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
+        <div className="admin-card-bg border border-white/6 rounded-2xl p-5">
           <h3 className="font-bold text-white text-sm mb-1 flex items-center gap-2">
             <span className="material-symbols-outlined text-[#ff4a8d] text-base">bar_chart</span>
             Histograma de ingresos totales
@@ -607,7 +607,7 @@ export default function AdvancedAnalytics({ data, presetLabel }: Props) {
           </div>
         </div>
 
-        <div className="bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
+        <div className="admin-card-bg border border-white/6 rounded-2xl p-5">
           <h3 className="font-bold text-white text-sm mb-1 flex items-center gap-2">
             <span className="material-symbols-outlined text-[#a855f7] text-base">leaderboard</span>
             Histograma de ingresos por producto
@@ -644,7 +644,7 @@ export default function AdvancedAnalytics({ data, presetLabel }: Props) {
       {/* ── High value products + Category by orders (with subcats) ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        <div className="bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
+        <div className="admin-card-bg border border-white/6 rounded-2xl p-5">
           <h3 className="font-bold text-white text-sm mb-5 flex items-center gap-2">
             <span className="material-symbols-outlined text-[#fbbf24] text-base">diamond</span>
             Productos de alto valor
@@ -675,7 +675,7 @@ export default function AdvancedAnalytics({ data, presetLabel }: Props) {
           }
         </div>
 
-        <div className="bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
+        <div className="admin-card-bg border border-white/6 rounded-2xl p-5">
           <h3 className="font-bold text-white text-sm mb-1 flex items-center gap-2">
             <span className="material-symbols-outlined text-[#3af4ff] text-base">account_tree</span>
             Categorías por órdenes
@@ -687,7 +687,7 @@ export default function AdvancedAnalytics({ data, presetLabel }: Props) {
 
       {/* ── Dead inventory ────────────────────────────────── */}
       {data.deadInventory.length > 0 && (
-        <div className="bg-[#0f0f23] border border-yellow-400/15 rounded-2xl p-5">
+        <div className="admin-card-bg border border-yellow-400/15 rounded-2xl p-5">
           <h3 className="font-bold text-white text-sm mb-5 flex items-center gap-2">
             <span className="material-symbols-outlined text-[#fbbf24] text-base">inventory</span>
             Inventario sin movimiento
@@ -729,7 +729,7 @@ export default function AdvancedAnalytics({ data, presetLabel }: Props) {
       )}
 
       {/* ── Seller performance ────────────────────────────── */}
-      <div className="bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
+      <div className="admin-card-bg border border-white/6 rounded-2xl p-5">
         <h3 className="font-bold text-white text-sm mb-5 flex items-center gap-2">
           <span className="material-symbols-outlined text-[#ff4a8d] text-base">storefront</span>
           Performance de vendedores

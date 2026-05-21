@@ -182,7 +182,7 @@ export default function ProductsPage() {
                 </button>
 
                 {sortOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-52 bg-[#0f0f23] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50"
+                  <div className="absolute right-0 top-full mt-2 w-52 admin-card-bg border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50"
                     style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05)' }}>
                     {SORT_OPTIONS.map(opt => (
                       <button

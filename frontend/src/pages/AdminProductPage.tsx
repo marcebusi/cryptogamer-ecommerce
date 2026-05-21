@@ -491,7 +491,7 @@ export default function AdminProductPage() {
                         </td>
                         <td className="px-md py-3">
                           <div className="flex items-center gap-sm">
-                            <div className="w-10 h-10 rounded-lg bg-[#07080d] overflow-hidden flex-shrink-0 border border-white/8">
+                            <div className="w-10 h-10 rounded-lg product-img-bg overflow-hidden flex-shrink-0 border border-white/8">
                               <img src={p.image} alt="" className="w-full h-full object-contain p-1" onError={e => { (e.target as HTMLImageElement).src = 'https://placehold.co/80x80/111318/39ff14?text=?' }} />
                             </div>
                             <div className="min-w-0">
@@ -968,7 +968,7 @@ export default function AdminProductPage() {
                       onDragOver={e => e.preventDefault()}
                       onDrop={() => handleImgDrop(idx)}
                       onClick={() => setPreviewEditIdx(idx)}
-                      className={`relative group aspect-square rounded-xl overflow-hidden border bg-[#07080d] cursor-grab active:cursor-grabbing transition-all ${
+                      className={`relative group aspect-square rounded-xl overflow-hidden border product-img-bg cursor-grab active:cursor-grabbing transition-all ${
                         previewEditIdx === idx ? 'border-primary-container/60 ring-1 ring-primary-container/40' : 'border-white/10'
                       }`}
                     >
@@ -1124,7 +1124,7 @@ export default function AdminProductPage() {
               <div className="rounded-xl border border-white/5 overflow-hidden bg-surface-container-low">
                 <div
                   ref={previewRef}
-                  className={`aspect-square bg-[#07080d] flex items-center justify-center relative overflow-hidden ${galleryImages[0] ? 'cursor-crosshair select-none' : ''}`}
+                  className={`aspect-square product-img-bg flex items-center justify-center relative overflow-hidden ${galleryImages[0] ? 'cursor-crosshair select-none' : ''}`}
                   onMouseDown={handlePreviewMouseDown}
                   onMouseMove={handlePreviewMouseMove}
                   onMouseUp={handlePreviewMouseUp}

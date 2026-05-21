@@ -312,9 +312,9 @@ export default function ContactPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-sm">
             {[
-              { q: '¿Cuánto tarda el envío?', a: 'Los envíos dentro de CABA llegan en 24–48 hs. Interior del país 3–5 días hábiles con OCA o Andreani.' },
+              { q: '¿Cuánto tarda el envío?', a: 'Los envíos llegan en 24–48 hs en zona AMBA. Interior del país 3–5 días hábiles con OCA o Andreani.' },
               { q: '¿Qué garantía tienen los productos?', a: 'Solo los productos nuevos cuentan con garantía de 30 días. Los productos usados se venden en el estado descrito y no incluyen garantía.' },
-              { q: '¿Puedo ver el producto antes de comprarlo?', a: 'Si elegís retiro en domicilio, podés coordinar una visita con el vendedor para revisar el estado del producto en persona antes de confirmar el pago. No estás obligado a transferir hasta que estés conforme.' },
+              { q: '¿Puedo ver el producto antes de comprarlo?', a: 'Sí. Podés pedirle al vendedor fotos o video del producto en detalle por WhatsApp antes de confirmar el pago. No transferís hasta que estés conforme.' },
               { q: '¿Cómo puedo vender mi equipo?', a: 'Completá el formulario indicando el asunto "Vender mi equipo" y te cotizamos en menos de 2 horas.' },
             ].map(({ q, a }) => (
               <div key={q} className="bg-surface-container rounded-xl border border-white/8 p-sm hover:border-purple-500/20 transition-colors">

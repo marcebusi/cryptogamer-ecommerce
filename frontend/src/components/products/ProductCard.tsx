@@ -62,7 +62,7 @@ export default function ProductCard({ product, accent = 'secondary' }: ProductCa
       <div className={`absolute -top-6 -right-6 w-24 h-24 rounded-full blur-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${theme.glowDot}`} />
 
       {/* ── Image ──────────────────────────────── */}
-      <Link to={`/products/${product.id}`} className="block relative overflow-hidden bg-[#0b0c12] flex-shrink-0" style={{ aspectRatio: '1 / 1' }}>
+      <Link to={`/products/${product.id}`} className="block relative overflow-hidden product-img-bg flex-shrink-0" style={{ aspectRatio: '1 / 1' }}>
         {/* Wrapper handles hover-scale; img handles zoom — no conflict */}
         <div className="w-full h-full group-hover:scale-105 transition-transform duration-700">
           <img

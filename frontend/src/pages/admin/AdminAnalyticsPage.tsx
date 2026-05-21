@@ -154,7 +154,7 @@ export function AreaChart({ days, color, gradId, prevDays }: { days:DayRevenue[]
       {hov && (
         <div className="absolute -top-1 z-10 pointer-events-none"
           style={{left:`${tipL}%`,transform:`translateX(${tipL<15?'0':tipL>85?'-100%':'-50%'})`}}>
-          <div className="bg-[#0a0a1a] border border-white/12 rounded-xl px-3 py-2 shadow-xl whitespace-nowrap"
+          <div className="admin-tooltip-bg border border-white/12 rounded-xl px-3 py-2 shadow-xl whitespace-nowrap"
             style={{boxShadow:`0 4px 24px rgba(0,0,0,0.7),0 0 0 1px ${color}25`}}>
             <p className="text-[10px] text-white/40 uppercase tracking-wider mb-1.5">
               {new Date(hov.date+'T12:00:00').toLocaleDateString('es-AR',{weekday:'short',day:'numeric',month:'short'})}
@@ -176,7 +176,7 @@ export function AreaChart({ days, color, gradId, prevDays }: { days:DayRevenue[]
               </>
             )}
           </div>
-          <div className="w-2 h-2 rotate-45 border-b border-r border-white/12 bg-[#0a0a1a] mx-auto -mt-1"/>
+          <div className="w-2 h-2 rotate-45 border-b border-r border-white/12 admin-tooltip-bg mx-auto -mt-1"/>
         </div>
       )}
 
@@ -336,7 +336,7 @@ export function KpiCard({ icon, label, value, sub, color, sparkData, delay=0, tr
     return `${i===0?'M':'L'} ${x} ${y}`
   }).join(' ') : ''
   return (
-    <div className={`relative rounded-2xl border border-white/8 bg-[#0f0f23] p-5 overflow-hidden transition-all duration-500 ${visible?'opacity-100 translate-y-0':'opacity-0 translate-y-4'}`}
+    <div className={`relative rounded-2xl border border-white/8 admin-card-bg p-5 overflow-hidden transition-all duration-500 ${visible?'opacity-100 translate-y-0':'opacity-0 translate-y-4'}`}
       style={{transitionDelay:`${delay}ms`}}>
       <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full blur-3xl pointer-events-none"
         style={{background:color, animation:'kpi-glow 4s ease-in-out infinite'}}/>
@@ -458,7 +458,7 @@ export default function AdminAnalyticsPage() {
   const presetLabel = PRESETS.find(p=>p.key===preset)?.label??''
 
   return (
-    <main className="max-w-screen-xl mx-auto px-4 md:px-8 py-lg space-y-8 bg-[#080812] min-h-screen">
+    <main className="max-w-screen-xl mx-auto px-4 md:px-8 py-lg space-y-8 bg-background min-h-screen">
 
       {/* Global keyframes */}
       <style>{`
@@ -513,12 +513,12 @@ export default function AdminAnalyticsPage() {
           {preset==='custom' && (
             <div className="flex items-center gap-2">
               <input type="date" value={customFrom} onChange={e=>setCustomFrom(e.target.value)}
-                className="bg-[#0f0f23] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white/70
+                className="admin-card-bg border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white/70
                   cursor-pointer focus:outline-none focus:border-[#3af4ff]/50 transition-colors"
                 style={{colorScheme:'dark'}}/>
               <span className="text-white/25 text-sm font-light">→</span>
               <input type="date" value={customTo} onChange={e=>setCustomTo(e.target.value)}
-                className="bg-[#0f0f23] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white/70
+                className="admin-card-bg border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white/70
                   cursor-pointer focus:outline-none focus:border-[#3af4ff]/50 transition-colors"
                 style={{colorScheme:'dark'}}/>
             </div>
@@ -537,7 +537,7 @@ export default function AdminAnalyticsPage() {
       {/* ── Revenue chart + Donut ─────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        <div className="lg:col-span-2 bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
+        <div className="lg:col-span-2 admin-card-bg border border-white/6 rounded-2xl p-5">
           <div className="flex items-start justify-between mb-5">
             <div>
               <h2 className="font-bold text-white font-['Plus_Jakarta_Sans'] text-base">Ingresos del período</h2>
@@ -568,7 +568,7 @@ export default function AdminAnalyticsPage() {
           })()}
         </div>
 
-        <div className="bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
+        <div className="admin-card-bg border border-white/6 rounded-2xl p-5">
           <h2 className="font-bold text-white font-['Plus_Jakarta_Sans'] text-base mb-5">Estado de órdenes</h2>
           <DonutChart paid={summary.paidOrders} pending={summary.pendingOrders} cancelled={summary.cancelledOrders}/>
           <div className="mt-5 pt-4 border-t border-white/6 grid grid-cols-2 gap-3">
@@ -588,7 +588,7 @@ export default function AdminAnalyticsPage() {
       {/* ── Top Products + Subcategories ─────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        <div className="lg:col-span-2 bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
+        <div className="lg:col-span-2 admin-card-bg border border-white/6 rounded-2xl p-5">
           <h2 className="font-bold text-white font-['Plus_Jakarta_Sans'] text-base mb-5 flex items-center gap-2">
             <span className="material-symbols-outlined text-base" style={{color:'#4ade80'}}>trending_up</span>
             Productos más vendidos
@@ -619,7 +619,7 @@ export default function AdminAnalyticsPage() {
           }
         </div>
 
-        <div className="bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
+        <div className="admin-card-bg border border-white/6 rounded-2xl p-5">
           <h2 className="font-bold text-white font-['Plus_Jakarta_Sans'] text-base mb-5 flex items-center gap-2">
             <span className="material-symbols-outlined text-[#3af4ff] text-base">category</span>
             Por subcategoría
@@ -642,7 +642,7 @@ export default function AdminAnalyticsPage() {
       </div>
 
       {/* ── Seller Ranking ────────────────────────────────── */}
-      <div className="bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
+      <div className="admin-card-bg border border-white/6 rounded-2xl p-5">
         <h2 className="font-bold text-white font-['Plus_Jakarta_Sans'] text-base mb-5 flex items-center gap-2">
           <span className="material-symbols-outlined text-[#ff4a8d] text-base">emoji_events</span>
           Ranking de vendedores
@@ -683,7 +683,7 @@ export default function AdminAnalyticsPage() {
       </div>
 
       {/* ── Recent Orders ─────────────────────────────────── */}
-      <div className="bg-[#0f0f23] border border-white/6 rounded-2xl p-5">
+      <div className="admin-card-bg border border-white/6 rounded-2xl p-5">
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-bold text-white font-['Plus_Jakarta_Sans'] text-base flex items-center gap-2">
             <span className="material-symbols-outlined text-white/30 text-base">receipt_long</span>

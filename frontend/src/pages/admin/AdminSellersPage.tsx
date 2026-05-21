@@ -82,7 +82,7 @@ export default function AdminSellersPage() {
         value={String(form[key])}
         onChange={e => setForm(p => ({ ...p, [key]: type === 'number' ? Number(e.target.value) : e.target.value }))}
         placeholder={placeholder}
-        className="w-full bg-[#0d0e14] border border-white/10 rounded-xl px-3 py-2 text-sm text-on-surface outline-none focus:border-purple-500/60 focus:ring-2 focus:ring-purple-500/15 transition-all"
+        className="w-full bg-surface-container border border-white/10 rounded-xl px-3 py-2 text-sm text-on-surface outline-none focus:border-purple-500/60 focus:ring-2 focus:ring-purple-500/15 transition-all"
       />
     </div>
   )

@@ -161,6 +161,16 @@ html.light body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Themed dark surfaces — dark mode keeps the dark look, light mode uses surface tokens */
+.product-img-bg   { background: #07080d; }
+.admin-card-bg    { background: #0f0f23; }
+.admin-tooltip-bg { background: #0a0a1a; }
+.popup-bg         { background: #111318; }
+html.light .product-img-bg   { background: #f0f1f6; }
+html.light .admin-card-bg    { background: var(--color-surface-container); }
+html.light .admin-tooltip-bg { background: var(--color-surface-container-highest); }
+html.light .popup-bg         { background: var(--color-surface-container); }
+
 /* ══════════════════════════════════════════════════════
    EFFECTS (dark only — light mode neutralizes them)
    ══════════════════════════════════════════════════════ */

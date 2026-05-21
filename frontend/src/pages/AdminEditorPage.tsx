@@ -65,7 +65,7 @@ function DragCard({
       )}
 
       {/* Image */}
-      <div className="aspect-square bg-[#07080d] flex items-center justify-center overflow-hidden">
+      <div className="aspect-square product-img-bg flex items-center justify-center overflow-hidden">
         <img
           src={product.image || 'https://placehold.co/200x200/111318/39ff14?text=?'}
           alt={product.name}

@@ -266,7 +266,7 @@ export default function Navbar() {
                       <img
                         src={p.image}
                         alt={p.name}
-                        className="w-10 h-10 object-contain rounded-lg bg-[#0b0c12] flex-shrink-0"
+                        className="w-10 h-10 object-contain rounded-lg product-img-bg flex-shrink-0"
                         onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
                       />
                       <div className="flex-1 min-w-0">
