@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { api } from '../lib/api'
 import toast from 'react-hot-toast'
 
-type Tab = 'sections' | 'payment'
+type Tab = 'sections' | 'payment' | 'billing'
 
 interface StoreConfig {
   id: string
@@ -13,6 +13,23 @@ interface StoreConfig {
   planName: string
   notes: string
   enabledSections: string
+}
+
+interface BillingConfig {
+  monthlyAmount: number
+  billingAlias:  string
+  billingDay:    number
+}
+
+interface ServicePayment {
+  id:            string
+  period:        string
+  dueDate:       string
+  amount:        number
+  status:        'PENDING' | 'PAID' | 'OVERDUE'
+  paidAt:        string | null
+  markedByEmail: string | null
+  note:          string
 }
 
 /* ── Optional sections the superadmin can toggle ── */
@@ -64,6 +81,15 @@ export default function SuperAdminPage() {
   const [loading,    setLoading]    = useState(true)
   const [saving,     setSaving]     = useState(false)
 
+  // Billing state
+  const [billingConfig,  setBillingConfig]  = useState<BillingConfig>({ monthlyAmount: 0, billingAlias: '', billingDay: 1 })
+  const [payments,       setPayments]       = useState<ServicePayment[]>([])
+  const [billingLoading, setBillingLoading] = useState(false)
+  const [markingId,      setMarkingId]      = useState<string | null>(null)
+  const today = new Date()
+  const [newPeriod, setNewPeriod] = useState(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`)
+  const [newNote,   setNewNote]   = useState('')
+
   useEffect(() => {
     if (!isLoading && !isSuperAdmin) navigate('/')
   }, [isLoading, isSuperAdmin, navigate])
@@ -89,6 +115,21 @@ export default function SuperAdminPage() {
 
   useEffect(() => { loadConfig() }, [loadConfig])
 
+  const loadBilling = useCallback(async () => {
+    setBillingLoading(true)
+    try {
+      const [cfg, pays] = await Promise.all([
+        api.get<BillingConfig>('/api/superadmin/billing'),
+        api.get<ServicePayment[]>('/api/superadmin/billing/payments'),
+      ])
+      setBillingConfig(cfg)
+      setPayments(pays)
+    } catch { /* ignore */ }
+    finally { setBillingLoading(false) }
+  }, [])
+
+  useEffect(() => { if (tab === 'billing') loadBilling() }, [tab, loadBilling])
+
   const toggleSection = (key: string) => {
     setEnabled(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key])
   }
@@ -100,6 +141,41 @@ export default function SuperAdminPage() {
       toast.success('Secciones guardadas.')
     } catch (e) { toast.error((e as Error).message) }
     finally { setSaving(false) }
+  }
+
+  const saveBillingConfig = async () => {
+    setSaving(true)
+    try {
+      await api.put('/api/superadmin/billing', billingConfig)
+      toast.success('Configuración guardada.')
+    } catch (e) { toast.error((e as Error).message) }
+    finally { setSaving(false) }
+  }
+
+  const createPayment = async () => {
+    if (!newPeriod) return
+    const [year, month] = newPeriod.split('-').map(Number)
+    const dueDate = new Date(year, month - 1, billingConfig.billingDay).toISOString()
+    setSaving(true)
+    try {
+      await api.post('/api/superadmin/billing/payments', {
+        period: newPeriod, dueDate, amount: billingConfig.monthlyAmount, note: newNote,
+      })
+      toast.success(`Registro ${newPeriod} creado.`)
+      setNewNote('')
+      await loadBilling()
+    } catch (e) { toast.error((e as Error).message) }
+    finally { setSaving(false) }
+  }
+
+  const markStatus = async (id: string, status: 'PAID' | 'OVERDUE' | 'PENDING') => {
+    setMarkingId(id)
+    try {
+      await api.patch(`/api/superadmin/billing/payments/${id}/status`, { status })
+      toast.success(status === 'PAID' ? 'Marcado como pagado.' : status === 'OVERDUE' ? 'Marcado como vencido.' : 'Restablecido a pendiente.')
+      await loadBilling()
+    } catch (e) { toast.error((e as Error).message) }
+    finally { setMarkingId(null) }
   }
 
   const savePayment = async () => {
@@ -156,8 +232,9 @@ export default function SuperAdminPage() {
           {/* Tabs */}
           <div className="flex gap-xs border-b border-white/10">
             {([
-              { key: 'sections', icon: 'toggle_on',      label: 'Secciones'   },
-              { key: 'payment',  icon: 'credit_card',     label: 'Suscripción' },
+              { key: 'sections', icon: 'toggle_on',      label: 'Secciones'    },
+              { key: 'payment',  icon: 'credit_card',    label: 'Suscripción'  },
+              { key: 'billing',  icon: 'receipt_long',   label: 'Facturación'  },
             ] as { key: Tab; icon: string; label: string }[]).map(t => (
               <button
                 key={t.key}
@@ -336,6 +413,152 @@ export default function SuperAdminPage() {
             )}
           </div>
         )}
+
+        {/* ── BILLING ──────────────────────────────── */}
+        {tab === 'billing' && (
+          <div className="space-y-lg">
+
+            {/* Config */}
+            <div className="max-w-md">
+              <h2 className="font-bold text-on-surface font-['Plus_Jakarta_Sans'] mb-xs">Configuración de cobro</h2>
+              <p className="text-sm text-on-surface-variant mb-md">Monto mensual, alias de transferencia y día de vencimiento.</p>
+              <div className="bg-surface-container rounded-2xl border border-purple-500/20 p-lg space-y-sm relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/40 to-transparent" />
+                <div>
+                  <label className="block text-xs text-on-surface-variant uppercase tracking-wider mb-1">Monto mensual ($)</label>
+                  <input type="number" min="0" value={billingConfig.monthlyAmount}
+                    onChange={e => setBillingConfig(f => ({ ...f, monthlyAmount: Number(e.target.value) }))}
+                    className="w-full bg-surface-container-high border border-outline-variant rounded-xl px-sm py-xs text-sm text-on-surface outline-none focus:border-purple-400" />
+                </div>
+                <div>
+                  <label className="block text-xs text-on-surface-variant uppercase tracking-wider mb-1">Alias / CBU</label>
+                  <input type="text" value={billingConfig.billingAlias} placeholder="ej: ateneatechs.mp"
+                    onChange={e => setBillingConfig(f => ({ ...f, billingAlias: e.target.value }))}
+                    className="w-full bg-surface-container-high border border-outline-variant rounded-xl px-sm py-xs text-sm text-on-surface placeholder:text-on-surface-variant/40 outline-none focus:border-purple-400" />
+                </div>
+                <div>
+                  <label className="block text-xs text-on-surface-variant uppercase tracking-wider mb-1">Día de vencimiento (1–28)</label>
+                  <input type="number" min="1" max="28" value={billingConfig.billingDay}
+                    onChange={e => setBillingConfig(f => ({ ...f, billingDay: Number(e.target.value) }))}
+                    className="w-full bg-surface-container-high border border-outline-variant rounded-xl px-sm py-xs text-sm text-on-surface outline-none focus:border-purple-400" />
+                </div>
+                <button onClick={saveBillingConfig} disabled={saving}
+                  className="w-full bg-purple-600 text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-xs hover:bg-purple-500 active:scale-95 transition-all cursor-pointer disabled:opacity-60">
+                  {saving
+                    ? <><span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>Guardando...</>
+                    : <><span className="material-symbols-outlined text-sm">save</span>Guardar configuración</>}
+                </button>
+              </div>
+            </div>
+
+            {/* Crear registro */}
+            <div className="max-w-md">
+              <h2 className="font-bold text-on-surface font-['Plus_Jakarta_Sans'] mb-xs">Crear registro de pago</h2>
+              <div className="bg-surface-container rounded-xl border border-white/10 p-md space-y-sm">
+                <div>
+                  <label className="block text-xs text-on-surface-variant uppercase tracking-wider mb-1">Período</label>
+                  <input type="month" value={newPeriod} onChange={e => setNewPeriod(e.target.value)}
+                    className="w-full bg-surface-container-high border border-outline-variant rounded-xl px-sm py-xs text-sm text-on-surface outline-none focus:border-purple-400" />
+                </div>
+                <div>
+                  <label className="block text-xs text-on-surface-variant uppercase tracking-wider mb-1">Nota interna (opcional)</label>
+                  <input type="text" value={newNote} onChange={e => setNewNote(e.target.value)}
+                    placeholder="Ej: avisado por WhatsApp"
+                    className="w-full bg-surface-container-high border border-outline-variant rounded-xl px-sm py-xs text-sm text-on-surface placeholder:text-on-surface-variant/40 outline-none focus:border-purple-400" />
+                </div>
+                <button onClick={createPayment} disabled={saving}
+                  className="w-full py-2.5 rounded-xl font-bold text-sm border border-primary-container/40 text-primary-container hover:bg-primary-container/10 active:scale-95 transition-all cursor-pointer disabled:opacity-60 flex items-center justify-center gap-xs">
+                  <span className="material-symbols-outlined text-sm">add_circle</span>
+                  Crear registro
+                </button>
+              </div>
+            </div>
+
+            {/* Tabla de pagos */}
+            <div>
+              <h2 className="font-bold text-on-surface font-['Plus_Jakarta_Sans'] mb-md">Historial de pagos</h2>
+              {billingLoading ? (
+                <div className="flex items-center gap-xs text-on-surface-variant text-sm">
+                  <span className="material-symbols-outlined animate-spin text-base">progress_activity</span>Cargando...
+                </div>
+              ) : payments.length === 0 ? (
+                <p className="text-sm text-on-surface-variant">No hay registros todavía. Creá el primero arriba.</p>
+              ) : (
+                <div className="overflow-x-auto rounded-2xl border border-white/8">
+                  <table className="w-full text-sm">
+                    <thead className="bg-surface-container-high">
+                      <tr>
+                        {['Período','Vencimiento','Monto','Estado','Acciones'].map(h => (
+                          <th key={h} className="text-left text-xs text-on-surface-variant uppercase tracking-wider px-md py-sm font-semibold">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {payments.map(p => {
+                        const statusStyle = {
+                          PAID:    'bg-green-500/15 text-green-300 border-green-500/30',
+                          PENDING: 'bg-yellow-500/15 text-yellow-300 border-yellow-500/30',
+                          OVERDUE: 'bg-red-500/15 text-red-300 border-red-500/30',
+                        }[p.status]
+                        const statusLabel = { PAID:'Pagado', PENDING:'Pendiente', OVERDUE:'Vencido' }[p.status]
+                        const isMarking = markingId === p.id
+                        return (
+                          <tr key={p.id} className="bg-surface-container hover:bg-surface-container-high transition-colors">
+                            <td className="px-md py-sm font-bold text-on-surface">{p.period}</td>
+                            <td className="px-md py-sm text-on-surface-variant">
+                              {new Date(p.dueDate).toLocaleDateString('es-AR')}
+                            </td>
+                            <td className="px-md py-sm font-semibold text-on-surface">
+                              ${p.amount.toLocaleString('es-AR')}
+                            </td>
+                            <td className="px-md py-sm">
+                              <span className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full border ${statusStyle}`}>
+                                <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: 'currentColor' }} />
+                                {statusLabel}
+                              </span>
+                              {p.paidAt && (
+                                <p className="text-[10px] text-on-surface-variant mt-0.5">
+                                  {new Date(p.paidAt).toLocaleDateString('es-AR')}
+                                </p>
+                              )}
+                            </td>
+                            <td className="px-md py-sm">
+                              <div className="flex gap-xs flex-wrap">
+                                {p.status !== 'PAID' && (
+                                  <button onClick={() => markStatus(p.id, 'PAID')} disabled={isMarking}
+                                    className="text-xs px-xs py-1 rounded-lg bg-green-500/15 text-green-300 border border-green-500/30 hover:bg-green-500/25 transition-all cursor-pointer disabled:opacity-50 flex items-center gap-0.5">
+                                    {isMarking
+                                      ? <span className="material-symbols-outlined text-xs animate-spin">progress_activity</span>
+                                      : <span className="material-symbols-outlined text-xs">check_circle</span>}
+                                    Pagado
+                                  </button>
+                                )}
+                                {p.status === 'PENDING' && (
+                                  <button onClick={() => markStatus(p.id, 'OVERDUE')} disabled={isMarking}
+                                    className="text-xs px-xs py-1 rounded-lg bg-red-500/15 text-red-300 border border-red-500/30 hover:bg-red-500/25 transition-all cursor-pointer disabled:opacity-50 flex items-center gap-0.5">
+                                    <span className="material-symbols-outlined text-xs">warning</span>
+                                    Vencido
+                                  </button>
+                                )}
+                                {p.status === 'PAID' && (
+                                  <button onClick={() => markStatus(p.id, 'PENDING')} disabled={isMarking}
+                                    className="text-xs px-xs py-1 rounded-lg bg-surface-container-high text-on-surface-variant border border-white/10 hover:border-white/20 transition-all cursor-pointer disabled:opacity-50">
+                                    Restablecer
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
       </div>
     </main>
   )
