@@ -216,10 +216,10 @@ export default function CheckoutModal() {
 
   /* ════════════════════════════════════════════════════ */
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center sm:p-4">
       <div className="absolute inset-0 bg-black/75 backdrop-blur-md" onClick={handleClose} />
 
-      <div className="checkout-modal relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-purple-500/30 shadow-[0_0_80px_rgba(138,43,226,0.25)]">
+      <div className="checkout-modal relative w-full max-w-lg max-h-[92dvh] overflow-y-auto sm:rounded-2xl rounded-t-2xl border border-purple-500/30 shadow-[0_0_80px_rgba(138,43,226,0.25)]">
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/60 to-transparent" />
 
         {/* ── Header ── */}

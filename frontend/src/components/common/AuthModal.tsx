@@ -89,12 +89,12 @@ export default function AuthModal({ isOpen, onClose, defaultView = 'login' }: Pr
   const inp = 'auth-input w-full bg-surface-container border border-outline-variant rounded-xl px-sm py-3 text-sm text-on-surface placeholder:text-on-surface-variant/40 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all'
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center px-4" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center sm:px-4" role="dialog" aria-modal="true">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
 
       {/* Panel */}
-      <div className="auth-modal relative w-full max-w-md rounded-2xl border border-purple-500/25 shadow-[0_0_60px_rgba(138,43,226,0.25)] overflow-hidden">
+      <div className="auth-modal relative w-full max-w-md sm:rounded-2xl rounded-t-2xl border border-purple-500/25 shadow-[0_0_60px_rgba(138,43,226,0.25)] overflow-hidden max-h-[90dvh] overflow-y-auto">
 
         {/* Top glow line */}
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/60 to-transparent" />

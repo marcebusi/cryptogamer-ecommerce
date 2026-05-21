@@ -33,3 +33,13 @@
 .product-cart-btn:hover {
   box-shadow: 0 4px 14px rgba(0,0,0,0.3);
 }
+
+/* ── Mobile: quick-add overlay always visible on touch ── */
+@media (hover: none) and (pointer: coarse) {
+  .group:hover .group-hover\:opacity-100 {
+    opacity: 0 !important; /* hide hover overlay on touch — bottom button is used instead */
+  }
+  .product-cart-btn:hover {
+    transform: none;
+  }
+}

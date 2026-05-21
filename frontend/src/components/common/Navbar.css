@@ -310,3 +310,104 @@ html.light .icon-manage   { color: #c2410c;  background: rgba(249,115,22,0.08); 
 html.light .icon-logout   { color: #dc2626;  background: rgba(220,38,38,0.07); }
 html.light .user-menu-item-logout { color: #dc2626; }
 html.light .user-menu-item-logout:hover { color: #991b1b; background: rgba(220,38,38,0.06); }
+
+/* ══ MOBILE DRAWER ══════════════════════════════════ */
+
+/* Overlay */
+.mobile-drawer-overlay {
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Drawer panel */
+.mobile-drawer {
+  width: min(82vw, 360px);
+  background: rgba(8, 6, 18, 0.98);
+  backdrop-filter: blur(28px) saturate(1.5);
+  -webkit-backdrop-filter: blur(28px) saturate(1.5);
+  border-left: 1px solid rgba(138, 43, 226, 0.2);
+  box-shadow: -20px 0 60px rgba(0, 0, 0, 0.8), -4px 0 0 rgba(138, 43, 226, 0.04);
+}
+
+/* Quick nav chips */
+.drawer-nav-chip {
+  color: rgba(203, 213, 225, 0.8);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.drawer-nav-chip:hover,
+.drawer-nav-chip:active {
+  background: rgba(138, 43, 226, 0.12);
+  color: #e2d9f3;
+  border-color: rgba(168, 85, 247, 0.25);
+}
+
+/* Footer buttons */
+.drawer-footer-btn {
+  color: rgba(203, 213, 225, 0.8);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  transition: background 0.2s, color 0.2s;
+}
+.drawer-footer-btn:hover,
+.drawer-footer-btn:active {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2d9f3;
+}
+
+.drawer-footer-btn-primary {
+  background: linear-gradient(135deg, #7c3aed, #4c1d95);
+  color: #ffffff;
+  border: 1px solid rgba(138, 43, 226, 0.4);
+  box-shadow: 0 0 20px rgba(138, 43, 226, 0.3);
+  transition: box-shadow 0.2s, transform 0.15s;
+}
+.drawer-footer-btn-primary:hover {
+  box-shadow: 0 0 32px rgba(168, 85, 247, 0.5);
+  transform: translateY(-1px);
+}
+.drawer-footer-btn-primary:active {
+  transform: scale(0.97);
+}
+
+/* ── LIGHT MODE ─────────────────────────────────── */
+html.light .mobile-drawer {
+  background: rgba(255, 255, 255, 0.99);
+  border-left-color: rgba(220, 38, 38, 0.12);
+  box-shadow: -20px 0 60px rgba(0, 0, 0, 0.12);
+}
+html.light .mobile-drawer-overlay {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+html.light .drawer-nav-chip {
+  color: rgba(30, 41, 59, 0.8);
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+html.light .drawer-nav-chip:hover {
+  background: rgba(220, 38, 38, 0.07);
+  color: #111827;
+  border-color: rgba(220, 38, 38, 0.2);
+}
+
+html.light .drawer-footer-btn {
+  color: rgba(55, 65, 81, 0.9);
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+html.light .drawer-footer-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #111827;
+}
+
+html.light .drawer-footer-btn-primary {
+  background: linear-gradient(135deg, #dc2626, #991b1b);
+  border-color: rgba(220, 38, 38, 0.3);
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3);
+}
+html.light .drawer-footer-btn-primary:hover {
+  box-shadow: 0 4px 24px rgba(220, 38, 38, 0.5);
+}

@@ -18,24 +18,37 @@ export default function Navbar() {
   const { categories } = useCategories()
   const navigate = useNavigate()
 
+  // Desktop dropdown
   const [productosOpen, setProductosOpen] = useState(false)
-  const [mobileOpen, setMobileOpen]       = useState(false)
   const [hoveredCatSlug, setHoveredCatSlug] = useState<string | null>(null)
   const [hoveredSubId,   setHoveredSubId]   = useState<string | null>(null)
 
+  // Mobile drawer
+  const [mobileOpen, setMobileOpen]         = useState(false)
+  const [expandedCatSlug, setExpandedCatSlug] = useState<string | null>(null)
+  const [mobileSearchQuery, setMobileSearchQuery] = useState('')
+
+  // Auth / user menu
   const [authOpen,     setAuthOpen]     = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const userBtnRef = useRef<HTMLDivElement>(null)
+  const userBtnRef  = useRef<HTMLDivElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Live search
-  const [searchQuery, setSearchQuery]       = useState('')
-  const [searchResults, setSearchResults]   = useState<any[]>([])
-  const [searchLoading, setSearchLoading]   = useState(false)
-  const [searchOpen, setSearchOpen]         = useState(false)
+  // Desktop live search
+  const [searchQuery,   setSearchQuery]   = useState('')
+  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [searchLoading, setSearchLoading] = useState(false)
+  const [searchOpen,    setSearchOpen]    = useState(false)
   const searchRef   = useRef<HTMLDivElement>(null)
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Lock body scroll when drawer is open
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [mobileOpen])
+
+  // Close dropdown/search on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -65,11 +78,13 @@ export default function Navbar() {
     }, 300)
   }
 
-  const goToSearch = () => {
-    if (!searchQuery.trim()) return
-    navigate(`/products?search=${encodeURIComponent(searchQuery)}`)
+  const goToSearch = (q: string = searchQuery) => {
+    if (!q.trim()) return
+    navigate(`/products?search=${encodeURIComponent(q)}`)
     setSearchOpen(false)
     setSearchQuery('')
+    setMobileOpen(false)
+    setMobileSearchQuery('')
   }
 
   const openDropdown = () => {
@@ -90,10 +105,11 @@ export default function Navbar() {
     setMobileOpen(false)
   }
 
-  // Derive current hovered data
-  const hoveredCat       = categories.find(c => c.slug === hoveredCatSlug) ?? null
+  const hoveredCat      = categories.find(c => c.slug === hoveredCatSlug) ?? null
   const hoveredChildren: CategoryChild[] = hoveredCat ? parseCategoryChildren(hoveredCat.children) : []
-  const hoveredSub: CategoryChild | null = hoveredSubId ? (hoveredChildren.find(s => s.id === hoveredSubId) ?? null) : null
+  const hoveredSub: CategoryChild | null = hoveredSubId
+    ? (hoveredChildren.find(s => s.id === hoveredSubId) ?? null)
+    : null
   const hasSubSub = !!(hoveredSub?.children?.length)
 
   return (
@@ -103,7 +119,6 @@ export default function Navbar() {
 
           {/* ── Logo ─────────────────────────────── */}
           <Link to="/" className="navbar-logo-glow flex items-center gap-2 flex-shrink-0">
-            {/* Gamepad icon */}
             <div className="navbar-logo-icon w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0">
               <i className="fa-solid fa-gamepad text-white text-sm" />
             </div>
@@ -236,9 +251,9 @@ export default function Navbar() {
           </nav>
 
           {/* ── Actions ──────────────────────────── */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 md:gap-2">
 
-            {/* Live Search */}
+            {/* Desktop Live Search */}
             <div ref={searchRef} className="relative hidden md:block">
               <div className="navbar-search">
                 <span className="material-symbols-outlined text-on-surface-variant" style={{fontSize:'16px'}}>search</span>
@@ -276,7 +291,7 @@ export default function Navbar() {
                     </Link>
                   ))}
                   <button
-                    onClick={goToSearch}
+                    onClick={() => goToSearch()}
                     className="w-full px-4 py-3 text-xs text-center text-purple-400 hover:bg-white/5 border-t border-white/8 transition-colors font-semibold"
                   >
                     Ver todos los resultados para "{searchQuery}"
@@ -291,10 +306,10 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* Theme toggle */}
+            {/* Theme toggle — desktop only */}
             <button
               onClick={toggleTheme}
-              className="navbar-icon-btn cursor-pointer"
+              className="hidden md:flex navbar-icon-btn cursor-pointer"
               aria-label={isDark ? 'Modo claro' : 'Modo oscuro'}
               title={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
             >
@@ -316,8 +331,8 @@ export default function Navbar() {
               )}
             </button>
 
-            {/* User */}
-            <div ref={userBtnRef} className="relative">
+            {/* User — desktop only */}
+            <div ref={userBtnRef} className="relative hidden md:block">
               <button
                 onClick={() => isAuthenticated ? setUserMenuOpen(p => !p) : setAuthOpen(true)}
                 className="navbar-icon-btn cursor-pointer"
@@ -339,47 +354,161 @@ export default function Navbar() {
             <button
               className="md:hidden navbar-icon-btn cursor-pointer"
               onClick={() => setMobileOpen(p => !p)}
-              aria-label="Menú">
-              <span className="material-symbols-outlined" style={{fontSize:'20px'}}>{mobileOpen ? 'close' : 'menu'}</span>
+              aria-label={mobileOpen ? 'Cerrar menú' : 'Abrir menú'}>
+              <span className="material-symbols-outlined" style={{fontSize:'20px'}}>
+                {mobileOpen ? 'close' : 'menu'}
+              </span>
             </button>
           </div>
         </div>
+      </header>
 
-        {/* Mobile menu */}
-        {mobileOpen && (
-          <div className="md:hidden border-t border-purple-500/15 px-4 py-md space-y-xs" style={{background:'rgba(8,6,18,0.97)'}}>
-            <p className="text-xs text-on-surface-variant uppercase tracking-widest mb-xs font-semibold">Categorías</p>
+      {/* ── Mobile Drawer Overlay ─────────────────────────── */}
+      <div
+        className={`mobile-drawer-overlay md:hidden fixed inset-0 z-[60] transition-opacity duration-300 ${
+          mobileOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setMobileOpen(false)}
+        aria-hidden="true"
+      />
+
+      {/* ── Mobile Drawer ────────────────────────────────── */}
+      <div
+        className={`mobile-drawer md:hidden fixed top-0 right-0 h-full z-[70] flex flex-col transition-transform duration-300 ease-out ${
+          mobileOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menú de navegación"
+      >
+        {/* Drawer header */}
+        <div className="flex items-center justify-between px-4 h-[58px] flex-shrink-0 border-b border-white/8">
+          <Link
+            to="/"
+            onClick={() => setMobileOpen(false)}
+            className="navbar-logo-glow flex items-center gap-2">
+            <div className="navbar-logo-icon w-7 h-7 rounded-xl flex items-center justify-center">
+              <i className="fa-solid fa-gamepad text-white text-xs" />
+            </div>
+            <span className="navbar-logo-text font-black italic font-['Plus_Jakarta_Sans'] tracking-tight text-base leading-none">
+              Crypto<span className="text-purple-400">gamer</span>
+            </span>
+          </Link>
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="navbar-icon-btn cursor-pointer"
+            aria-label="Cerrar menú">
+            <span className="material-symbols-outlined" style={{fontSize:'20px'}}>close</span>
+          </button>
+        </div>
+
+        {/* Search bar */}
+        <div className="px-4 py-3 flex-shrink-0 border-b border-white/8">
+          <div className="navbar-search w-full">
+            <span className="material-symbols-outlined text-on-surface-variant" style={{fontSize:'16px'}}>search</span>
+            <input
+              type="search"
+              value={mobileSearchQuery}
+              onChange={e => setMobileSearchQuery(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && goToSearch(mobileSearchQuery)}
+              placeholder="Buscar productos..."
+              className="bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant/50 outline-none flex-1 min-w-0"
+              autoComplete="off"
+            />
+            {mobileSearchQuery.trim() && (
+              <button
+                onClick={() => goToSearch(mobileSearchQuery)}
+                className="text-purple-400 text-xs font-bold whitespace-nowrap cursor-pointer transition-opacity hover:opacity-80">
+                Buscar
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Quick nav links */}
+        <div className="px-4 py-3 flex-shrink-0 border-b border-white/8 flex gap-2">
+          <NavLink
+            to="/ofertas"
+            onClick={() => setMobileOpen(false)}
+            className="drawer-nav-chip flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-full text-sm font-semibold transition-all cursor-pointer">
+            <i className="fa-solid fa-bolt text-yellow-400 text-xs" />
+            Ofertas
+          </NavLink>
+          <NavLink
+            to="/contacto"
+            onClick={() => setMobileOpen(false)}
+            className="drawer-nav-chip flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-full text-sm font-semibold transition-all cursor-pointer">
+            <span className="material-symbols-outlined text-sm">mail</span>
+            Contacto
+          </NavLink>
+        </div>
+
+        {/* Categories accordion — scrollable */}
+        <div className="flex-1 overflow-y-auto px-4 py-3">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2 px-1">Categorías</p>
+          <div className="space-y-0.5">
             {categories.map(cat => {
               const children = parseCategoryChildren(cat.children)
+              const isExpanded = expandedCatSlug === cat.slug
+
               return (
                 <div key={cat.id}>
                   <button
-                    onClick={() => goTo(cat.slug)}
-                    className="w-full flex items-center gap-xs px-sm py-xs text-sm text-on-surface-variant hover:text-purple-300 transition-colors cursor-pointer border-l border-purple-500/20">
-                    <span className="material-symbols-outlined text-sm">{cat.icon}</span>
-                    {cat.name}
+                    onClick={() => {
+                      if (children.length > 0) {
+                        setExpandedCatSlug(isExpanded ? null : cat.slug)
+                      } else {
+                        goTo(cat.slug)
+                      }
+                    }}
+                    className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer ${
+                      isExpanded
+                        ? 'bg-purple-600/12 text-on-surface'
+                        : 'text-on-surface-variant hover:bg-white/5 hover:text-on-surface'
+                    }`}>
+                    <span className={`material-symbols-outlined text-base flex-shrink-0 ${isExpanded ? 'text-purple-400' : 'text-on-surface-variant'}`}>
+                      {cat.icon}
+                    </span>
+                    <span className="flex-1 text-left">{cat.name}</span>
+                    {children.length > 0 ? (
+                      <span className={`material-symbols-outlined text-sm flex-shrink-0 transition-transform duration-200 ${
+                        isExpanded ? 'rotate-180 text-purple-400' : 'text-on-surface-variant/40'
+                      }`}>
+                        expand_more
+                      </span>
+                    ) : (
+                      <span className="material-symbols-outlined text-sm flex-shrink-0 text-on-surface-variant/30">
+                        chevron_right
+                      </span>
+                    )}
                   </button>
-                  {children.length > 0 && (
-                    <div className="ml-sm pl-sm border-l border-white/5 space-y-0.5 mb-xs">
+
+                  {/* Subcategories */}
+                  {isExpanded && children.length > 0 && (
+                    <div className="ml-3 pl-4 border-l border-purple-500/20 space-y-0.5 mb-2">
+                      <button
+                        onClick={() => goTo(cat.slug)}
+                        className="w-full text-left text-xs px-3 py-2 rounded-lg text-on-surface-variant hover:text-purple-300 hover:bg-white/5 transition-all cursor-pointer font-semibold">
+                        Ver todos
+                      </button>
                       {children.map(sub => (
                         <div key={sub.id}>
                           <button
-                            onClick={() => (sub.children?.length ?? 0) > 0 ? undefined : goTo(cat.slug, sub.id)}
-                            className="w-full text-left text-xs text-on-surface-variant hover:text-purple-300 py-1 cursor-pointer transition-colors">
+                            onClick={() => {
+                              if (!(sub.children?.length)) goTo(cat.slug, sub.id)
+                              else setExpandedCatSlug(sub.id) // won't conflict — just a visual toggle
+                            }}
+                            className="w-full text-left text-xs px-3 py-2 rounded-lg text-on-surface-variant hover:text-purple-300 hover:bg-white/5 transition-all cursor-pointer">
                             {sub.label}
                           </button>
-                          {sub.children && (
-                            <div className="ml-sm pl-sm border-l border-white/5">
-                              {sub.children.map(ssub => (
-                                <button
-                                  key={ssub.id}
-                                  onClick={() => goTo(cat.slug, ssub.id)}
-                                  className="w-full text-left text-xs text-on-surface-variant/70 hover:text-purple-300 py-0.5 cursor-pointer transition-colors">
-                                  › {ssub.label}
-                                </button>
-                              ))}
-                            </div>
-                          )}
+                          {sub.children?.map(ssub => (
+                            <button
+                              key={ssub.id}
+                              onClick={() => goTo(cat.slug, ssub.id)}
+                              className="w-full text-left text-xs px-3 py-1.5 rounded-lg text-on-surface-variant/60 hover:text-purple-300 hover:bg-white/5 transition-all cursor-pointer pl-6">
+                              › {ssub.label}
+                            </button>
+                          ))}
                         </div>
                       ))}
                     </div>
@@ -387,18 +516,47 @@ export default function Navbar() {
                 </div>
               )
             })}
-            <div className="border-t border-white/8 pt-sm space-y-sm">
-              <Link to="/ofertas" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 text-on-surface-variant hover:text-purple-300 font-semibold text-sm transition-colors">
-                <i className="fa-solid fa-bolt text-yellow-400 text-xs" />Ofertas
-              </Link>
-              <Link to="/contacto" onClick={() => setMobileOpen(false)} className="block text-on-surface-variant hover:text-purple-300 font-semibold text-sm transition-colors">Contacto</Link>
-            </div>
           </div>
-        )}
-      </header>
+        </div>
+
+        {/* Drawer footer */}
+        <div className="px-4 pb-6 pt-3 flex-shrink-0 border-t border-white/8 space-y-2">
+          {/* User account */}
+          {isAuthenticated ? (
+            <button
+              onClick={() => { navigate('/profile'); setMobileOpen(false) }}
+              className="w-full drawer-footer-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer">
+              <div className="w-8 h-8 rounded-full bg-purple-600/30 flex items-center justify-center text-purple-300 text-xs font-black flex-shrink-0">
+                {(user?.name ?? user?.email ?? 'U').charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 text-left min-w-0">
+                <p className="text-on-surface text-sm font-semibold truncate">{user?.name ?? user?.email}</p>
+                <p className="text-on-surface-variant text-xs">Mi cuenta</p>
+              </div>
+              <span className="material-symbols-outlined text-sm text-on-surface-variant/50 flex-shrink-0">chevron_right</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => { setAuthOpen(true); setMobileOpen(false) }}
+              className="w-full drawer-footer-btn-primary flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer">
+              <span className="material-symbols-outlined text-sm">person</span>
+              Iniciar sesión
+            </button>
+          )}
+
+          {/* Theme toggle */}
+          <button
+            onClick={toggleTheme}
+            className="w-full drawer-footer-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer">
+            <span className="material-symbols-outlined text-base">
+              {isDark ? 'light_mode' : 'dark_mode'}
+            </span>
+            {isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+          </button>
+        </div>
+      </div>
 
       <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
     </>
   )
 }
-
