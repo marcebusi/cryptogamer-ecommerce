@@ -91,18 +91,6 @@ export default function ProductCard({ product, accent = 'secondary' }: ProductCa
           </div>
         )}
 
-        {/* Quick-add overlay */}
-        <div className="absolute inset-0 bg-background/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-xs">
-          <button
-            onClick={e => { e.preventDefault(); addToCart(product) }}
-            disabled={!product.inStock}
-            className={`flex items-center gap-xs px-sm py-xs rounded-full text-xs font-bold transition-all active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${theme.btn}`}
-            aria-label="Agregar al carrito"
-          >
-            <span className="material-symbols-outlined text-sm">add_shopping_cart</span>
-            Agregar
-          </button>
-        </div>
       </Link>
 
       {/* ── Info ───────────────────────────────── */}

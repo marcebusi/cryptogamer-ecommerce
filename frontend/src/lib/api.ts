@@ -1,4 +1,5 @@
 /* Centralised API helper — adds auth header automatically */
+import { normalizeImgUrl } from '../types'
 
 const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3001'
 
@@ -50,6 +51,7 @@ export const api = {
     })
     const data = await res.json().catch(() => ({}))
     if (!res.ok) throw new Error((data as { message?: string }).message ?? `HTTP ${res.status}`)
-    return data as { url: string }
+    const raw = data as { url: string }
+    return { url: normalizeImgUrl(raw.url) }
   },
 }
