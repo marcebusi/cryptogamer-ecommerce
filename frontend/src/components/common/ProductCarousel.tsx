@@ -1,6 +1,5 @@
 import { useRef, useEffect, useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useCart } from '../../context/CartContext'
 import type { Product } from '../../types'
 import './ProductCarousel.css'
 
@@ -10,8 +9,7 @@ const ARS = (n: number) =>
 interface Props { products: Product[] }
 
 export default function ProductCarousel({ products }: Props) {
-  const { addToCart }  = useCart()
-  const trackRef       = useRef<HTMLDivElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
   const isJumping      = useRef(false)
   const [activeArrow, setActiveArrow] = useState<'left' | 'right' | null>(null)
 
@@ -110,18 +108,6 @@ export default function ProductCarousel({ products }: Props) {
                   </div>
                 )}
 
-                {/* Hover overlay — quick add */}
-                <Link to={`/products/${product.id}`} className="pc-overlay">
-                  <button
-                    onClick={e => { e.stopPropagation(); e.preventDefault(); addToCart(product) }}
-                    disabled={!product.inStock}
-                    className="flex items-center gap-1.5 px-4 py-2 bg-[#ff4a8d] text-white rounded-full text-xs font-bold shadow-[0_0_20px_rgba(255,74,141,0.6)] hover:brightness-110 transition-all active:scale-90 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                    aria-label="Agregar al carrito"
-                  >
-                    <span className="material-symbols-outlined text-sm">add_shopping_cart</span>
-                    Agregar
-                  </button>
-                </Link>
               </div>
 
               {/* Info */}
