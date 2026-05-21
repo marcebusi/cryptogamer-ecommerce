@@ -195,7 +195,7 @@ export default function Navbar() {
                           <button
                             key={sub.id}
                             onMouseEnter={() => setHoveredSubId(sub.id)}
-                            onClick={() => (sub.children?.length ?? 0) > 0 ? undefined : goTo(hoveredCatSlug!, sub.id)}
+                            onClick={() => goTo(hoveredCatSlug!, sub.id)}
                             className={`w-full flex items-center gap-2 px-xs py-2 rounded-lg text-sm transition-all duration-150 cursor-pointer ${
                               hoveredSubId === sub.id ? 'bg-white/10 text-cyan-400' : 'text-on-surface-variant hover:bg-white/5 hover:text-cyan-400'
                             }`}>
@@ -494,10 +494,7 @@ export default function Navbar() {
                       {children.map(sub => (
                         <div key={sub.id}>
                           <button
-                            onClick={() => {
-                              if (!(sub.children?.length)) goTo(cat.slug, sub.id)
-                              else setExpandedCatSlug(sub.id) // won't conflict — just a visual toggle
-                            }}
+                            onClick={() => goTo(cat.slug, sub.id)}
                             className="w-full text-left text-xs px-3 py-2 rounded-lg text-on-surface-variant hover:text-purple-300 hover:bg-white/5 transition-all cursor-pointer">
                             {sub.label}
                           </button>

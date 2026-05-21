@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { normalizeImgUrl } from '../types'
 import ImageGallery from '../components/product-detail/ImageGallery'
 import ProductInfo from '../components/product-detail/ProductInfo'
 import RelatedProducts from '../components/product-detail/RelatedProducts'
@@ -34,7 +35,7 @@ function mapApi(p: ApiProduct): Product {
   return {
     id: p.id, name: p.name, slug: p.slug,
     price: p.price, originalPrice: p.originalPrice ?? undefined,
-    image: p.image, images: tryParse<import('../types').ImgSrc[]>(p.images, []),
+    image: normalizeImgUrl(p.image), images: tryParse<import('../types').ImgSrc[]>(p.images, []),
     category: p.category?.slug ?? p.categoryId,
     subcategory: p.subcategory ?? undefined,
     badge: p.badge ?? undefined,

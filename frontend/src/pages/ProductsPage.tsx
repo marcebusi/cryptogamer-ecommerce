@@ -59,7 +59,8 @@ export default function ProductsPage() {
     setSelectedConditions(prev => prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c])
 
   const filtered = allProducts.filter(p => {
-    if (sub && p.subcategory !== sub) return false
+    // Match exact subcategory OR any sub that starts with the parent prefix (e.g. "xbox" matches "xbox-series")
+    if (sub && !p.subcategory?.startsWith(sub)) return false
     if (minPrice && p.price < Number(minPrice)) return false
     if (maxPrice && p.price > Number(maxPrice)) return false
     if (sliderMax < MAX_PRICE && p.price > sliderMax) return false

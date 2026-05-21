@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { Product } from '../types'
+import { normalizeImgUrl } from '../types'
 import { api } from '../lib/api'
 import { catalogProducts } from '../data/products'
 
@@ -39,7 +40,7 @@ function mapApiProduct(p: ApiProduct): Product {
     slug:             p.slug,
     price:            p.price,
     originalPrice:    p.originalPrice ?? undefined,
-    image:            p.image,
+    image:            normalizeImgUrl(p.image),
     images:           tryParse<string[]>(p.images, []),
     category:         p.category?.slug ?? p.categoryId,
     subcategory:      p.subcategory ?? undefined,

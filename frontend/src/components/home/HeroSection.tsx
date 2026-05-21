@@ -2,8 +2,8 @@ import { useNavigate } from 'react-router-dom'
 import './HeroSection.css'
 
 const STATS = [
-  { value: '10',    label: 'Años en el mercado' },
   { value: '4.9★',  label: 'Calificación'       },
+  { value: '10',    label: 'Años en el mercado' },
   { value: '+500',  label: 'Ventas realizadas'  },
 ]
 

@@ -23,8 +23,23 @@ export interface ImageItem {
 
 export type ImgSrc = string | ImageItem
 
-export const imgUrl = (item: ImgSrc): string =>
-  typeof item === 'string' ? item : item.url
+/** Convert http://host/uploads/... → /uploads/... to avoid mixed-content blocking */
+export const normalizeImgUrl = (url: string): string => {
+  if (!url) return url
+  // Relative paths and external https:// are fine as-is
+  if (url.startsWith('/') || url.startsWith('https://') || url.startsWith('data:')) return url
+  // Local upload URLs served over HTTP from a known host → make relative
+  try {
+    const u = new URL(url)
+    if (u.pathname.startsWith('/uploads/')) return u.pathname
+  } catch { /* not a URL */ }
+  return url
+}
+
+export const imgUrl = (item: ImgSrc): string => {
+  const raw = typeof item === 'string' ? item : item.url
+  return normalizeImgUrl(raw)
+}
 
 export const imgPosition = (item: ImgSrc): string =>
   typeof item === 'string' ? '50% 50%' : (item.position ?? '50% 50%')

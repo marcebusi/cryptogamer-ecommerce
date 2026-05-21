@@ -100,8 +100,8 @@ const respondWithUrl = (req: Request, res: Response): void => {
       res.status(400).json({ message: 'El archivo no es una imagen válida.' })
       return
     }
-    const host = `${req.protocol}://${req.get('host')}`
-    res.json({ url: `${host}/uploads/${req.file.filename}` })
+    // Use relative path so the URL works regardless of HTTP/HTTPS and reverse-proxy chain
+    res.json({ url: `/uploads/${req.file.filename}` })
     return
   }
 
