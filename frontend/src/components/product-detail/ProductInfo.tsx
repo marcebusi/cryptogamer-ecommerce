@@ -191,11 +191,17 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             {product.inStock ? 'Comprar' : 'Sin Stock'}
           </button>
 
+          {/* WA button — always solid green with white text for visibility in both modes */}
           <button
             onClick={openModal}
-            className="w-full bg-transparent border border-[#25D366]/40 text-[#25D366] py-3 px-5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#25D366]/10 hover:border-[#25D366]/70 hover:shadow-[0_0_20px_rgba(37,211,102,0.2)] transition-all active:scale-95 cursor-pointer"
+            className="w-full py-3 px-5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer hover:brightness-110"
+            style={{
+              background: '#25D366',
+              color:      '#ffffff',
+              boxShadow:  '0 4px 14px rgba(37,211,102,0.3)',
+            }}
           >
-            <i className="fa-brands fa-whatsapp text-base" />
+            <i className="fa-brands fa-whatsapp text-base" style={{ color: '#ffffff' }} />
             Consultar por WhatsApp
           </button>
         </div>

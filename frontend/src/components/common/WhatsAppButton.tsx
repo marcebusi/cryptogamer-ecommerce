@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useThemeColors } from '../../lib/themeColors'
 
 interface Seller { id: string; name: string; bio: string; avatar: string; whatsapp: string }
 
@@ -25,13 +26,15 @@ function SellerAvatar({ seller }: { seller: Seller }) {
     return <img src={seller.avatar} alt={seller.name} className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
   }
   return (
-    <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">
+    <div className="w-10 h-10 rounded-full bg-[#25D366] flex items-center justify-center flex-shrink-0 font-bold text-sm"
+      style={{ color: '#ffffff' }}>
       {seller.name.charAt(0).toUpperCase()}
     </div>
   )
 }
 
 export default function WhatsAppButton() {
+  const tc = useThemeColors()
   const [modal,    setModal]    = useState<ModalStep | null>(null)
   const [sellers,  setSellers]  = useState<Seller[]>([])
   const [loading,  setLoading]  = useState(false)
@@ -55,7 +58,6 @@ export default function WhatsAppButton() {
       setSelected(getRRSeller(sellers))
       setModal('selected')
     } else {
-      // Fallback: open main contact number directly
       const msg = encodeURIComponent('¡Hola! Quisiera hacer una consulta sobre un producto.')
       window.open(`https://wa.me/${FALLBACK_WA}?text=${msg}`, '_blank', 'noopener,noreferrer')
       closeModal()
@@ -80,81 +82,98 @@ export default function WhatsAppButton() {
 
   return (
     <>
-      {/* Floating button */}
+      {/* ── Floating button ─────────────────────────────── */}
       <button
         onClick={openModal}
-        className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 bg-[#25D366] text-white rounded-full shadow-[0_4px_20px_rgba(37,211,102,0.5)] hover:scale-110 hover:shadow-[0_4px_30px_rgba(37,211,102,0.7)] transition-all duration-300 group cursor-pointer"
+        className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 bg-[#25D366] rounded-full shadow-[0_4px_20px_rgba(37,211,102,0.5)] hover:scale-110 hover:shadow-[0_4px_30px_rgba(37,211,102,0.7)] transition-all duration-300 group cursor-pointer"
         aria-label="Contactar por WhatsApp"
       >
-        <i className="fa-brands fa-whatsapp text-3xl" />
-        <span className="absolute right-full mr-4 top-1/2 -translate-y-1/2 bg-[#111318] text-white px-4 py-2 rounded-xl text-sm font-bold opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap pointer-events-none shadow-lg border border-white/10">
+        {/* icon — explicit white, never affected by theme overrides */}
+        <i className="fa-brands fa-whatsapp text-3xl" style={{ color: '#ffffff' }} />
+
+        {/* Tooltip — theme-aware */}
+        <span className="absolute right-full mr-4 top-1/2 -translate-y-1/2 px-4 py-2 rounded-xl text-sm font-bold opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap pointer-events-none shadow-lg"
+          style={{
+            background: tc.isDark ? '#111318' : '#ffffff',
+            color:      tc.isDark ? '#ffffff' : '#111827',
+            border:     `1px solid ${tc.cardBorder}`,
+          }}>
           ¡Consultanos por WhatsApp!
         </span>
       </button>
 
-      {/* Modal */}
+      {/* ── Modal ───────────────────────────────────────── */}
       {modal && (
         <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4">
-          {/* Backdrop */}
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closeModal} />
 
-          {/* Panel */}
-          <div className="relative w-full max-w-sm bg-[#111318] border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+          {/* Panel — explicit inline bg */}
+          <div className="relative w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden"
+            style={{
+              background: tc.isDark ? '#111318' : '#ffffff',
+              border:     `1px solid ${tc.cardBorder}`,
+            }}>
 
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/8">
+            <div className="flex items-center justify-between px-5 py-4"
+              style={{ borderBottom: `1px solid ${tc.cardBorder}` }}>
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-[#25D366]/15 flex items-center justify-center">
-                  <i className="fa-brands fa-whatsapp text-[#25D366] text-base" />
+                <div className="w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ background: 'rgba(37,211,102,0.15)' }}>
+                  <i className="fa-brands fa-whatsapp text-base" style={{ color: '#25D366' }} />
                 </div>
                 <div>
                   {modal === 'choose' && (
                     <>
-                      <p className="text-sm font-bold text-white">¿Conocés a un vendedor?</p>
-                      <p className="text-xs text-white/35">Elegí cómo querés continuar</p>
+                      <p className="text-sm font-bold text-on-surface">¿Conocés a un vendedor?</p>
+                      <p className="text-xs text-on-surface-variant">Elegí cómo querés continuar</p>
                     </>
                   )}
-                  {modal === 'list' && <p className="text-sm font-bold text-white">Elegir vendedor</p>}
-                  {modal === 'selected' && <p className="text-sm font-bold text-white">Vendedor seleccionado</p>}
+                  {modal === 'list'     && <p className="text-sm font-bold text-on-surface">Elegir vendedor</p>}
+                  {modal === 'selected' && <p className="text-sm font-bold text-on-surface">Vendedor seleccionado</p>}
                 </div>
               </div>
               <button onClick={closeModal}
-                className="w-7 h-7 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors cursor-pointer">
-                <span className="material-symbols-outlined text-white/50 text-base">close</span>
+                className="w-7 h-7 rounded-full flex items-center justify-center transition-colors cursor-pointer">
+                <span className="material-symbols-outlined text-on-surface-variant text-base">close</span>
               </button>
             </div>
 
             {/* ── Step: choose ── */}
             {modal === 'choose' && (
               <div className="px-5 py-5 space-y-3">
-                <p className="text-xs text-white/35 text-center mb-4">Elegí cómo querés continuar</p>
+                <p className="text-xs text-on-surface-variant text-center mb-4">Elegí cómo querés continuar</p>
 
                 <button onClick={handleRandom} disabled={loading}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-[#25D366]/10 border border-[#25D366]/25 hover:bg-[#25D366]/18 hover:border-[#25D366]/45 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed group">
-                  <div className="w-9 h-9 rounded-xl bg-[#25D366]/15 border border-[#25D366]/25 flex items-center justify-center flex-shrink-0 group-hover:bg-[#25D366]/25 transition-colors">
+                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{ background: 'rgba(37,211,102,0.08)', border: '1px solid rgba(37,211,102,0.25)' }}>
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'rgba(37,211,102,0.12)', border: '1px solid rgba(37,211,102,0.25)' }}>
                     {loading
-                      ? <span className="material-symbols-outlined text-[#25D366] text-base animate-spin">progress_activity</span>
-                      : <span className="material-symbols-outlined text-[#25D366] text-base">shuffle</span>}
+                      ? <span className="material-symbols-outlined text-base animate-spin" style={{ color: '#25D366' }}>progress_activity</span>
+                      : <span className="material-symbols-outlined text-base" style={{ color: '#25D366' }}>shuffle</span>}
                   </div>
                   <div className="text-left">
-                    <p className="text-sm font-bold text-white">Elegir al azar</p>
-                    <p className="text-[11px] text-white/35">Rápido · equitativo para todos</p>
+                    <p className="text-sm font-bold text-on-surface">Elegir al azar</p>
+                    <p className="text-xs text-on-surface-variant">Rápido · equitativo para todos</p>
                   </div>
-                  <span className="material-symbols-outlined text-white/20 text-base ml-auto group-hover:text-white/40 transition-colors">chevron_right</span>
+                  <span className="material-symbols-outlined text-on-surface-variant/40 text-base ml-auto">chevron_right</span>
                 </button>
 
                 <button onClick={() => setModal('list')} disabled={loading || sellers.length === 0}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-white/[0.04] border border-white/8 hover:bg-white/[0.08] hover:border-white/15 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed group">
-                  <div className="w-9 h-9 rounded-xl bg-white/8 border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:bg-white/12 transition-colors">
-                    <span className="material-symbols-outlined text-white/60 text-base">group</span>
+                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{ background: tc.cardBg, border: `1px solid ${tc.cardBorder}` }}>
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: tc.cardBg, border: `1px solid ${tc.cardBorder}` }}>
+                    <span className="material-symbols-outlined text-on-surface-variant text-base">group</span>
                   </div>
                   <div className="text-left">
-                    <p className="text-sm font-bold text-white">Elegir un vendedor</p>
-                    <p className="text-[11px] text-white/35">
+                    <p className="text-sm font-bold text-on-surface">Elegir un vendedor</p>
+                    <p className="text-xs text-on-surface-variant">
                       {loading ? 'Cargando...' : `${sellers.length} disponible${sellers.length !== 1 ? 's' : ''}`}
                     </p>
                   </div>
-                  <span className="material-symbols-outlined text-white/20 text-base ml-auto group-hover:text-white/40 transition-colors">chevron_right</span>
+                  <span className="material-symbols-outlined text-on-surface-variant/40 text-base ml-auto">chevron_right</span>
                 </button>
               </div>
             )}
@@ -164,13 +183,14 @@ export default function WhatsAppButton() {
               <div className="px-4 py-3 space-y-1.5 max-h-72 overflow-y-auto">
                 {sellers.map(seller => (
                   <button key={seller.id} onClick={() => handlePickSeller(seller)}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/6 border border-transparent hover:border-[#25D366]/20 transition-all cursor-pointer group text-left">
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all cursor-pointer text-left"
+                    style={{ border: '1px solid transparent' }}>
                     <SellerAvatar seller={seller} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-white truncate">{seller.name}</p>
-                      {seller.bio && <p className="text-xs text-white/35 truncate">{seller.bio}</p>}
+                      <p className="text-sm font-semibold text-on-surface truncate">{seller.name}</p>
+                      {seller.bio && <p className="text-xs text-on-surface-variant truncate">{seller.bio}</p>}
                     </div>
-                    <span className="material-symbols-outlined text-white/20 text-base group-hover:text-white/50 transition-colors flex-shrink-0">chevron_right</span>
+                    <span className="material-symbols-outlined text-on-surface-variant/40 text-base flex-shrink-0">chevron_right</span>
                   </button>
                 ))}
               </div>
@@ -179,18 +199,24 @@ export default function WhatsAppButton() {
             {/* ── Step: selected ── */}
             {modal === 'selected' && selected && (
               <div className="px-5 py-5">
-                <div className="flex items-center gap-3 p-3.5 bg-white/[0.04] rounded-xl border border-white/8 mb-5">
+                <div className="flex items-center gap-3 p-3.5 rounded-xl mb-5"
+                  style={{ background: tc.cardBg, border: `1px solid ${tc.cardBorder}` }}>
                   <SellerAvatar seller={selected} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-white truncate">{selected.name}</p>
-                    {selected.bio && <p className="text-xs text-white/40 truncate">{selected.bio}</p>}
+                    <p className="text-sm font-bold text-on-surface truncate">{selected.name}</p>
+                    {selected.bio && <p className="text-xs text-on-surface-variant truncate">{selected.bio}</p>}
                   </div>
                   <div className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
                 </div>
 
                 <button onClick={handleWA}
-                  className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl bg-[#25D366]/12 border border-[#25D366]/30 text-[#25D366] font-bold text-sm hover:bg-[#25D366]/20 hover:border-[#25D366]/55 hover:shadow-[0_0_20px_rgba(37,211,102,0.2)] transition-all active:scale-95 cursor-pointer">
-                  <i className="fa-brands fa-whatsapp text-base" />
+                  className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl font-bold text-sm transition-all active:scale-95 cursor-pointer"
+                  style={{
+                    background: '#25D366',
+                    color:      '#ffffff',
+                    boxShadow:  '0 4px 14px rgba(37,211,102,0.35)',
+                  }}>
+                  <i className="fa-brands fa-whatsapp text-base" style={{ color: '#ffffff' }} />
                   Consultar por WhatsApp
                 </button>
               </div>

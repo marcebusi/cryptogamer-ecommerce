@@ -699,8 +699,7 @@ html.light .divide-white\/5 > * + * { border-color: rgba(0,0,0,0.05) !important;
 
 /* ── ProductInfo: WA button (always green, fine in both modes) ── */
 /* ── SpecsGrid / condition cards ── */
-html.light [class*="bg-\[#25D366\]"]    { background-color: #16a34a !important; }
-html.light [class*="text-\[#25D366\]"]  { color: #15803d !important; }
+/* WhatsApp brand green (#25D366) — intentionally kept as-is in both modes */
 html.light [class*="text-\[#26a17b\]"]  { color: #15803d !important; }
 
 /* ── Gradient from dark → transparent ── */
