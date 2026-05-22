@@ -130,62 +130,7 @@ export default function ProductDetailPage() {
         <ProductInfo product={p} />
       </div>
 
-      {/* Features section — only shown if the product has specs */}
-      {p.specs && p.specs.length > 0 && (
-        <section className="mt-xl py-xl border-t border-white/5">
-          <h2 className="text-h2-headline font-h2-headline text-on-background mb-lg flex items-center space-x-4">
-            <span style={{ color: tc.primary }}>#</span>
-            <span>Especificaciones</span>
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-md items-center">
-            <div className="md:col-span-4 bg-surface-container p-md rounded-2xl shadow-xl relative overflow-hidden min-h-[300px] flex flex-col justify-end"
-              style={{ border: `1px solid ${tc.cardBorder}` }}>
-              <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none">
-                <img alt="Feature visual" className="w-full h-full object-cover" src={p.image} />
-              </div>
-              <div className="relative z-10">
-                <h3 className="text-h3-title font-h3-title text-on-surface mb-2">{p.name}</h3>
-                <p className="text-on-surface-variant">{p.description?.slice(0, 80) || 'Especificaciones del producto.'}</p>
-              </div>
-            </div>
-
-            <div className="md:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-md">
-              {p.specs.slice(0, 2).map(s => (
-                <div key={s.label} className="bg-surface-container p-md rounded-2xl flex items-start space-x-4"
-                  style={{ border: `1px solid ${tc.cardBorder}` }}>
-                  <div className="p-3 rounded-xl flex-shrink-0"
-                    style={{ background: tc.primaryBg, border: `1px solid ${tc.primaryBorder}` }}>
-                    <span className="material-symbols-outlined text-3xl"
-                      style={{ color: tc.isDark ? '#94a3b8' : tc.primary }}>
-                      {s.icon ?? 'star'}
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-lg mb-1 text-on-surface">{s.label}</h4>
-                    <p className="text-sm text-on-surface-variant">{s.value}</p>
-                  </div>
-                </div>
-              ))}
-
-              {p.specs.length > 2 && (
-                <div className="bg-surface-container p-md rounded-2xl sm:col-span-2"
-                  style={{ border: `1px solid ${tc.cardBorder}` }}>
-                  <div className="flex flex-wrap gap-sm">
-                    {p.specs.slice(2).map(s => (
-                      <div key={s.label} className="flex items-center gap-xs">
-                        <span className="material-symbols-outlined text-sm"
-                          style={{ color: tc.isDark ? (s.color ?? '#94a3b8') : '#6b7280' }}>{s.icon}</span>
-                        <span className="text-xs text-on-surface-variant font-semibold uppercase tracking-wider">{s.label}:</span>
-                        <span className="text-xs text-on-surface">{s.value}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-      )}
+      {/* Specs section removed — shown inline in ProductInfo below the buy button */}
 
       {/* Related products */}
       <RelatedProducts />
