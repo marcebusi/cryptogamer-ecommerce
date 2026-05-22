@@ -26,9 +26,9 @@ const ALL_CARDS = [
 ]
 
 const colorMap = {
-  primary:   { bg: 'bg-primary-container/15',   border: 'border-primary-container/25',   icon: 'text-primary-container',   glow: 'hover:shadow-[0_0_24px_rgba(57,255,20,0.2)]'   },
-  secondary: { bg: 'bg-secondary-container/15', border: 'border-secondary-container/25', icon: 'text-secondary-container', glow: 'hover:shadow-[0_0_24px_rgba(255,74,141,0.2)]'  },
-  tertiary:  { bg: 'bg-tertiary-container/15',  border: 'border-tertiary-container/25',  icon: 'text-tertiary-container',  glow: 'hover:shadow-[0_0_24px_rgba(58,244,255,0.2)]'  },
+  primary:   { bg: 'bg-primary-container/15',   border: 'border-primary-container/25',   icon: 'text-primary-container',   glow: '' },
+  secondary: { bg: 'bg-secondary-container/15', border: 'border-secondary-container/25', icon: 'text-secondary-container', glow: '' },
+  tertiary:  { bg: 'bg-tertiary-container/15',  border: 'border-tertiary-container/25',  icon: 'text-tertiary-container',  glow: '' },
 }
 
 export default function AdminDashboard() {

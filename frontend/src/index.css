@@ -226,22 +226,41 @@ html.light .bg-surface-container         { background-color: #eeedf3    !importa
 html.light .bg-surface-container-high    { background-color: #e9e7ed    !important; }
 html.light .bg-surface-container-highest { background-color: #e3e2e7    !important; }
 
-/* ── Primary accent ── */
-html.light .bg-primary-container    { background-color: #eb0000 !important; }
-html.light .text-primary-container  { color: #eb0000 !important; }
-html.light .border-primary-container { border-color: #eb0000 !important; }
-html.light .text-on-primary         { color: #ffffff !important; }
-html.light .bg-on-primary           { background-color: #ffffff !important; }
+/* ── Primary accent — extra-specific to beat inline CSS var fallbacks ── */
+html.light .bg-primary-container,
+html.light [class~="bg-primary-container"]  { background-color: #eb0000 !important; }
+html.light .text-primary-container,
+html.light [class~="text-primary-container"]{ color: #eb0000 !important; }
+html.light .border-primary-container        { border-color: #eb0000 !important; }
+html.light .text-on-primary                 { color: #ffffff !important; }
+html.light .text-on-primary-container       { color: #ffffff !important; }
+html.light .bg-on-primary                   { background-color: #ffffff !important; }
+
+/* Primary with opacity modifiers (AdminDashboard cards, etc.) */
+html.light .bg-primary-container\/15 { background-color: rgba(235,0,0,0.12) !important; }
+html.light .bg-primary-container\/25 { background-color: rgba(235,0,0,0.18) !important; }
+html.light .bg-primary-container\/30 { background-color: rgba(235,0,0,0.22) !important; }
+html.light .border-primary-container\/25 { border-color: rgba(235,0,0,0.22) !important; }
+html.light .border-primary-container\/20 { border-color: rgba(235,0,0,0.18) !important; }
 
 /* ── Secondary (rojo oscuro en light mode) ── */
-html.light .bg-secondary-container  { background-color: #b91c1c !important; }
-html.light .text-secondary          { color: #7f1d1d !important; }
-html.light .text-secondary-container { color: #b91c1c !important; }
+html.light .bg-secondary-container,
+html.light [class~="bg-secondary-container"]  { background-color: #b91c1c !important; }
+html.light .text-secondary                    { color: #7f1d1d !important; }
+html.light .text-secondary-container,
+html.light [class~="text-secondary-container"]{ color: #b91c1c !important; }
+html.light .text-on-secondary                 { color: #ffffff !important; }
+html.light .bg-secondary-container\/15 { background-color: rgba(185,28,28,0.10) !important; }
+html.light .bg-secondary-container\/25 { background-color: rgba(185,28,28,0.16) !important; }
+html.light .border-secondary-container\/25 { border-color: rgba(185,28,28,0.20) !important; }
 
 /* ── Tertiary ── */
-html.light .text-tertiary           { color: #5a5c5e !important; }
-html.light .text-tertiary-fixed     { color: #454749 !important; }
-html.light .bg-tertiary-container   { background-color: #737576 !important; }
+html.light .text-tertiary            { color: #5a5c5e !important; }
+html.light .text-tertiary-fixed      { color: #454749 !important; }
+html.light .bg-tertiary-container    { background-color: #737576 !important; }
+html.light .text-tertiary-container  { color: #4b5563 !important; }
+html.light .bg-tertiary-container\/15 { background-color: rgba(115,117,118,0.10) !important; }
+html.light .border-tertiary-container\/25 { border-color: rgba(115,117,118,0.20) !important; }
 
 /* ── On-surface text ── */
 html.light .text-on-background      { color: #1a1b1f !important; }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useCart } from '../../context/CartContext'
+import { useThemeColors } from '../../lib/themeColors'
 import type { Product, ProductCondition } from '../../types'
 import SpecsGrid from './SpecsGrid'
 import './ProductInfo.css'
@@ -61,6 +62,7 @@ type ModalStep = 'choose' | 'list' | 'selected'
 
 /* ── Main component ──────────────────────────────── */
 export default function ProductInfo({ product }: ProductInfoProps) {
+  const tc = useThemeColors()
   const { addToCart, openCart } = useCart()
 
   const cond  = (product.condition ?? 'new') as ProductCondition
@@ -129,13 +131,15 @@ export default function ProductInfo({ product }: ProductInfoProps) {
           {product.inStock ? 'En stock' : 'Sin stock'}
         </span>
         {cond !== 'new' && (
-          <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${meta.text} bg-purple-500/10 border-purple-500/25`}>
+          <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${meta.text}`}
+            style={{ background: tc.primaryBg, borderColor: tc.primaryBorder }}>
             <span className="material-symbols-outlined text-xs">{meta.icon}</span>
             {meta.label}
           </span>
         )}
         {product.subcategory && (
-          <span className="px-3 py-1 rounded-full text-xs font-medium bg-white/5 border border-white/10 text-white/50 uppercase tracking-widest">
+          <span className="px-3 py-1 rounded-full text-xs font-medium uppercase tracking-widest text-on-surface-variant"
+            style={{ background: tc.cardBg, border: `1px solid ${tc.cardBorder}` }}>
             {product.subcategory}
           </span>
         )}
@@ -144,20 +148,20 @@ export default function ProductInfo({ product }: ProductInfoProps) {
       {/* ── Title ──────────────────────────────────── */}
       <h1 className="text-3xl md:text-4xl font-black text-on-background leading-tight font-['Plus_Jakarta_Sans']">
         {product.name.split(' ').slice(0, -1).join(' ')}{' '}
-        <span className="text-purple-400 italic block md:inline">
+        <span className="italic block md:inline" style={{ color: tc.primary }}>
           {product.name.split(' ').slice(-1)[0]}
         </span>
       </h1>
 
       {/* ── Price ──────────────────────────────────── */}
       <div className="flex items-center gap-sm flex-wrap">
-        <span className="text-4xl font-black text-secondary-container drop-shadow-[0_0_10px_rgba(255,74,141,0.5)]">
+        <span className="text-4xl font-black text-secondary-container">
           {ARS(product.price)}
         </span>
         {product.originalPrice && (
           <>
             <span className="text-on-surface-variant line-through text-lg">{ARS(product.originalPrice)}</span>
-            <span className="px-2 py-0.5 bg-secondary-container text-on-secondary text-xs font-bold rounded-full shadow-[0_0_10px_rgba(255,74,141,0.4)]">
+            <span className="px-2 py-0.5 bg-secondary-container text-on-secondary text-xs font-bold rounded-full">
               AHORRÁS {ARS(product.originalPrice - product.price)}
             </span>
           </>
@@ -168,7 +172,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
       <div className="flex flex-col gap-3 w-full">
 
         {/* Description */}
-        <p className="text-on-surface-variant text-sm leading-relaxed border-l-2 border-purple-500/30 pl-sm">
+        <p className="text-on-surface-variant text-sm leading-relaxed pl-sm" style={{ borderLeft: `2px solid ${tc.primaryBorder}` }}>
           {product.description}
         </p>
 
@@ -220,7 +224,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             disabled={!product.inStock}
             className={`w-full py-3 px-5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
               product.inStock
-                ? 'bg-secondary-container text-on-secondary hover:shadow-[0_0_24px_rgba(255,74,141,0.5)] hover:brightness-110 cursor-pointer'
+                ? 'bg-secondary-container text-on-secondary hover:brightness-110 cursor-pointer'
                 : 'bg-surface-container-high text-on-surface-variant'
             }`}
           >
@@ -266,80 +270,76 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/65 backdrop-blur-sm" onClick={closeModal} />
 
-          <div className="relative w-full max-w-sm bg-[#111318] border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+          {/* Modal panel — uses surface-container so it adapts to light/dark */}
+          <div className="relative w-full max-w-sm bg-surface-container rounded-2xl shadow-2xl overflow-hidden"
+            style={{ border: `1px solid ${tc.cardBorder}` }}>
 
             {/* ── Header ── */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/8">
+            <div className="flex items-center justify-between px-5 py-4"
+              style={{ borderBottom: `1px solid ${tc.cardBorder}` }}>
               <div className="flex items-center gap-2.5">
                 {modal !== 'choose' && (
                   <button onClick={() => setModal(modal === 'selected' ? 'choose' : 'choose')}
-                    className="w-7 h-7 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors cursor-pointer flex-shrink-0">
-                    <span className="material-symbols-outlined text-white/50 text-base">arrow_back</span>
+                    className="w-7 h-7 rounded-full flex items-center justify-center transition-colors cursor-pointer flex-shrink-0"
+                    style={{ '--hover-bg': tc.cardBg } as React.CSSProperties}>
+                    <span className="material-symbols-outlined text-on-surface-variant text-base">arrow_back</span>
                   </button>
                 )}
                 <div>
                   {modal === 'choose' && (
                     <>
-                      <p className="text-sm font-bold text-white">¿Conocés a un vendedor?</p>
-                      <p className="text-xs text-white/35 truncate max-w-[200px]">{product.name}</p>
+                      <p className="text-sm font-bold text-on-surface">¿Conocés a un vendedor?</p>
+                      <p className="text-xs text-on-surface-variant truncate max-w-[200px]">{product.name}</p>
                     </>
                   )}
-                  {modal === 'list' && (
-                    <p className="text-sm font-bold text-white">Elegir vendedor</p>
-                  )}
-                  {modal === 'selected' && selected && (
-                    <p className="text-sm font-bold text-white">Vendedor seleccionado</p>
-                  )}
+                  {modal === 'list' && <p className="text-sm font-bold text-on-surface">Elegir vendedor</p>}
+                  {modal === 'selected' && selected && <p className="text-sm font-bold text-on-surface">Vendedor seleccionado</p>}
                 </div>
               </div>
               <button onClick={closeModal}
-                className="w-7 h-7 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors cursor-pointer">
-                <span className="material-symbols-outlined text-white/50 text-base">close</span>
+                className="w-7 h-7 rounded-full flex items-center justify-center transition-colors cursor-pointer">
+                <span className="material-symbols-outlined text-on-surface-variant text-base">close</span>
               </button>
             </div>
 
             {/* ── Step: choose ── */}
             {modal === 'choose' && (
               <div className="px-5 py-5 space-y-3">
-                <p className="text-xs text-white/35 text-center mb-4">
-                  Elegí cómo querés continuar
-                </p>
+                <p className="text-xs text-on-surface-variant text-center mb-4">Elegí cómo querés continuar</p>
 
-                {/* Random */}
-                <button
-                  onClick={handleRandom}
-                  disabled={loading || sellers.length === 0}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-[#25D366]/10 border border-[#25D366]/25 hover:bg-[#25D366]/18 hover:border-[#25D366]/45 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed group"
-                >
-                  <div className="w-9 h-9 rounded-xl bg-[#25D366]/15 border border-[#25D366]/25 flex items-center justify-center flex-shrink-0 group-hover:bg-[#25D366]/25 transition-colors">
+                {/* Random — WhatsApp green, same in both modes */}
+                <button onClick={handleRandom} disabled={loading || sellers.length === 0}
+                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed group"
+                  style={{ background: 'rgba(37,211,102,0.08)', border: '1px solid rgba(37,211,102,0.25)' }}>
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'rgba(37,211,102,0.12)', border: '1px solid rgba(37,211,102,0.25)' }}>
                     {loading
-                      ? <span className="material-symbols-outlined text-[#25D366] text-base animate-spin">progress_activity</span>
-                      : <span className="material-symbols-outlined text-[#25D366] text-base">shuffle</span>
+                      ? <span className="material-symbols-outlined text-base animate-spin" style={{ color: '#25D366' }}>progress_activity</span>
+                      : <span className="material-symbols-outlined text-base" style={{ color: '#25D366' }}>shuffle</span>
                     }
                   </div>
                   <div className="text-left">
-                    <p className="text-sm font-bold text-white">Elegir al azar</p>
-                    <p className="text-[11px] text-white/35">Rápido · equitativo para todos</p>
+                    <p className="text-sm font-bold text-on-surface">Elegir al azar</p>
+                    <p className="text-[11px] text-on-surface-variant">Rápido · equitativo para todos</p>
                   </div>
-                  <span className="material-symbols-outlined text-white/20 text-base ml-auto group-hover:text-white/40 transition-colors">chevron_right</span>
+                  <span className="material-symbols-outlined text-on-surface-variant/40 text-base ml-auto">chevron_right</span>
                 </button>
 
                 {/* Manual */}
-                <button
-                  onClick={() => setModal('list')}
-                  disabled={loading || sellers.length === 0}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-white/[0.04] border border-white/8 hover:bg-white/[0.08] hover:border-white/15 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed group"
-                >
-                  <div className="w-9 h-9 rounded-xl bg-white/8 border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:bg-white/12 transition-colors">
-                    <span className="material-symbols-outlined text-white/60 text-base">group</span>
+                <button onClick={() => setModal('list')} disabled={loading || sellers.length === 0}
+                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed group"
+                  style={{ background: tc.cardBg, border: `1px solid ${tc.cardBorder}` }}>
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: tc.cardBg, border: `1px solid ${tc.cardBorder}` }}>
+                    <span className="material-symbols-outlined text-on-surface-variant text-base">group</span>
                   </div>
                   <div className="text-left">
-                    <p className="text-sm font-bold text-white">Elegir un vendedor</p>
-                    <p className="text-[11px] text-white/35">
+                    <p className="text-sm font-bold text-on-surface">Elegir un vendedor</p>
+                    <p className="text-[11px] text-on-surface-variant">
                       {loading ? 'Cargando...' : `${sellers.length} disponible${sellers.length !== 1 ? 's' : ''}`}
                     </p>
                   </div>
-                  <span className="material-symbols-outlined text-white/20 text-base ml-auto group-hover:text-white/40 transition-colors">chevron_right</span>
+                  <span className="material-symbols-outlined text-on-surface-variant/40 text-base ml-auto">chevron_right</span>
                 </button>
               </div>
             )}
@@ -349,13 +349,14 @@ export default function ProductInfo({ product }: ProductInfoProps) {
               <div className="px-4 py-3 space-y-1.5 max-h-72 overflow-y-auto">
                 {sellers.map(seller => (
                   <button key={seller.id} onClick={() => handlePickSeller(seller)}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/6 border border-transparent hover:border-[#25D366]/20 transition-all cursor-pointer group text-left">
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all cursor-pointer text-left"
+                    style={{ border: '1px solid transparent' }}>
                     <SellerAvatar seller={seller} size="sm" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-white truncate">{seller.name}</p>
-                      {seller.bio && <p className="text-xs text-white/35 truncate">{seller.bio}</p>}
+                      <p className="text-sm font-semibold text-on-surface truncate">{seller.name}</p>
+                      {seller.bio && <p className="text-xs text-on-surface-variant truncate">{seller.bio}</p>}
                     </div>
-                    <span className="material-symbols-outlined text-white/20 text-base group-hover:text-white/50 transition-colors flex-shrink-0">chevron_right</span>
+                    <span className="material-symbols-outlined text-on-surface-variant/40 text-base flex-shrink-0">chevron_right</span>
                   </button>
                 ))}
               </div>
@@ -365,37 +366,33 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             {modal === 'selected' && selected && (
               <div className="px-5 py-5">
                 {/* Seller card */}
-                <div className="flex items-center gap-3 p-3.5 bg-white/[0.04] rounded-xl border border-white/8 mb-5">
+                <div className="flex items-center gap-3 p-3.5 rounded-xl mb-5"
+                  style={{ background: tc.cardBg, border: `1px solid ${tc.cardBorder}` }}>
                   <SellerAvatar seller={selected} size="md" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-white truncate">{selected.name}</p>
-                    {selected.bio && <p className="text-xs text-white/40 truncate">{selected.bio}</p>}
+                    <p className="text-sm font-bold text-on-surface truncate">{selected.name}</p>
+                    {selected.bio && <p className="text-xs text-on-surface-variant truncate">{selected.bio}</p>}
                   </div>
                   <div className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
                 </div>
 
                 {/* Actions */}
                 <div className="space-y-2.5">
-                  <button
-                    onClick={handleWA}
-                    className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl bg-[#25D366]/12 border border-[#25D366]/30 text-[#25D366] font-bold text-sm hover:bg-[#25D366]/20 hover:border-[#25D366]/55 hover:shadow-[0_0_20px_rgba(37,211,102,0.2)] transition-all active:scale-95 cursor-pointer"
-                  >
+                  <button onClick={handleWA}
+                    className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl font-bold text-sm transition-all active:scale-95 cursor-pointer"
+                    style={{ background: 'rgba(37,211,102,0.10)', border: '1.5px solid rgba(37,211,102,0.35)', color: '#25D366' }}>
                     <i className="fa-brands fa-whatsapp text-base" />
                     Consultar por WhatsApp
                   </button>
 
-                  <button
-                    onClick={handleBuy}
-                    disabled={!product.inStock}
-                    className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl bg-secondary-container text-on-secondary font-bold text-sm hover:brightness-110 hover:shadow-[0_0_20px_rgba(255,74,141,0.4)] transition-all active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
+                  <button onClick={handleBuy} disabled={!product.inStock}
+                    className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl bg-secondary-container text-on-secondary font-bold text-sm hover:brightness-110 transition-all active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
                     <span className="material-symbols-outlined text-base">shopping_bag</span>
                     {product.inStock ? 'Agregar al carrito' : 'Sin stock'}
                   </button>
                 </div>
 
-                {/* Price reminder */}
-                <p className="text-center text-[11px] text-white/20 mt-3">{product.name} · {ARS(product.price)}</p>
+                <p className="text-center text-[11px] text-on-surface-variant/50 mt-3">{product.name} · {ARS(product.price)}</p>
               </div>
             )}
 
