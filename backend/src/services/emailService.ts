@@ -136,52 +136,102 @@ const infoBox = (content: string, borderColor = T.purple) =>
 /* ── Templates ──────────────────────────────────── */
 export const emailTemplates = {
 
-  /* ── Confirmación de pedido al comprador ─────── */
+  /* ── Confirmación de pedido / Factura al comprador ─── */
   orderConfirmation: (params: {
-    orderNumber: string
-    total: number
-    buyerName: string
-    items: { name: string; qty: number; price: number }[]
-    sellerName?: string
-    sellerAlias?: string
-    sellerBank?: string
+    orderNumber:         string
+    total:               number
+    buyerName:           string
+    items:               { name: string; qty: number; price: number }[]
+    paymentMethod?:      string
+    shippingCost?:       number
+    sellerName?:         string
+    sellerAlias?:        string
+    sellerBank?:         string
     sellerAccountHolder?: string
   }) => {
     const trackingUrl = `${process.env.FRONTEND_URL ?? 'http://localhost:5173'}/seguimiento/${params.orderNumber}`
+    const now         = new Date().toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'numeric' })
+    const subtotal    = params.items.reduce((s,i) => s + i.price * i.qty, 0)
+    const shipping    = params.shippingCost ?? 0
+    const payLabel: Record<string,string> = {
+      transfer: 'Transferencia bancaria',
+      cash:     'Efectivo',
+      usdt:     'Crypto (USDT)',
+      mercadopago: 'Mercado Pago',
+    }
+    const payText = payLabel[params.paymentMethod ?? ''] ?? 'Transferencia bancaria'
+
     return ({
-    subject: `Pedido confirmado #${params.orderNumber} · Cryptogamer's`,
+    subject: `🧾 Comprobante de compra #${params.orderNumber} · Cryptogamer's`,
     html: shell(`
-      <p style="margin:0 0 6px;font-size:12px;color:${T.textMuted};text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">Confirmación de compra</p>
-      <h1 style="margin:0 0 8px;font-size:24px;font-weight:900;color:${T.white};line-height:1.2;">¡Gracias por tu compra, ${params.buyerName}!</h1>
-      <p style="margin:0 0 24px;font-size:14px;color:${T.textMuted};line-height:1.6;">Tu pedido fue recibido y está siendo procesado.</p>
+      <!-- Invoice header -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+        <tr>
+          <td>
+            <p style="margin:0 0 4px;font-size:12px;color:${T.textMuted};text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">Comprobante de compra</p>
+            <h1 style="margin:0 0 4px;font-size:22px;font-weight:900;color:${T.white};line-height:1.2;">¡Gracias, ${params.buyerName}!</h1>
+            <p style="margin:0;font-size:13px;color:${T.textMuted};">Tu pedido fue recibido correctamente.</p>
+          </td>
+          <td style="text-align:right;vertical-align:top;">
+            <p style="margin:0;font-size:11px;color:${T.textDim};">Fecha</p>
+            <p style="margin:2px 0 0;font-size:13px;color:${T.textMain};font-weight:600;">${now}</p>
+          </td>
+        </tr>
+      </table>
 
-      ${badge(`Orden #${params.orderNumber}`, T.primary)}
-
-      ${ctaButton(trackingUrl, '📦 Seguir mi pedido →', T.purple)}
+      <!-- Order & payment info -->
+      ${infoBox(`
+        <table width="100%" cellpadding="0" cellspacing="0">
+          ${statRow('N° de pedido',     '#' + params.orderNumber, T.primary)}
+          ${statRow('Método de pago',   payText,                  T.textMain)}
+          ${params.sellerName ? statRow('Vendedor', params.sellerName, T.purpleLight) : ''}
+        </table>
+      `, T.purple)}
 
       ${divider()}
 
-      <!-- Items -->
+      <!-- Line items -->
+      <p style="margin:0 0 10px;font-size:11px;color:${T.textDim};text-transform:uppercase;letter-spacing:1px;font-weight:700;">Detalle de productos</p>
       <table width="100%" cellpadding="0" cellspacing="0">
         <thead>
           <tr style="border-bottom:1px solid ${T.cardBorder};">
-            <th style="text-align:left;padding:0 0 10px;font-size:11px;font-weight:700;color:${T.textDim};text-transform:uppercase;letter-spacing:1px;">Producto</th>
-            <th style="text-align:center;padding:0 0 10px;font-size:11px;font-weight:700;color:${T.textDim};text-transform:uppercase;letter-spacing:1px;">Cant.</th>
-            <th style="text-align:right;padding:0 0 10px;font-size:11px;font-weight:700;color:${T.textDim};text-transform:uppercase;letter-spacing:1px;">Total</th>
+            <th style="text-align:left;padding:0 0 8px;font-size:11px;font-weight:700;color:${T.textDim};text-transform:uppercase;letter-spacing:1px;">Producto</th>
+            <th style="text-align:center;padding:0 0 8px;font-size:11px;font-weight:700;color:${T.textDim};letter-spacing:1px;">Cant.</th>
+            <th style="text-align:right;padding:0 0 8px;font-size:11px;font-weight:700;color:${T.textDim};text-transform:uppercase;letter-spacing:1px;">Precio unit.</th>
+            <th style="text-align:right;padding:0 0 8px;font-size:11px;font-weight:700;color:${T.textDim};text-transform:uppercase;letter-spacing:1px;">Subtotal</th>
           </tr>
         </thead>
         <tbody>
           ${params.items.map(i => `
-            <tr style="border-bottom:1px solid ${T.cardBorder}11;">
-              <td style="padding:12px 0;color:${T.textMain};font-size:14px;">${i.name}</td>
-              <td style="padding:12px 0;color:${T.textMuted};font-size:13px;text-align:center;">×${i.qty}</td>
-              <td style="padding:12px 0;color:${T.primary};font-size:14px;font-weight:700;text-align:right;">$${(i.price * i.qty).toFixed(2)}</td>
+            <tr style="border-bottom:1px solid ${T.cardBorder}22;">
+              <td style="padding:10px 0;color:${T.textMain};font-size:13px;">${i.name}</td>
+              <td style="padding:10px 0;color:${T.textMuted};font-size:13px;text-align:center;">×${i.qty}</td>
+              <td style="padding:10px 0;color:${T.textMuted};font-size:13px;text-align:right;">$${i.price.toLocaleString('es-AR')}</td>
+              <td style="padding:10px 0;color:${T.textMain};font-size:13px;font-weight:600;text-align:right;">$${(i.price * i.qty).toLocaleString('es-AR')}</td>
             </tr>`).join('')}
-          <tr>
-            <td colspan="2" style="padding-top:16px;font-size:13px;font-weight:700;color:${T.textMuted};text-transform:uppercase;letter-spacing:1px;">Total</td>
-            <td style="padding-top:16px;font-size:22px;font-weight:900;color:${T.primary};text-align:right;text-shadow:0 0 12px ${T.primary}66;">$${params.total.toFixed(2)}</td>
-          </tr>
         </tbody>
+      </table>
+
+      <!-- Totals -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;border-top:1px solid ${T.cardBorder};">
+        ${subtotal !== params.total ? `
+          <tr>
+            <td style="padding:6px 0;font-size:13px;color:${T.textMuted};">Subtotal</td>
+            <td style="padding:6px 0;font-size:13px;color:${T.textMuted};text-align:right;">$${subtotal.toLocaleString('es-AR')}</td>
+          </tr>` : ''}
+        ${shipping > 0 ? `
+          <tr>
+            <td style="padding:6px 0;font-size:13px;color:${T.textMuted};">Envío</td>
+            <td style="padding:6px 0;font-size:13px;color:${T.textMuted};text-align:right;">$${shipping.toLocaleString('es-AR')}</td>
+          </tr>` : `
+          <tr>
+            <td style="padding:6px 0;font-size:13px;color:${T.textMuted};">Retiro a domicilio</td>
+            <td style="padding:6px 0;font-size:13px;color:#39ff14;text-align:right;font-weight:700;">Gratis</td>
+          </tr>`}
+        <tr style="border-top:1px solid ${T.cardBorder};margin-top:8px;">
+          <td style="padding:12px 0 0;font-size:16px;font-weight:900;color:${T.white};">TOTAL</td>
+          <td style="padding:12px 0 0;font-size:22px;font-weight:900;color:${T.primary};text-align:right;text-shadow:0 0 12px ${T.primary}66;">$${params.total.toLocaleString('es-AR')}</td>
+        </tr>
       </table>
 
       ${params.sellerAlias ? `
@@ -189,15 +239,18 @@ export const emailTemplates = {
         <p style="margin:0 0 12px;font-size:12px;color:${T.textMuted};text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">💳 Datos para transferencia</p>
         ${infoBox(`
           <table width="100%" cellpadding="0" cellspacing="0">
-            ${statRow('Vendedor',  params.sellerName        ?? '', T.purpleLight)}
-            ${statRow('Banco',     params.sellerBank        ?? '', T.textMain)}
-            ${statRow('Alias',     params.sellerAlias       ?? '', T.primary)}
-            ${statRow('Titular',   params.sellerAccountHolder ?? '', T.textMain)}
-            ${statRow('Monto a transferir', '$' + params.total.toFixed(2), T.primary)}
+            ${statRow('Banco / Billetera', params.sellerBank        ?? '', T.textMain)}
+            ${statRow('Alias',              params.sellerAlias       ?? '', T.primary)}
+            ${statRow('Titular',            params.sellerAccountHolder ?? '', T.textMain)}
+            ${statRow('Monto exacto',       '$' + params.total.toLocaleString('es-AR'), T.primary)}
           </table>
         `, T.purple)}
-        <p style="margin:12px 0 0;font-size:12px;color:${T.textMuted};text-align:center;">Realizá la transferencia y tu pedido quedará confirmado.</p>
+        <p style="margin:12px 0 0;font-size:12px;color:${T.textMuted};text-align:center;">
+          Una vez acreditada la transferencia, el vendedor confirmará tu pedido.
+        </p>
       ` : ''}
+
+      ${ctaButton(trackingUrl, '📦 Seguir mi pedido →', T.purple)}
     `),
   })},
 

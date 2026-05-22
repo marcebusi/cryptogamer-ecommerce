@@ -75,7 +75,7 @@ const STATUS_MAP: Record<string,{label:string;dot:string;badge:string}> = {
 const calcTrend = (curr:number, prev:number) => prev > 0 ? ((curr - prev) / prev) * 100 : 0
 
 /* ── Animated counter ────────────────────────────────────── */
-function useCountUp(target:number, duration=1400, delay=0) {
+function useCountUp(target:number, duration=900, delay=0) {
   const [val, setVal] = useState(0)
   useEffect(() => {
     let frame:number
@@ -123,9 +123,10 @@ export function AreaChart({ days, color, gradId, prevDays }: { days:DayRevenue[]
   const prevLine  = buildLine(prevPts)
   const areaPath  = pts.length ? `${linePath} L ${pts[pts.length-1][0]} ${H-PY} L ${PX} ${H-PY} Z` : ''
 
+  // Smooth opacity crossfade when data changes (no abrupt stroke reset)
   useEffect(()=>{
     setAnimated(false)
-    const t = setTimeout(()=>setAnimated(true), 80)
+    const t = setTimeout(()=>setAnimated(true), 220)
     return ()=>clearTimeout(t)
   }, [days])
 
@@ -134,7 +135,9 @@ export function AreaChart({ days, color, gradId, prevDays }: { days:DayRevenue[]
     const len = pathRef.current.getTotalLength()
     pathRef.current.style.strokeDasharray  = String(len)
     pathRef.current.style.strokeDashoffset = animated ? '0' : String(len)
-    pathRef.current.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1)'
+    pathRef.current.style.transition = animated
+      ? 'stroke-dashoffset 0.9s cubic-bezier(0.25,0.46,0.45,0.94)'
+      : 'none'
   },[animated])
 
   const onMove = (e:React.MouseEvent) => {
@@ -150,7 +153,8 @@ export function AreaChart({ days, color, gradId, prevDays }: { days:DayRevenue[]
   const lastPt = pts[pts.length-1]
 
   return (
-    <div ref={wrapRef} className="relative" onMouseMove={onMove} onMouseLeave={()=>setHovIdx(null)}>
+    <div ref={wrapRef} className="relative" onMouseMove={onMove} onMouseLeave={()=>setHovIdx(null)}
+      style={{opacity: animated ? 1 : 0, transition: 'opacity 0.22s ease'}}>
       {hov && (
         <div className="absolute -top-1 z-10 pointer-events-none"
           style={{left:`${tipL}%`,transform:`translateX(${tipL<15?'0':tipL>85?'-100%':'-50%'})`}}>
@@ -310,12 +314,12 @@ export function AnimBar({ value, max, color, delay=0 }: { value:number; max:numb
   return (
     <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
       <div className="h-full rounded-full relative overflow-hidden"
-        style={{width:w, background:color, transition:'width 0.9s cubic-bezier(0.4,0,0.2,1)'}}>
+        style={{width:w, background:color, transition:'width 0.5s cubic-bezier(0.25,0.46,0.45,0.94)'}}>
         <div className="absolute inset-0"
           style={{
-            background:'linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.32) 50%,transparent 100%)',
+            background:'linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.18) 50%,transparent 100%)',
             backgroundSize:'200% 100%',
-            animation:'bar-shimmer 2s linear infinite',
+            animation:'bar-shimmer 3.5s linear infinite',
           }}/>
       </div>
     </div>
@@ -547,7 +551,7 @@ export default function AdminAnalyticsPage() {
               </p>
             </div>
           </div>
-          <AreaChart key={chartKey} days={revenueByDay} color="#4ade80" gradId="rev-grad"/>
+          <AreaChart days={revenueByDay} color="#4ade80" gradId="rev-grad"/>
           {revenueByDay.length > 1 && (() => {
             const n = revenueByDay.length
             const step = n<=7?1:n<=14?2:n<=21?3:n<=35?5:Math.ceil(n/5)

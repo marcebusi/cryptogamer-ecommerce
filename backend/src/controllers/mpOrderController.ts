@@ -106,58 +106,56 @@ export const createOrder = async (req: AuthRequest, res: Response): Promise<void
 
     const orderNumber = `CG-${order.id.slice(-6).toUpperCase()}`
 
-    // ── Send confirmation email for non-MP flows right away ──
-    // For MercadoPago, confirmation is sent via webhook on payment approval.
-    // Transfer, cash and USDT get the email immediately.
-    const isMpFlow = paymentMethod === 'mercadopago'
-    if (!isMpFlow) {
-      const emailItems = orderItems.map(i => ({
-        name: i.product.name, qty: i.quantity, price: i.price,
-      }))
+    const isMpFlow    = paymentMethod === 'mercadopago'
+    const emailItems  = orderItems.map(i => ({ name: i.product.name, qty: i.quantity, price: i.price }))
+    const buyerName   = customer?.name  ?? order.user.name  ?? 'Cliente'
+    const buyerEmailAddr = customer?.email ?? order.user.email
 
-      const buyerEmailAddr = customer?.email ?? order.user.email
-      if (buyerEmailAddr) {
-        const buyerEmail = emailTemplates.orderConfirmation({
-          orderNumber,
-          total:               totalAmount,
-          buyerName:           customer?.name ?? order.user.name ?? 'Cliente',
-          items:               emailItems,
-          sellerName:          order.seller?.name,
-          sellerAlias:         order.seller?.alias,
-          sellerBank:          order.seller?.bank,
-          sellerAccountHolder: order.seller?.name,
-        })
-        sendEmail(buyerEmailAddr, buyerEmail.subject, buyerEmail.html)
-          .then(() => console.log(`[EMAIL] Confirmación enviada a ${buyerEmailAddr}`))
-          .catch(err => console.error('[EMAIL ERROR] buyer:', err?.message ?? err))
-      }
+    // ── Always send buyer confirmation immediately ──────────────────────────
+    // MP flow: also sends now (not only on webhook) so buyer always gets a receipt.
+    if (buyerEmailAddr) {
+      const buyerEmail = emailTemplates.orderConfirmation({
+        orderNumber,
+        total:               totalAmount,
+        buyerName,
+        items:               emailItems,
+        paymentMethod:       paymentMethod ?? 'transfer',
+        shippingCost:        shippingCost,
+        sellerName:          order.seller?.name,
+        sellerAlias:         order.seller?.alias,
+        sellerBank:          order.seller?.bank,
+        sellerAccountHolder: order.seller?.name,
+      })
+      sendEmail(buyerEmailAddr, buyerEmail.subject, buyerEmail.html)
+        .then(() => console.log(`[EMAIL] Confirmación enviada a ${buyerEmailAddr}`))
+        .catch(err => console.error('[EMAIL ERROR] buyer:', err?.message ?? err))
+    }
 
-      // Notify admin
-      if (ADMIN_EMAIL) {
-        const adminEmail = emailTemplates.newOrderAdmin({
-          orderNumber,
-          buyerName:  customer?.name  ?? order.user.name  ?? 'Cliente',
-          buyerEmail: customer?.email ?? order.user.email,
-          sellerName: order.seller?.name,
-          total:      totalAmount,
-        })
-        sendEmail(ADMIN_EMAIL, adminEmail.subject, adminEmail.html)
-          .catch(err => console.error('[EMAIL ERROR] admin:', err?.message ?? err))
-      }
+    // ── Notify admin ────────────────────────────────────────────────────────
+    if (ADMIN_EMAIL) {
+      const adminEmail = emailTemplates.newOrderAdmin({
+        orderNumber,
+        buyerName,
+        buyerEmail: buyerEmailAddr,
+        sellerName: order.seller?.name,
+        total:      totalAmount,
+      })
+      sendEmail(ADMIN_EMAIL, adminEmail.subject, adminEmail.html)
+        .catch(err => console.error('[EMAIL ERROR] admin:', err?.message ?? err))
+    }
 
-      // Notify seller
-      if (order.seller && ADMIN_EMAIL) {
-        const sellerEmail = emailTemplates.newOrderSeller({
-          sellerName:  order.seller.name,
-          orderNumber,
-          buyerName:   customer?.name  ?? order.user.name  ?? 'Cliente',
-          buyerEmail:  customer?.email ?? order.user.email,
-          buyerPhone:  customer?.phone,
-          total:       totalAmount,
-          items:       emailItems,
-        })
-        sendEmail(ADMIN_EMAIL, sellerEmail.subject, sellerEmail.html).catch(console.error)
-      }
+    // ── Notify seller ───────────────────────────────────────────────────────
+    if (order.seller && ADMIN_EMAIL && !isMpFlow) {
+      const sellerEmail = emailTemplates.newOrderSeller({
+        sellerName:  order.seller.name,
+        orderNumber,
+        buyerName,
+        buyerEmail:  buyerEmailAddr,
+        buyerPhone:  customer?.phone,
+        total:       totalAmount,
+        items:       emailItems,
+      })
+      sendEmail(ADMIN_EMAIL, sellerEmail.subject, sellerEmail.html).catch(console.error)
     }
 
     // ── Try MercadoPago preference (only if configured + user chose MP) ──
