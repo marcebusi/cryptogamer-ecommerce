@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useThemeColors } from '../../lib/themeColors'
 
 interface Seller {
   id: string
@@ -22,6 +23,7 @@ interface Props {
 const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3001'
 
 export default function SellerPicker({ selected, onSelect, sellers: propSellers }: Props) {
+  const tc = useThemeColors()
   const [sellers, setSellers] = useState<Seller[]>(propSellers ?? [])
   const [loading, setLoading] = useState(!propSellers)
 
@@ -79,18 +81,18 @@ export default function SellerPicker({ selected, onSelect, sellers: propSellers 
                   src={s.avatar}
                   alt={s.name}
                   className="w-12 h-12 rounded-xl object-cover flex-shrink-0"
-                  style={{ border: active ? '2px solid rgba(168,85,247,0.5)' : '2px solid rgba(255,255,255,0.08)' }}
+                  style={{ border: active ? `2px solid ${tc.primaryBorder}` : `2px solid ${tc.whiteLine}` }}
                   onError={e => (e.target as HTMLImageElement).style.display = 'none'}
                 />
               ) : (
                 <div className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center text-lg font-black text-white"
-                  style={{ background: 'linear-gradient(135deg, #7c3aed, #4f1d96)' }}>
+                  style={{ background: `linear-gradient(135deg, ${tc.primary}, ${tc.isDark ? '#4f1d96' : '#991b1b'})` }}>
                   {s.name.charAt(0)}
                 </div>
               )}
 
               <div className="min-w-0 flex-1">
-                <p className={`font-bold text-sm truncate ${active ? 'text-purple-200' : 'text-on-surface'}`}>{s.name}</p>
+                <p className="font-bold text-sm truncate text-on-surface" style={active ? { color: tc.primary } : {}}>{s.name}</p>
                 <p className="text-xs text-on-surface-variant truncate">{s.bio}</p>
                 {s.whatsapp && (
                   <div className="flex items-center gap-1 mt-0.5">
@@ -103,15 +105,15 @@ export default function SellerPicker({ selected, onSelect, sellers: propSellers 
 
             {/* Payment info shown when selected */}
             {active && s.alias && (
-              <div className="mt-3 pt-3 border-t border-purple-500/20">
-                <p className="text-[10px] text-purple-300 font-bold uppercase tracking-wider mb-1.5">
+              <div className="mt-3 pt-3" style={{ borderTop: `1px solid ${tc.primaryBorder}` }}>
+                <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: tc.primary }}>
                   <i className="fa-solid fa-building-columns mr-1" />
                   Datos para transferencia
                 </p>
                 <div className="space-y-1 text-xs">
                   {s.bank && <p className="text-on-surface-variant"><span className="text-on-surface font-semibold">Banco/Billetera:</span> {s.bank}</p>}
-                  <p className="text-on-surface-variant"><span className="text-on-surface font-semibold">Alias / CBU:</span> <span className="font-mono text-purple-300">{s.alias}</span></p>
-                  {s.mpAlias && <p className="text-on-surface-variant"><span className="text-on-surface font-semibold">MP Alias:</span> <span className="font-mono text-cyan-300">{s.mpAlias}</span></p>}
+                  <p className="text-on-surface-variant"><span className="text-on-surface font-semibold">Alias / CBU:</span> <span className="font-mono" style={{ color: tc.primary }}>{s.alias}</span></p>
+                  {s.mpAlias && <p className="text-on-surface-variant"><span className="text-on-surface font-semibold">MP Alias:</span> <span className="font-mono" style={{ color: tc.cyan }}>{s.mpAlias}</span></p>}
                 </div>
               </div>
             )}

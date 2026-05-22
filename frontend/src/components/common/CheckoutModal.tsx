@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useCart } from '../../context/CartContext'
 import { api } from '../../lib/api'
+import { useThemeColors } from '../../lib/themeColors'
 import SellerPicker from '../checkout/SellerPicker'
 import ShippingRatePicker, { type ShippingRate } from '../checkout/ShippingRatePicker'
 import './CheckoutModal.css'
@@ -60,6 +61,7 @@ export default function CheckoutModal() {
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
 
+  const tc = useThemeColors()
   const shippingCost = shipping?.price ?? 0
   const total        = totalPrice + shippingCost
   const totalItems   = items.reduce((s, i) => s + i.quantity, 0)
@@ -251,15 +253,18 @@ export default function CheckoutModal() {
           <div className="flex px-md pt-sm gap-xs">
             {VISIBLE.map((s, i) => (
               <div key={s} className="flex items-center gap-xs flex-1">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 transition-all ${
-                  s === step        ? 'bg-purple-600 text-white shadow-[0_0_10px_rgba(138,43,226,0.5)]'
-                  : i < vi          ? 'bg-purple-600/30 text-purple-300'
-                  :                   'bg-surface-container-high text-on-surface-variant'
-                }`}>
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 transition-all ${!(s === step || i < vi) ? 'bg-surface-container-high text-on-surface-variant' : ''}`}
+                  style={{
+                    background: s === step ? tc.primary : i < vi ? `${tc.primary}30` : undefined,
+                    color:      s === step ? '#fff' : i < vi ? tc.primary : undefined,
+                    boxShadow:  s === step ? tc.primaryGlow : undefined,
+                  }}
+                >
                   {i < vi ? <i className="fa-solid fa-check text-[9px]" /> : i + 1}
                 </div>
                 {i < VISIBLE.length - 1 && (
-                  <div className={`flex-1 h-px transition-all ${i < vi ? 'bg-purple-500/50' : 'bg-white/10'}`} />
+                  <div className="flex-1 h-px transition-all"
+                    style={{ background: i < vi ? `${tc.primary}50` : tc.whiteLine }} />
                 )}
               </div>
             ))}
@@ -297,20 +302,17 @@ export default function CheckoutModal() {
                   onClick={pickRandomSeller}
                   disabled={loadingSellers || allSellers.length === 0}
                   className="w-full group flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-left"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(57,255,20,0.08), rgba(57,255,20,0.04))',
-                    border: '1.5px solid rgba(57,255,20,0.25)',
-                  }}
+                  style={{ background: tc.neonBg, border: `1.5px solid ${tc.neonBorder}` }}
                 >
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
-                    style={{ background: 'rgba(57,255,20,0.12)', border: '1px solid rgba(57,255,20,0.25)' }}>
-                    <i className="fa-solid fa-shuffle text-lg" style={{ color: '#39ff14' }} />
+                    style={{ background: tc.neonBgStrong, border: `1px solid ${tc.neonBorder}` }}>
+                    <i className="fa-solid fa-shuffle text-lg" style={{ color: tc.neon }} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm" style={{ color: '#39ff14' }}>Elegir al azar</p>
+                    <p className="font-bold text-sm" style={{ color: tc.neon }}>Elegir al azar</p>
                     <p className="text-xs text-on-surface-variant mt-0.5">Te asignamos el próximo vendedor disponible</p>
                   </div>
-                  <i className="fa-solid fa-arrow-right text-xs flex-shrink-0" style={{ color: 'rgba(57,255,20,0.6)' }} />
+                  <i className="fa-solid fa-arrow-right text-xs flex-shrink-0" style={{ color: tc.neon }} />
                 </button>
 
                 {/* Option 2 — Manual */}
@@ -319,22 +321,19 @@ export default function CheckoutModal() {
                   onClick={() => setSellerSubStep('list')}
                   disabled={loadingSellers || allSellers.length === 0}
                   className="w-full group flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-left"
-                  style={{
-                    background: 'rgba(138,43,226,0.08)',
-                    border: '1.5px solid rgba(138,43,226,0.25)',
-                  }}
+                  style={{ background: tc.primaryBg, border: `1.5px solid ${tc.primaryBorder}` }}
                 >
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
-                    style={{ background: 'rgba(138,43,226,0.15)', border: '1px solid rgba(168,85,247,0.3)' }}>
-                    <i className="fa-solid fa-users text-lg text-purple-400" />
+                    style={{ background: tc.primaryBg, border: `1px solid ${tc.primaryBorder}` }}>
+                    <i className="fa-solid fa-users text-lg" style={{ color: tc.primary }} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm text-purple-300">Elegir un vendedor</p>
+                    <p className="font-bold text-sm" style={{ color: tc.primary }}>Elegir un vendedor</p>
                     <p className="text-xs text-on-surface-variant mt-0.5">
                       {loadingSellers ? 'Cargando vendedores...' : `Ver los ${allSellers.length} vendedores disponibles`}
                     </p>
                   </div>
-                  <i className="fa-solid fa-arrow-right text-xs text-purple-500/60 flex-shrink-0" />
+                  <i className="fa-solid fa-arrow-right text-xs flex-shrink-0" style={{ color: tc.primaryBorder }} />
                 </button>
 
                 {allSellers.length === 0 && !loadingSellers && (
@@ -365,8 +364,8 @@ export default function CheckoutModal() {
                   disabled={!seller}
                   className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                   style={{
-                    background: seller ? 'linear-gradient(135deg,#7c3aed,#5b21b6)' : 'rgba(255,255,255,0.05)',
-                    color:      seller ? 'white' : 'rgba(255,255,255,0.4)',
+                    background: seller ? `linear-gradient(135deg,${tc.primary},${tc.isDark ? '#5b21b6' : '#991b1b'})` : tc.cardBg,
+                    color:      seller ? 'white' : tc.mutedText,
                     boxShadow:  seller ? '0 0 24px rgba(138,43,226,0.4)' : 'none',
                   }}
                 >
@@ -430,7 +429,7 @@ export default function CheckoutModal() {
               </div>
               <div className="flex justify-between items-center pt-xs border-t border-white/10">
                 <span className="font-bold text-on-surface uppercase tracking-wide text-sm">Total estimado</span>
-                <span className="text-xl font-black text-primary-container drop-shadow-[0_0_8px_rgba(57,255,20,0.4)]">
+                <span className="text-xl font-black text-primary-container font-bold">
                   {ARS(total)}
                 </span>
               </div>
@@ -494,7 +493,7 @@ export default function CheckoutModal() {
                 </div>
                 <div className="flex justify-between items-center pt-1.5 border-t border-purple-500/20">
                   <span className="text-sm font-bold text-white">Total</span>
-                  <span className="text-lg font-black text-primary-container drop-shadow-[0_0_8px_rgba(57,255,20,0.4)]">
+                  <span className="text-lg font-black text-primary-container font-bold">
                     {ARS(total)}
                   </span>
                 </div>
@@ -593,24 +592,24 @@ export default function CheckoutModal() {
             {/* Transfer preview */}
             {payMethod === 'transfer' && seller?.alias && (
               <div className="rounded-xl p-3 text-xs space-y-1"
-                style={{ background:'rgba(6,182,212,0.08)', border:'1px solid rgba(6,182,212,0.2)' }}>
-                <p className="font-bold text-cyan-300 uppercase tracking-wider">
+                style={{ background: tc.cyanBg, border:`1px solid ${tc.cyanBorder}` }}>
+                <p className="font-bold uppercase tracking-wider" style={{ color: tc.cyan }}>
                   <i className="fa-solid fa-building-columns mr-1" />Transferí a {seller.name}
                 </p>
-                {seller.bank   && <p className="text-white/60"><span className="text-white font-semibold">Banco:</span> {seller.bank}</p>}
-                <p className="text-white/60"><span className="text-white font-semibold">Alias / CBU:</span> <span className="font-mono text-cyan-300">{seller.alias}</span></p>
-                {seller.mpAlias && <p className="text-white/60"><span className="text-white font-semibold">MP Alias:</span> <span className="font-mono">{seller.mpAlias}</span></p>}
-                <p className="text-cyan-200 font-bold pt-1">Monto: <span className="font-mono">{ARS(total)}</span></p>
+                {seller.bank && <p className="text-on-surface-variant"><span className="text-on-surface font-semibold">Banco:</span> {seller.bank}</p>}
+                <p className="text-on-surface-variant"><span className="text-on-surface font-semibold">Alias / CBU:</span> <span className="font-mono" style={{ color: tc.cyan }}>{seller.alias}</span></p>
+                {seller.mpAlias && <p className="text-on-surface-variant"><span className="text-on-surface font-semibold">MP Alias:</span> <span className="font-mono">{seller.mpAlias}</span></p>}
+                <p className="font-bold pt-1" style={{ color: tc.cyan }}>Monto: <span className="font-mono">{ARS(total)}</span></p>
               </div>
             )}
 
             {/* Cash note */}
             {payMethod === 'cash' && (
               <div className="rounded-xl p-3 text-xs"
-                style={{ background:'rgba(168,85,247,0.08)', border:'1px solid rgba(168,85,247,0.2)' }}>
-                <p className="text-purple-300 leading-relaxed">
+                style={{ background: tc.primaryBg, border:`1px solid ${tc.primaryBorder}` }}>
+                <p className="text-on-surface-variant leading-relaxed">
                   El vendedor te contactará para coordinar el pago en efectivo.
-                  Tendrás que abonar <span className="font-bold font-mono text-white">{ARS(total)}</span>.
+                  Tendrás que abonar <span className="font-bold font-mono text-on-surface">{ARS(total)}</span>.
                 </p>
               </div>
             )}
@@ -618,11 +617,11 @@ export default function CheckoutModal() {
             {/* USDT note */}
             {payMethod === 'usdt' && (
               <div className="rounded-xl p-3 text-xs space-y-1.5"
-                style={{ background:'rgba(38,161,123,0.08)', border:'1px solid rgba(38,161,123,0.25)' }}>
-                <p className="font-bold text-[#26a17b] uppercase tracking-wider flex items-center gap-1.5">
+                style={{ background: tc.usdtBg, border:`1px solid ${tc.usdtBorder}` }}>
+                <p className="font-bold uppercase tracking-wider flex items-center gap-1.5" style={{ color: tc.usdt }}>
                   <i className="fa-brands fa-ethereum" /> USDT · Tether
                 </p>
-                <p className="text-white/55 leading-relaxed">
+                <p className="text-on-surface-variant leading-relaxed">
                   Al confirmar recibirás la dirección de wallet del vendedor para realizar la transferencia.
                   El monto equivalente en USDT se calculará al tipo de cambio del momento.
                 </p>
@@ -641,7 +640,8 @@ export default function CheckoutModal() {
                 Volver
               </button>
               <button type="button" onClick={handleConfirmOrder} disabled={submitting || !payMethod}
-                className="flex-[2] bg-purple-600 hover:bg-purple-700 text-white py-3 px-lg rounded-xl font-bold text-sm flex items-center justify-center gap-xs hover:shadow-[0_0_20px_rgba(138,43,226,0.5)] cursor-pointer transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+                className="flex-[2] text-white py-3 px-lg rounded-xl font-bold text-sm flex items-center justify-center gap-xs cursor-pointer transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{ background: `linear-gradient(135deg,${tc.primary},${tc.isDark?'#5b21b6':'#991b1b'})`, boxShadow: tc.primaryGlow }}>
                 {submitting
                   ? <><span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>Procesando...</>
                   : !payMethod
@@ -670,7 +670,7 @@ export default function CheckoutModal() {
             {/* Order number */}
             <div className="bg-surface-container rounded-xl border border-white/10 p-sm">
               <p className="text-xs text-on-surface-variant mb-xs uppercase tracking-widest">Número de orden</p>
-              <p className="text-2xl font-black text-primary-container font-['Plus_Jakarta_Sans'] drop-shadow-[0_0_8px_rgba(57,255,20,0.4)]">
+              <p className="text-2xl font-black text-primary-container font-['Plus_Jakarta_Sans'] font-bold">
                 {orderNumber}
               </p>
             </div>
@@ -679,16 +679,17 @@ export default function CheckoutModal() {
             <div className="space-y-2 text-left">
               {seller && (
                 <div className="flex items-center gap-3 p-3 rounded-xl"
-                  style={{ background:'rgba(138,43,226,0.08)', border:'1px solid rgba(168,85,247,0.2)' }}>
+                  style={{ background: tc.primaryBg, border: `1px solid ${tc.primaryBorder}` }}>
                   {seller.avatar
                     ? <img src={seller.avatar} alt={seller.name} className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
-                    : <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-violet-900 flex items-center justify-center text-sm font-black text-white flex-shrink-0">
+                    : <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black text-white flex-shrink-0"
+                        style={{ background: `linear-gradient(135deg,${tc.primary},${tc.isDark?'#5b21b6':'#991b1b'})` }}>
                         {seller.name.charAt(0)}
                       </div>
                   }
                   <div className="text-left flex-1 min-w-0">
-                    <p className="text-xs text-purple-300">Tu vendedor</p>
-                    <p className="font-bold text-white text-sm">{seller.name}</p>
+                    <p className="text-xs" style={{ color: tc.primary }}>Tu vendedor</p>
+                    <p className="font-bold text-on-surface text-sm">{seller.name}</p>
                     {seller.whatsapp && (
                       <a href={`https://wa.me/${seller.whatsapp}`} target="_blank" rel="noreferrer"
                         className="text-xs text-green-400 flex items-center gap-1 hover:text-green-300 transition-colors">

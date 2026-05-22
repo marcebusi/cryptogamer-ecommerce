@@ -1,4 +1,5 @@
 /* Carriers (Andreani / Correo Argentino) commented out — only home pickup active */
+import { useThemeColors } from '../../lib/themeColors'
 
 export interface ShippingRate {
   carrierId:    'andreani' | 'correo-argentino' | 'pickup'
@@ -31,6 +32,7 @@ interface Props {
 }
 
 export default function ShippingRatePicker({ selected, onSelect }: Props) {
+  const tc = useThemeColors()
   const isSelected = selected?.serviceId === 'pickup'
 
   /* Auto-select pickup on first render */
@@ -64,7 +66,7 @@ export default function ShippingRatePicker({ selected, onSelect }: Props) {
 
         {/* Icon */}
         <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: 'linear-gradient(135deg,#7c3aed,#5b21b6)' }}>
+          style={{ background: `linear-gradient(135deg,${tc.primary},${tc.isDark?'#5b21b6':'#991b1b'})` }}>
           <span className="material-symbols-outlined text-white text-base">delivery_truck_speed</span>
         </div>
 
@@ -78,7 +80,7 @@ export default function ShippingRatePicker({ selected, onSelect }: Props) {
           </p>
         </div>
 
-        <span className="text-sm font-bold flex-shrink-0 ml-3 text-[#39ff14]">Gratis</span>
+        <span className="text-sm font-bold flex-shrink-0 ml-3" style={{ color: tc.neon }}>Gratis</span>
       </button>
     </div>
   )

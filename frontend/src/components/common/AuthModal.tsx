@@ -94,7 +94,7 @@ export default function AuthModal({ isOpen, onClose, defaultView = 'login' }: Pr
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
 
       {/* Panel */}
-      <div className="auth-modal relative w-full max-w-md sm:rounded-2xl rounded-t-2xl border border-purple-500/25 shadow-[0_0_60px_rgba(138,43,226,0.25)] overflow-hidden max-h-[90dvh] overflow-y-auto">
+      <div className="auth-modal relative w-full max-w-md sm:rounded-2xl rounded-t-2xl border border-purple-500/25 overflow-hidden max-h-[90dvh] overflow-y-auto">
 
         {/* Top glow line */}
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/60 to-transparent" />
@@ -110,7 +110,7 @@ export default function AuthModal({ isOpen, onClose, defaultView = 'login' }: Pr
 
         {/* Header logo */}
         <div className="px-lg pt-lg pb-md text-center">
-          <span className="text-2xl font-black italic text-purple-400 drop-shadow-[0_0_10px_rgba(138,43,226,0.6)] font-['Plus_Jakarta_Sans']">
+          <span className="text-2xl font-black italic text-purple-400 font-['Plus_Jakarta_Sans']">
             Cryptogamer
           </span>
         </div>
@@ -175,7 +175,7 @@ export default function AuthModal({ isOpen, onClose, defaultView = 'login' }: Pr
             </button>
 
             <button type="submit" disabled={busy}
-              className="w-full bg-primary-container text-on-primary py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-xs hover:shadow-[0_0_20px_rgba(57,255,20,0.4)] hover:brightness-110 active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed mt-sm">
+              className="w-full bg-primary-container text-on-primary py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-xs hover:brightness-110 active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed mt-sm">
               {busy
                 ? <><span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>Ingresando...</>
                 : <><span className="material-symbols-outlined text-sm">login</span>Iniciar sesión</>}
@@ -217,7 +217,7 @@ export default function AuthModal({ isOpen, onClose, defaultView = 'login' }: Pr
             </label>
 
             <button type="submit" disabled={busy}
-              className="w-full bg-purple-600 text-white py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-xs hover:bg-purple-500 hover:shadow-[0_0_20px_rgba(138,43,226,0.4)] active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed mt-xs">
+              className="w-full bg-purple-600 text-white py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-xs hover:brightness-110 active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed mt-xs">
               {busy
                 ? <><span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>Creando cuenta...</>
                 : <><span className="material-symbols-outlined text-sm">person_add</span>Crear cuenta</>}

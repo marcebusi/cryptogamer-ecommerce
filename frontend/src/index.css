@@ -601,3 +601,88 @@ html.light [class*="text-\[#ff2d6b\]"]  { color: #be185d !important; }
 /* ── Light mode: product price text ── */
 html.light .text-secondary-container { color: #b91c1c !important; }
 html.light .text-tertiary-container  { color: #374151 !important; }
+
+/* ══════════════════════════════════════════════════════
+   LIGHT MODE — COMPREHENSIVE INLINE STYLE OVERRIDES
+   These handle everything that can't be fixed with
+   Tailwind class selectors (drop-shadows, glows, etc.)
+   ══════════════════════════════════════════════════════ */
+
+/* ── Remove neon glow drop-shadows everywhere ── */
+html.light [class*="drop-shadow-"] { filter: none !important; }
+
+/* ── Neon box-shadow glows → neutral ── */
+html.light [class*="shadow-\[0_0_"] { box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important; }
+html.light [class*="hover\:shadow-\[0_0_"]:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.16) !important; }
+
+/* ── Purple buttons / inputs ── */
+html.light .bg-purple-600 { background-color: #dc2626 !important; }
+html.light .bg-purple-700 { background-color: #b91c1c !important; }
+html.light .hover\:bg-purple-700:hover { background-color: #b91c1c !important; }
+html.light .hover\:bg-purple-500:hover { background-color: #ef4444 !important; }
+html.light .text-purple-300 { color: #dc2626 !important; }
+html.light .text-purple-200 { color: #b91c1c !important; }
+html.light .border-purple-500\/20 { border-color: rgba(220,38,38,0.15) !important; }
+html.light .border-purple-500\/25 { border-color: rgba(220,38,38,0.18) !important; }
+html.light .border-purple-500\/30 { border-color: rgba(220,38,38,0.2) !important; }
+html.light .border-purple-500\/50 { border-color: rgba(220,38,38,0.35) !important; }
+html.light .bg-purple-500\/5  { background-color: rgba(220,38,38,0.04) !important; }
+html.light .bg-purple-500\/12 { background-color: rgba(220,38,38,0.07) !important; }
+html.light .bg-purple-600\/20 { background-color: rgba(220,38,38,0.1) !important; }
+html.light .bg-purple-600\/15 { background-color: rgba(220,38,38,0.08) !important; }
+html.light .bg-purple-600\/30 { background-color: rgba(220,38,38,0.12) !important; }
+html.light .bg-purple-600\/12 { background-color: rgba(220,38,38,0.07) !important; }
+
+/* ── ProfilePage purple avatar/button ── */
+html.light [class*="bg-purple-600\/"][class*="border-purple-5"] {
+  background-color: rgba(220,38,38,0.1) !important;
+  border-color: rgba(220,38,38,0.3) !important;
+}
+
+/* ── ResetPasswordPage ── */
+html.light [class*="border-purple-500\/25"] { border-color: rgba(220,38,38,0.18) !important; }
+html.light [class*="text-purple-400"] { color: #dc2626 !important; }
+
+/* ── ProductInfo: dark backgrounds for spec pills ── */
+html.light [class*="bg-surface-container-highest\/70"] { background-color: rgba(0,0,0,0.06) !important; }
+html.light [class*="bg-background\/50"] { background-color: rgba(255,255,255,0.85) !important; }
+
+/* ── OrderTrackingPage: black bg card → white ── */
+html.light [class*="bg-black\/30"] { background-color: rgba(0,0,0,0.06) !important; }
+
+/* ── Neon green text on specific patterns ── */
+html.light [class*="text-green-400"] { color: #15803d !important; }
+html.light [class*="text-cyan-300"]  { color: #0369a1 !important; }
+html.light [class*="text-cyan-200"]  { color: #0284c7 !important; }
+
+/* ── White/opacity text → dark equivalents ── */
+html.light [class*="text-white\/60"] { color: rgba(0,0,0,0.55) !important; }
+html.light [class*="text-white\/55"] { color: rgba(0,0,0,0.52) !important; }
+html.light [class*="text-white\/45"] { color: rgba(0,0,0,0.45) !important; }
+html.light [class*="text-white\/40"] { color: rgba(0,0,0,0.42) !important; }
+html.light [class*="text-white\/35"] { color: rgba(0,0,0,0.38) !important; }
+html.light [class*="text-white\/30"] { color: rgba(0,0,0,0.32) !important; }
+html.light [class*="text-white\/25"] { color: rgba(0,0,0,0.28) !important; }
+html.light [class*="text-white\/20"] { color: rgba(0,0,0,0.22) !important; }
+html.light [class*="text-white\/80"] { color: rgba(0,0,0,0.8) !important; }
+html.light [class*="text-white\/70"] { color: rgba(0,0,0,0.7) !important; }
+html.light .text-white { color: #111827 !important; }
+
+/* ── White opacity backgrounds → light equivalents ── */
+html.light [class*="bg-white\/\[0.04\]"] { background-color: rgba(0,0,0,0.03) !important; }
+html.light [class*="bg-white\/\[0.03\]"] { background-color: rgba(0,0,0,0.02) !important; }
+html.light [class*="bg-white\/\[0.02\]"] { background-color: rgba(0,0,0,0.015) !important; }
+
+/* ── Border white-opacity → dark ── */
+html.light .border-white\/6  { border-color: rgba(0,0,0,0.06) !important; }
+html.light .border-white\/12 { border-color: rgba(0,0,0,0.10) !important; }
+html.light .divide-white\/5 > * + * { border-color: rgba(0,0,0,0.05) !important; }
+
+/* ── ProductInfo: WA button (always green, fine in both modes) ── */
+/* ── SpecsGrid / condition cards ── */
+html.light [class*="bg-\[#25D366\]"]    { background-color: #16a34a !important; }
+html.light [class*="text-\[#25D366\]"]  { color: #15803d !important; }
+html.light [class*="text-\[#26a17b\]"]  { color: #15803d !important; }
+
+/* ── Gradient from dark → transparent ── */
+html.light [class*="from-background\/"] { --tw-gradient-from: rgba(250,248,254,var(--tw-gradient-from-position)); }

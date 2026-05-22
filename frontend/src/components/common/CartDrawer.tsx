@@ -1,8 +1,10 @@
 import { useEffect } from 'react'
 import { useCart } from '../../context/CartContext'
+import { useThemeColors } from '../../lib/themeColors'
 import './CartDrawer.css'
 
 export default function CartDrawer() {
+  const tc = useThemeColors()
   const { items, isCartOpen, closeCart, openCheckout, removeFromCart, updateQuantity, totalPrice } = useCart()
 
   const ars = (n: number) =>
@@ -32,7 +34,7 @@ export default function CartDrawer() {
       />
 
       {/* Panel */}
-      <div className="cart-panel relative w-full max-w-md h-full flex flex-col shadow-[0_0_60px_rgba(57,255,20,0.08),_0_0_40px_rgba(138,43,226,0.15)] border-l border-purple-500/20">
+      <div className="cart-panel relative w-full max-w-md h-full flex flex-col border-l" style={{ borderColor: tc.primaryBorder }}>
 
         {/* Header */}
         <div className="flex justify-between items-center px-md py-sm border-b border-white/10">
@@ -142,7 +144,7 @@ export default function CartDrawer() {
               </div>
               <div className="flex justify-between items-center pt-xs border-t border-white/10">
                 <span className="font-bold text-base uppercase tracking-wider text-on-surface">Total</span>
-                <span className="text-xl font-black text-primary-container drop-shadow-[0_0_8px_rgba(57,255,20,0.4)]">
+                <span className="text-xl font-black text-primary-container">
                   {ars(totalPrice)}
                 </span>
               </div>
@@ -151,7 +153,7 @@ export default function CartDrawer() {
             {/* Checkout button */}
             <button
               onClick={openCheckout}
-              className="w-full bg-primary-container text-on-primary py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-xs hover:shadow-[0_0_24px_rgba(57,255,20,0.5)] hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+              className="w-full bg-primary-container text-on-primary py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-xs hover:brightness-110 active:scale-95 transition-all cursor-pointer"
             >
               <span className="material-symbols-outlined">shopping_cart_checkout</span>
               Finalizar Compra
