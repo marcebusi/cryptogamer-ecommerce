@@ -482,7 +482,7 @@ export default function AdminAnalyticsPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-2"
-            style={{background:'rgba(58,244,255,0.08)',border:'1px solid rgba(58,244,255,0.2)',color:'#3af4ff'}}>
+            style={{ background: tc.primaryBg, border: `1px solid ${tc.primaryBorder}`, color: tc.primary }}>
             <span className="material-symbols-outlined text-sm">bar_chart</span>
             Analytics
           </div>

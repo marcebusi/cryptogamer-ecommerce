@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { normalizeImgUrl } from '../types'
+import { useThemeColors } from '../lib/themeColors'
 import ImageGallery from '../components/product-detail/ImageGallery'
 import ProductInfo from '../components/product-detail/ProductInfo'
 import RelatedProducts from '../components/product-detail/RelatedProducts'
@@ -53,6 +54,7 @@ function mapApi(p: ApiProduct): Product {
 }
 
 export default function ProductDetailPage() {
+  const tc = useThemeColors()
   const { id } = useParams<{ id: string }>()
   const [product, setProduct] = useState<Product | null>(null)
   const [notFound, setNotFound] = useState(false)
@@ -132,25 +134,31 @@ export default function ProductDetailPage() {
       {p.specs && p.specs.length > 0 && (
         <section className="mt-xl py-xl border-t border-white/5">
           <h2 className="text-h2-headline font-h2-headline text-on-background mb-lg flex items-center space-x-4">
-            <span className="text-purple-500">#</span>
+            <span style={{ color: tc.primary }}>#</span>
             <span>Especificaciones</span>
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-12 gap-md items-center">
-            <div className="md:col-span-4 bg-surface-container p-md rounded-2xl border border-white/5 shadow-xl relative overflow-hidden min-h-[300px] flex flex-col justify-end">
+            <div className="md:col-span-4 bg-surface-container p-md rounded-2xl shadow-xl relative overflow-hidden min-h-[300px] flex flex-col justify-end"
+              style={{ border: `1px solid ${tc.cardBorder}` }}>
               <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none">
                 <img alt="Feature visual" className="w-full h-full object-cover" src={p.image} />
               </div>
               <div className="relative z-10">
-                <h3 className="text-h3-title font-h3-title text-tertiary-container mb-2">{p.name}</h3>
+                <h3 className="text-h3-title font-h3-title text-on-surface mb-2">{p.name}</h3>
                 <p className="text-on-surface-variant">{p.description?.slice(0, 80) || 'Especificaciones del producto.'}</p>
               </div>
             </div>
 
             <div className="md:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-md">
               {p.specs.slice(0, 2).map(s => (
-                <div key={s.label} className="bg-surface-container-low p-md rounded-2xl border border-white/5 flex items-start space-x-4">
-                  <div className="p-3 rounded-xl border bg-purple-500/10 border-purple-500/20">
-                    <span className={`material-symbols-outlined ${s.color ?? 'text-purple-400'} text-3xl`}>{s.icon ?? 'star'}</span>
+                <div key={s.label} className="bg-surface-container p-md rounded-2xl flex items-start space-x-4"
+                  style={{ border: `1px solid ${tc.cardBorder}` }}>
+                  <div className="p-3 rounded-xl flex-shrink-0"
+                    style={{ background: tc.primaryBg, border: `1px solid ${tc.primaryBorder}` }}>
+                    <span className="material-symbols-outlined text-3xl"
+                      style={{ color: tc.isDark ? '#94a3b8' : tc.primary }}>
+                      {s.icon ?? 'star'}
+                    </span>
                   </div>
                   <div>
                     <h4 className="font-bold text-lg mb-1 text-on-surface">{s.label}</h4>
@@ -160,11 +168,13 @@ export default function ProductDetailPage() {
               ))}
 
               {p.specs.length > 2 && (
-                <div className="bg-surface-container-low p-md rounded-2xl border border-white/5 sm:col-span-2">
+                <div className="bg-surface-container p-md rounded-2xl sm:col-span-2"
+                  style={{ border: `1px solid ${tc.cardBorder}` }}>
                   <div className="flex flex-wrap gap-sm">
                     {p.specs.slice(2).map(s => (
                       <div key={s.label} className="flex items-center gap-xs">
-                        <span className={`material-symbols-outlined text-sm ${s.color ?? 'text-primary-container'}`}>{s.icon}</span>
+                        <span className="material-symbols-outlined text-sm"
+                          style={{ color: tc.isDark ? (s.color ?? '#94a3b8') : '#6b7280' }}>{s.icon}</span>
                         <span className="text-xs text-on-surface-variant font-semibold uppercase tracking-wider">{s.label}:</span>
                         <span className="text-xs text-on-surface">{s.value}</span>
                       </div>
