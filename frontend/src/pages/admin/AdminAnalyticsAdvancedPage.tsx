@@ -99,7 +99,7 @@ export default function AdminAnalyticsAdvancedPage() {
     <main className="max-w-screen-xl mx-auto px-4 md:px-8 py-lg space-y-8">
 
       {/* ── Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 flex-wrap">
         <div>
           <div className="inline-flex items-center gap-xs px-sm py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-sm"
             style={{ background: tc.primaryBg, border: `1px solid ${tc.primaryBorder}`, color: tc.primary }}>
@@ -114,8 +114,8 @@ export default function AdminAnalyticsAdvancedPage() {
         </div>
 
         {/* ── Date filter ── */}
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-1 rounded-xl p-1"
+        <div className="flex flex-col gap-2 w-full sm:w-auto">
+          <div className="flex flex-wrap items-center gap-1 rounded-xl p-1"
             style={{ background: tc.cardBg, border: `1px solid ${tc.cardBorder}` }}>
             {PRESETS.map(p => {
               const isActive = preset === p.key

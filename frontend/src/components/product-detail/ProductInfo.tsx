@@ -206,23 +206,6 @@ export default function ProductInfo({ product }: ProductInfoProps) {
           </button>
         </div>
 
-        {/* Guarantees */}
-        <div className="flex gap-2">
-          <div className="flex items-center gap-3 px-4 py-3.5 bg-surface-container rounded-xl border border-outline-variant/30 flex-1">
-            <span className="material-symbols-outlined text-2xl flex-shrink-0" style={{ color: tc.primary }}>store</span>
-            <div>
-              <p className="text-sm font-bold text-on-surface leading-tight">Retiro en local</p>
-              <p className="text-xs text-on-surface-variant mt-0.5">Coordinás con el vendedor</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 px-4 py-3.5 bg-surface-container rounded-xl border border-outline-variant/30 flex-1">
-            <span className="material-symbols-outlined text-2xl flex-shrink-0" style={{ color: tc.primary }}>workspace_premium</span>
-            <div>
-              <p className="text-sm font-bold text-on-surface leading-tight">Garantía 30 días</p>
-              <p className="text-xs text-on-surface-variant mt-0.5">Para productos nuevos</p>
-            </div>
-          </div>
-        </div>
 
       </div>
 
