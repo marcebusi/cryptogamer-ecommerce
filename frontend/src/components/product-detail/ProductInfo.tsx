@@ -176,47 +176,6 @@ export default function ProductInfo({ product }: ProductInfoProps) {
           {product.description}
         </p>
 
-        {/* Condition card */}
-        <div className="condition-card rounded-2xl border border-white/10 overflow-hidden">
-          <div className="flex items-center justify-between px-md py-sm bg-white/[0.03] border-b border-white/8">
-            <div className="flex items-center gap-xs">
-              <span className={`material-symbols-outlined text-lg ${meta.text}`}>{meta.icon}</span>
-              <span className={`font-bold text-sm font-['Plus_Jakarta_Sans'] ${meta.text}`}>
-                Producto {meta.label}
-              </span>
-            </div>
-            <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full border text-xs font-bold ${meta.text}`}
-              style={{ borderColor: 'currentColor', opacity: 0.9 }}>
-              <span className="material-symbols-outlined text-xs">check_circle</span>
-              Verificado
-            </div>
-          </div>
-          <div className="p-md space-y-sm">
-            <p className="text-sm text-on-surface-variant leading-relaxed">
-              {product.conditionDescription ?? 'Esta unidad ha sido inspeccionada y certificada por nuestros técnicos. Desgaste cosmético mínimo. Incluye todos los accesorios originales.'}
-            </p>
-            <div>
-              <div className="flex justify-between items-center mb-1.5">
-                <span className="text-[11px] text-on-surface-variant uppercase tracking-widest font-semibold">Calidad del producto</span>
-                <span className={`text-xs font-black ${meta.text}`}>{score}%</span>
-              </div>
-              <div className="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
-                <div className={`h-full rounded-full transition-all duration-700 ${meta.bar} ${meta.glow}`} style={{ width: `${score}%` }} />
-              </div>
-            </div>
-            {product.conditionTags && product.conditionTags.length > 0 && (
-              <div className="flex gap-xs flex-wrap">
-                {product.conditionTags.map(tag => (
-                  <span key={tag} className="flex items-center gap-1 px-sm py-1 bg-surface-container-high text-on-surface-variant text-xs rounded-full border border-white/10">
-                    <span className="material-symbols-outlined text-xs text-primary-container">check</span>
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
         {/* CTA buttons */}
         <div className="space-y-2.5">
           <button
@@ -243,15 +202,15 @@ export default function ProductInfo({ product }: ProductInfoProps) {
 
         {/* Guarantees */}
         <div className="flex gap-2">
-          <div className="flex items-center gap-3 px-4 py-3.5 bg-surface-container rounded-xl border border-white/5 flex-1">
-            <span className="material-symbols-outlined text-tertiary-container text-2xl flex-shrink-0">local_shipping</span>
+          <div className="flex items-center gap-3 px-4 py-3.5 bg-surface-container rounded-xl border border-outline-variant/30 flex-1">
+            <span className="material-symbols-outlined text-2xl flex-shrink-0" style={{ color: tc.primary }}>delivery_truck_speed</span>
             <div>
-              <p className="text-sm font-bold text-on-surface leading-tight">Tipos de envío</p>
-              <p className="text-xs text-on-surface-variant mt-0.5">Andreani, Correo Argentino y Retiro en sucursal</p>
+              <p className="text-sm font-bold text-on-surface leading-tight">Retiro a domicilio</p>
+              <p className="text-xs text-on-surface-variant mt-0.5">El vendedor te lo lleva</p>
             </div>
           </div>
-          <div className="flex items-center gap-3 px-4 py-3.5 bg-surface-container rounded-xl border border-white/5 flex-1">
-            <span className="material-symbols-outlined text-tertiary-container text-2xl flex-shrink-0">workspace_premium</span>
+          <div className="flex items-center gap-3 px-4 py-3.5 bg-surface-container rounded-xl border border-outline-variant/30 flex-1">
+            <span className="material-symbols-outlined text-2xl flex-shrink-0" style={{ color: tc.primary }}>workspace_premium</span>
             <div>
               <p className="text-sm font-bold text-on-surface leading-tight">Garantía 30 días</p>
               <p className="text-xs text-on-surface-variant mt-0.5">Para productos nuevos</p>
@@ -270,9 +229,12 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/65 backdrop-blur-sm" onClick={closeModal} />
 
-          {/* Modal panel — uses surface-container so it adapts to light/dark */}
-          <div className="relative w-full max-w-sm bg-surface-container rounded-2xl shadow-2xl overflow-hidden"
-            style={{ border: `1px solid ${tc.cardBorder}` }}>
+          {/* Modal panel — explicit inline style for guaranteed light/dark bg */}
+          <div className="relative w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden"
+            style={{
+              background: tc.isDark ? '#111318' : '#ffffff',
+              border: `1px solid ${tc.cardBorder}`,
+            }}>
 
             {/* ── Header ── */}
             <div className="flex items-center justify-between px-5 py-4"

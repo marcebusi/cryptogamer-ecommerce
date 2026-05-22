@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { useThemeColors } from '../../lib/themeColors'
 import { api } from '../../lib/api'
 
 interface OrderItem {
@@ -59,6 +60,7 @@ const ARS = (n: number) =>
 const PAGE_SIZE = 15
 
 export default function AdminOrdersPage() {
+  const tc = useThemeColors()
   const { isAdmin, isLoading } = useAuth()
   const navigate = useNavigate()
 
@@ -144,7 +146,8 @@ export default function AdminOrdersPage() {
           <p className="text-sm text-on-surface-variant mt-1">Gestión de órdenes, pagos y envíos</p>
         </div>
         <button onClick={load}
-          className="flex items-center gap-xs px-sm py-xs rounded-xl border border-white/10 text-sm text-on-surface-variant hover:bg-white/5 transition-colors cursor-pointer">
+          className="flex items-center gap-xs px-sm py-xs rounded-xl text-sm text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer"
+          style={{ border: `1px solid ${tc.cardBorder}` }}>
           <span className="material-symbols-outlined text-sm">refresh</span>Actualizar
         </button>
       </div>
@@ -157,7 +160,7 @@ export default function AdminOrdersPage() {
           { label: 'En camino',   value: totals.processing + totals.shipped,    icon: 'local_shipping',color:'text-blue-400'   },
           { label: 'Ingresos',    value: ARS(totals.revenue),                   icon: 'payments',     color: 'text-primary-container' },
         ].map(s => (
-          <div key={s.label} className="bg-surface-container rounded-xl border border-white/10 p-sm">
+          <div key={s.label} className="bg-surface-container rounded-xl border border-outline-variant/20 p-sm">
             <span className={`material-symbols-outlined text-xl mb-xs block ${s.color}`}>{s.icon}</span>
             <p className={`text-lg font-black ${s.color}`}>{s.value}</p>
             <p className="text-xs text-on-surface-variant">{s.label}</p>
@@ -180,7 +183,7 @@ export default function AdminOrdersPage() {
             className={`px-sm py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
               filter === f.key
                 ? 'bg-primary-container/20 text-primary-container border-primary-container/40'
-                : 'bg-surface-container text-on-surface-variant border-white/10 hover:border-white/20'
+                : 'bg-surface-container text-on-surface-variant border-outline-variant/30 hover:border-outline-variant/60'
             }`}>
             {f.label}
           </button>
@@ -207,28 +210,31 @@ export default function AdminOrdersPage() {
               const orderNum = `CG-${order.id.slice(-6).toUpperCase()}`
 
               return (
-                <div key={order.id} className="bg-surface-container rounded-xl border border-white/10 overflow-hidden">
+                <div key={order.id} className="bg-surface-container rounded-xl border border-outline-variant/20 overflow-hidden">
 
                   {/* ── Summary row ── */}
                   <button onClick={() => setExpanded(isOpen ? null : order.id)}
-                    className="w-full flex items-center gap-sm p-sm text-left hover:bg-white/[0.03] transition-colors cursor-pointer">
+                    className="w-full flex items-center gap-sm p-sm text-left transition-colors cursor-pointer hover:bg-surface-container-high/50">
 
                     {/* Left: order info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-xs flex-wrap mb-0.5">
-                        <span className="font-mono text-xs font-bold text-white/70">{orderNum}</span>
+                        <span className="font-mono text-xs font-bold text-on-surface-variant">{orderNum}</span>
                         <span className={`text-[10px] font-bold px-xs py-0.5 rounded-full border flex items-center gap-0.5 ${st.color}`}>
                           <span className="material-symbols-outlined text-[11px]">{st.icon}</span>
                           {st.label}
                         </span>
                         {pay && (
-                          <span className="text-[10px] font-bold px-xs py-0.5 rounded-full border border-white/10 bg-white/5 text-white/50 flex items-center gap-1">
-                            <i className={`${pay.icon} text-[9px]`} style={{ color: pay.color }} />
+                          <span className="text-[10px] font-bold px-xs py-0.5 rounded-full flex items-center gap-1 text-on-surface-variant"
+                            style={{ border: `1px solid ${tc.cardBorder}`, background: tc.cardBg }}>
+                            <i className={`${pay.icon} text-[9px]`}
+                              style={{ color: tc.isDark ? pay.color : '#6b7280' }} />
                             {pay.label}
                           </span>
                         )}
                         {order.comprovanteUrl && (
-                          <span className="text-[10px] font-bold px-xs py-0.5 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 flex items-center gap-1">
+                          <span className="text-[10px] font-bold px-xs py-0.5 rounded-full flex items-center gap-1"
+                            style={{ border: `1px solid ${tc.cyanBorder}`, background: tc.cyanBg, color: tc.cyan }}>
                             <i className="fa-solid fa-paperclip text-[9px]" /> Comprobante
                           </span>
                         )}
@@ -238,7 +244,7 @@ export default function AdminOrdersPage() {
                       </p>
                       <p className="text-xs text-on-surface-variant">
                         {order.customerEmail ?? order.user.email}
-                        {order.seller && <span className="ml-2 text-purple-300">· {order.seller.name}</span>}
+                        {order.seller && <span className="ml-2 text-on-surface-variant">· {order.seller.name}</span>}
                       </p>
                     </div>
 
