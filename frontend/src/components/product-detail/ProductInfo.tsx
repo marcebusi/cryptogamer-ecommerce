@@ -209,10 +209,10 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         {/* Guarantees */}
         <div className="flex gap-2">
           <div className="flex items-center gap-3 px-4 py-3.5 bg-surface-container rounded-xl border border-outline-variant/30 flex-1">
-            <span className="material-symbols-outlined text-2xl flex-shrink-0" style={{ color: tc.primary }}>delivery_truck_speed</span>
+            <span className="material-symbols-outlined text-2xl flex-shrink-0" style={{ color: tc.primary }}>store</span>
             <div>
-              <p className="text-sm font-bold text-on-surface leading-tight">Retiro a domicilio</p>
-              <p className="text-xs text-on-surface-variant mt-0.5">El vendedor te lo lleva</p>
+              <p className="text-sm font-bold text-on-surface leading-tight">Retiro en local</p>
+              <p className="text-xs text-on-surface-variant mt-0.5">Coordinás con el vendedor</p>
             </div>
           </div>
           <div className="flex items-center gap-3 px-4 py-3.5 bg-surface-container rounded-xl border border-outline-variant/30 flex-1">

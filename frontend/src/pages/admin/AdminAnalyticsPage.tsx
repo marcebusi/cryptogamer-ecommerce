@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { useThemeColors } from '../../lib/themeColors'
 import { api } from '../../lib/api'
 
 
@@ -387,6 +388,7 @@ function Skeleton() {
 
 /* ── Page ────────────────────────────────────────────────── */
 export default function AdminAnalyticsPage() {
+  const tc = useThemeColors()
   const { isAdmin, isLoading:authLoading } = useAuth()
   const navigate = useNavigate()
   const [data, setData]             = useState<Analytics|null>(null)
@@ -502,29 +504,39 @@ export default function AdminAnalyticsPage() {
 
         {/* ── Date filter ──────────────────────────────────── */}
         <div className="flex flex-col gap-2 items-stretch sm:items-end w-full sm:w-auto">
-          <div className="flex flex-wrap gap-1 bg-white/4 border border-white/6 rounded-xl p-1">
-            {PRESETS.map(p=>(
-              <button key={p.key} onClick={()=>setPreset(p.key)}
-                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all whitespace-nowrap flex-1 sm:flex-none justify-center sm:justify-start
-                  ${preset===p.key
-                    ? 'bg-[#3af4ff]/12 text-[#3af4ff] border border-[#3af4ff]/25'
-                    : 'text-white/30 hover:text-white/60 border border-transparent'}`}>
-                <span className="material-symbols-outlined text-sm">{p.icon}</span>
-                <span className="hidden xs:inline sm:inline">{p.label}</span>
-              </button>
-            ))}
+          <div className="flex flex-wrap gap-1 rounded-xl p-1"
+            style={{ background: tc.cardBg, border: `1px solid ${tc.cardBorder}` }}>
+            {PRESETS.map(p=>{
+              const isActive = preset === p.key
+              return (
+                <button key={p.key} onClick={()=>setPreset(p.key)}
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all whitespace-nowrap flex-1 sm:flex-none justify-center sm:justify-start"
+                  style={isActive
+                    ? { background: tc.isDark ? 'rgba(58,244,255,0.12)' : '#1f2937',
+                        color:      tc.isDark ? '#3af4ff' : '#ffffff',
+                        border:     `1px solid ${tc.isDark ? 'rgba(58,244,255,0.25)' : 'transparent'}` }
+                    : { color:  tc.isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.5)',
+                        border: '1px solid transparent' }
+                  }>
+                  <span className="material-symbols-outlined text-sm">{p.icon}</span>
+                  <span className="hidden xs:inline sm:inline">{p.label}</span>
+                </button>
+              )
+            })}
           </div>
           {preset==='custom' && (
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
               <input type="date" value={customFrom} onChange={e=>setCustomFrom(e.target.value)}
-                className="admin-card-bg border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white/70
-                  cursor-pointer focus:outline-none focus:border-[#3af4ff]/50 transition-colors w-full sm:w-auto"
-                style={{colorScheme:'dark'}}/>
-              <span className="text-white/25 text-sm font-light text-center">→</span>
+                className="rounded-lg px-3 py-1.5 text-xs cursor-pointer focus:outline-none transition-colors w-full sm:w-auto"
+                style={{ background: tc.cardBg, border: `1px solid ${tc.cardBorder}`,
+                  color: tc.isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+                  colorScheme: tc.isDark ? 'dark' : 'light' }}/>
+              <span className="text-on-surface-variant text-sm font-light text-center">→</span>
               <input type="date" value={customTo} onChange={e=>setCustomTo(e.target.value)}
-                className="admin-card-bg border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white/70
-                  cursor-pointer focus:outline-none focus:border-[#3af4ff]/50 transition-colors w-full sm:w-auto"
-                style={{colorScheme:'dark'}}/>
+                className="rounded-lg px-3 py-1.5 text-xs cursor-pointer focus:outline-none transition-colors w-full sm:w-auto"
+                style={{ background: tc.cardBg, border: `1px solid ${tc.cardBorder}`,
+                  color: tc.isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+                  colorScheme: tc.isDark ? 'dark' : 'light' }}/>
             </div>
           )}
         </div>

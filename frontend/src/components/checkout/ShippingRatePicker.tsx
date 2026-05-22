@@ -16,7 +16,7 @@ export const PICKUP_RATE: ShippingRate = {
   carrierId:    'pickup',
   carrierName:  'Retiro',
   serviceId:    'pickup',
-  serviceName:  'Retiro a domicilio del vendedor',
+  serviceName:  'Retiro en domicilio del vendedor',
   deliveryType: 'P',
   price:        0,
   daysMin:      0,
@@ -72,11 +72,11 @@ export default function ShippingRatePicker({ selected, onSelect }: Props) {
 
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <span className={`text-sm font-semibold ${isSelected ? 'text-purple-200' : 'text-white/80'}`}>
-            Retiro a domicilio del vendedor
+          <span className={`text-sm font-semibold ${isSelected ? 'text-purple-200' : 'text-on-surface'}`}>
+            Retiro en domicilio del vendedor
           </span>
-          <p className="text-xs text-white/40 mt-0.5">
-            Coordinás el retiro directamente con el vendedor vía WhatsApp
+          <p className="text-xs text-on-surface-variant mt-0.5">
+            El vendedor te indica su dirección para coordinar la entrega
           </p>
         </div>
 

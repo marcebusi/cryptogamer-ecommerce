@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate }         from 'react-router-dom'
 import { useAuth }             from '../../context/AuthContext'
+import { useThemeColors }      from '../../lib/themeColors'
 import { api }                 from '../../lib/api'
 import { Analytics }           from './AdminAnalyticsPage'
 import AdvancedAnalytics       from '../../components/analytics/AdvancedAnalytics'
@@ -48,6 +49,7 @@ function Skeleton() {
 
 /* ── Page ────────────────────────────────────────────────── */
 export default function AdminAnalyticsAdvancedPage() {
+  const tc = useThemeColors()
   const { isAdmin, isLoading: authLoading } = useAuth()
   const navigate = useNavigate()
 
@@ -99,54 +101,77 @@ export default function AdminAnalyticsAdvancedPage() {
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-xs px-sm py-1 rounded-full bg-purple-500/15 border border-purple-500/25 text-purple-400 text-xs font-bold uppercase tracking-widest mb-sm">
+          <div className="inline-flex items-center gap-xs px-sm py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-sm"
+            style={{ background: tc.primaryBg, border: `1px solid ${tc.primaryBorder}`, color: tc.primary }}>
             <span className="material-symbols-outlined text-sm">electric_bolt</span>
             Analytics Avanzado
           </div>
-          <h1 className="text-2xl md:text-3xl font-black text-white font-['Plus_Jakarta_Sans'] leading-tight">
+          <h1 className="text-2xl md:text-3xl font-black text-on-background font-['Plus_Jakarta_Sans'] leading-tight">
             Métricas{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-[#3af4ff]">
-              Avanzadas
-            </span>
+            <span style={{ color: tc.primary }}>Avanzadas</span>
           </h1>
-          <p className="text-xs text-white/30 mt-1 font-mono tracking-wide">{presetLabel}</p>
+          <p className="text-xs text-on-surface-variant mt-1 font-mono tracking-wide">{presetLabel}</p>
         </div>
 
         {/* ── Date filter ── */}
         <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-1.5 bg-white/4 border border-white/8 rounded-xl p-1">
-            {PRESETS.map(p => (
-              <button
-                key={p.key}
-                onClick={() => setPreset(p.key)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer
-                  ${preset === p.key
-                    ? 'bg-purple-500/25 text-purple-300 border border-purple-500/40 shadow-[0_0_12px_rgba(168,85,247,0.2)]'
-                    : 'text-white/40 hover:text-white/70 hover:bg-white/5'}`}
-              >
-                <span className="material-symbols-outlined text-sm">{p.icon}</span>
-                {p.label}
-              </button>
-            ))}
+          <div className="flex items-center gap-1 rounded-xl p-1"
+            style={{ background: tc.cardBg, border: `1px solid ${tc.cardBorder}` }}>
+            {PRESETS.map(p => {
+              const isActive = preset === p.key
+              return (
+                <button
+                  key={p.key}
+                  onClick={() => setPreset(p.key)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer"
+                  style={isActive
+                    ? {
+                        background: tc.isDark ? 'rgba(168,85,247,0.25)' : '#1f2937',
+                        color:      tc.isDark ? '#c084fc'              : '#ffffff',
+                        border:     `1px solid ${tc.isDark ? 'rgba(168,85,247,0.4)' : 'transparent'}`,
+                      }
+                    : {
+                        color:  tc.isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.5)',
+                        border: '1px solid transparent',
+                      }
+                  }
+                >
+                  <span className="material-symbols-outlined text-sm">{p.icon}</span>
+                  {p.label}
+                </button>
+              )
+            })}
           </div>
 
           {preset === 'custom' && (
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <input
                 type="date"
                 value={customFrom}
                 onChange={e => setCustomFrom(e.target.value)}
                 max={customTo || fmtDate(new Date())}
-                className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white/70 focus:outline-none focus:border-purple-500/50 focus:bg-white/8 transition-colors cursor-pointer"
+                className="flex-1 rounded-lg px-3 py-1.5 text-xs cursor-pointer focus:outline-none transition-colors"
+                style={{
+                  background: tc.cardBg,
+                  border:     `1px solid ${tc.cardBorder}`,
+                  color:      tc.isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+                  colorScheme: tc.isDark ? 'dark' : 'light',
+                }}
               />
-              <span className="text-white/20 text-xs">→</span>
+              <span className="text-on-surface-variant text-xs text-center">→</span>
               <input
                 type="date"
                 value={customTo}
                 onChange={e => setCustomTo(e.target.value)}
                 min={customFrom}
                 max={fmtDate(new Date())}
-                className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white/70 focus:outline-none focus:border-purple-500/50 focus:bg-white/8 transition-colors cursor-pointer"
+                className="flex-1 rounded-lg px-3 py-1.5 text-xs cursor-pointer focus:outline-none transition-colors"
+                style={{
+                  background: tc.cardBg,
+                  border:     `1px solid ${tc.cardBorder}`,
+                  color:      tc.isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+                  colorScheme: tc.isDark ? 'dark' : 'light',
+                }}
               />
             </div>
           )}
