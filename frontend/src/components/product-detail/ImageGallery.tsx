@@ -51,7 +51,6 @@ export default function ImageGallery({ product }: ImageGalleryProps) {
           }
         }}
       >
-        <div className="scanline-overlay absolute inset-0 opacity-20 pointer-events-none z-10" />
         <div className="gallery-bg absolute inset-0" />
 
         <img

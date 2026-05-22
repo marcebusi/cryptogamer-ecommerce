@@ -38,13 +38,14 @@ export const uploadLimiter = rateLimit({
   handler: rateLimitHandler,
 })
 
-// ── Contacto / Email ──────────────────────────────────────────────────────────
+// ── Contacto / Email — 3 mensajes por hora por IP para evitar spam al owner ──
 export const contactLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hora
-  max: 10,
+  max: 3,
   standardHeaders: true,
   legacyHeaders: false,
   handler: rateLimitHandler,
+  message: 'Límite de mensajes alcanzado. Podés enviar hasta 3 mensajes por hora.',
 })
 
 // ── Admin endpoints ───────────────────────────────────────────────────────────

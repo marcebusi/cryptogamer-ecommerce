@@ -304,6 +304,31 @@ export const emailTemplates = {
     `),
   }),
 
+  /* ── Notificación al dueño de tienda ────────── */
+  contactNotification: (params: { name: string; email: string; message: string }) => ({
+    subject: `📩 Nuevo contacto de ${params.name} · Cryptogamer's`,
+    html: shell(`
+      <p style="margin:0 0 6px;font-size:12px;color:${T.textMuted};text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">Formulario de contacto</p>
+      <h1 style="margin:0 0 24px;font-size:22px;font-weight:900;color:${T.white};line-height:1.2;">
+        Nuevo mensaje de <span style="color:${T.purpleLight};">${params.name}</span>
+      </h1>
+
+      ${infoBox(`
+        <table width="100%" cellpadding="0" cellspacing="0">
+          ${statRow('Nombre', params.name, T.textMain)}
+          ${statRow('Email',  params.email, T.purpleLight)}
+        </table>
+      `, T.cyan)}
+
+      ${divider()}
+
+      <p style="margin:0 0 8px;font-size:12px;color:${T.textMuted};font-weight:700;text-transform:uppercase;letter-spacing:1px;">Mensaje</p>
+      ${infoBox(`<p style="margin:0;font-size:14px;color:${T.textMain};line-height:1.7;white-space:pre-wrap;">${params.message.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>`, T.purple)}
+
+      ${ctaButton(`mailto:${params.email}`, `Responder a ${params.name} →`, T.purple)}
+    `),
+  }),
+
   /* ── Confirmación de contacto ────────────────── */
   contactConfirmation: (name: string) => ({
     subject: `Recibimos tu mensaje · Cryptogamer's`,

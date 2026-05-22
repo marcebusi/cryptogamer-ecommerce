@@ -16,9 +16,16 @@ export const submitContact = async (req: Request, res: Response): Promise<void> 
       data: { name, email, message }
     })
 
-    // Send confirmation email (non-blocking)
+    // Confirmation to the person who wrote (non-blocking)
     const { subject, html } = emailTemplates.contactConfirmation(name)
     sendEmail(email, subject, html).catch(console.error)
+
+    // Notification to store owner (non-blocking)
+    const adminEmail = process.env.CONTACT_NOTIFY_EMAIL ?? process.env.ADMIN_EMAIL ?? ''
+    if (adminEmail) {
+      const { subject: as, html: ah } = emailTemplates.contactNotification({ name, email, message })
+      sendEmail(adminEmail, as, ah).catch(console.error)
+    }
 
     res.status(201).json({ message: 'Mensaje enviado correctamente', contact: newContact })
   } catch (error) {
