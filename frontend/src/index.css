@@ -580,3 +580,24 @@ html.light .text-secondary-container { color: #b91c1c !important; }
 html.light #footer a { color: #374151; }
 html.light #footer a:hover { color: #eb0000 !important; }
 html.light #footer .text-purple-400 { color: #eb0000 !important; }
+
+/* ── Light mode: MaterialSymbols icon color fix ── */
+html.light .material-symbols-outlined {
+  color: inherit;
+}
+
+/* ── Light mode: remove cyan/green text from general UI ── */
+html.light .text-cyan-400   { color: #0891b2 !important; }
+html.light .text-purple-400 { color: #7c3aed !important; }
+html.light .text-purple-300 { color: #9333ea !important; }
+html.light .text-yellow-400 { color: #d97706 !important; }
+
+/* ── Light mode: badge/tag neon glows → neutral ── */
+html.light [class*="text-\[#39ff14\]"]  { color: #15803d !important; }
+html.light [class*="text-\[#3af4ff\]"]  { color: #0284c7 !important; }
+html.light [class*="text-\[#ff4a8d\]"]  { color: #be185d !important; }
+html.light [class*="text-\[#ff2d6b\]"]  { color: #be185d !important; }
+
+/* ── Light mode: product price text ── */
+html.light .text-secondary-container { color: #b91c1c !important; }
+html.light .text-tertiary-container  { color: #374151 !important; }

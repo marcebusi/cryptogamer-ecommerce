@@ -1,3 +1,25 @@
+/* ── Badge & button glows — dark: neon, light: neutral ─── */
+.pc-badge-glow {
+  box-shadow: 0 0 12px rgba(255, 74, 141, 0.55);
+}
+.pc-btn-hover:hover {
+  box-shadow: 0 0 20px rgba(57, 255, 20, 0.45);
+}
+
+html.light .pc-badge-glow {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22) !important;
+}
+html.light .pc-btn-hover:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18) !important;
+  filter: brightness(1.08);
+}
+
+/* ── Light mode: on-tertiary-container (dark background badge) ── */
+html.light .bg-tertiary-container.text-on-tertiary-container {
+  background-color: #6b7280 !important;
+  color: #ffffff !important;
+}
+
 .product-card-image {
   transition: transform 0.7s ease;
 }

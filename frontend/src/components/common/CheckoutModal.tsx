@@ -452,28 +452,21 @@ export default function CheckoutModal() {
         {/* ════════ STEP 3 — Shipping ════════ */}
         {step === 'shipping' && (
           <div className="p-md space-y-sm">
-            <p className="text-xs text-white/40 uppercase tracking-wider font-semibold">Tus datos</p>
+            <p className="text-xs text-white/40 uppercase tracking-wider font-semibold">Tus datos de contacto</p>
             <div className="grid grid-cols-1 gap-sm">
               {field('name',  'Nombre completo', 'text',  'Ej: Juan Pérez')}
               {field('email', 'Email',           'email', 'tu@email.com')}
               {field('phone', 'Teléfono',        'tel',   '+54 11 0000-0000')}
             </div>
 
-            <p className="text-xs text-white/40 uppercase tracking-wider font-semibold pt-1">Dirección de entrega</p>
-            <div className="grid grid-cols-1 gap-sm">
-              {field('address', 'Calle y número', 'text', 'Ej: Av. Corrientes 1234')}
-              <div className="grid grid-cols-2 gap-sm">
-                {field('city',   'Ciudad',        'text', 'Ej: Buenos Aires')}
-                {field('postal', 'Código postal', 'text', 'Ej: 1414')}
-              </div>
+            {/* Pickup notice */}
+            <div className="rounded-xl border border-purple-500/20 bg-purple-500/5 px-4 py-3 flex items-start gap-3">
+              <span className="material-symbols-outlined text-purple-400 text-base flex-shrink-0 mt-0.5">delivery_truck_speed</span>
               <div>
-                <label className="block text-xs text-on-surface-variant uppercase tracking-wider mb-1">Provincia</label>
-                <select
-                  value={form.province}
-                  onChange={e => setForm(f => ({ ...f, province: e.target.value }))}
-                  className="w-full bg-surface-container border border-outline-variant rounded-lg px-sm py-xs text-sm text-on-surface outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container/30 cursor-pointer">
-                  {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
-                </select>
+                <p className="text-sm font-semibold text-white/80">Retiro a domicilio</p>
+                <p className="text-xs text-white/45 mt-0.5 leading-relaxed">
+                  El vendedor se contactará con vos para coordinar el retiro. No necesitás ingresar dirección.
+                </p>
               </div>
             </div>
 

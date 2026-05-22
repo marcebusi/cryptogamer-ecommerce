@@ -120,6 +120,50 @@
   50%       { box-shadow: 0 0 18px rgba(255,74,141,0.85); }
 }
 
+/* ── Small floating add-to-cart button ── */
+.pc-cart-btn {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  z-index: 12;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(255, 74, 141, 0.85);
+  color: #fff;
+  border: 1px solid rgba(255, 74, 141, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: opacity 0.2s ease, transform 0.15s ease, background 0.2s ease;
+  /* desktop: only visible on card hover */
+  opacity: 0;
+}
+.pc-card:hover .pc-cart-btn {
+  opacity: 1;
+}
+.pc-cart-btn:hover {
+  background: rgba(255, 74, 141, 1);
+  transform: scale(1.1);
+}
+.pc-cart-btn:active {
+  transform: scale(0.92);
+}
+/* mobile / touch: always visible */
+@media (hover: none) and (pointer: coarse) {
+  .pc-cart-btn { opacity: 1; }
+}
+
+html.light .pc-cart-btn {
+  background: rgba(220, 38, 38, 0.85);
+  border-color: rgba(220, 38, 38, 0.5);
+}
+html.light .pc-cart-btn:hover {
+  background: rgba(220, 38, 38, 1);
+}
+
 /* Hover "add to cart" overlay */
 .pc-overlay {
   position: absolute;

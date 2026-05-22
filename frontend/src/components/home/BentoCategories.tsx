@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom'
-import { navCategories } from '../../data/categories'
 import './BentoCategories.css'
 
 export default function BentoCategories() {
@@ -85,22 +84,6 @@ export default function BentoCategories() {
         </div>
       </div>
 
-      {/* Mobile — horizontal scroll chips */}
-      <div className="md:hidden mt-3 -mx-4 px-4 overflow-x-auto scrollbar-hide">
-        <div className="flex gap-2 pb-1" style={{ width: 'max-content' }}>
-          {navCategories.map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => navigate(`/products?cat=${cat.id}`)}
-              className="bento-chip flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer whitespace-nowrap active:scale-95 flex-shrink-0"
-              title={cat.label}
-            >
-              <span className="material-symbols-outlined text-sm">{cat.icon}</span>
-              <span className="hidden sm:inline">{cat.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
     </section>
   )
 }

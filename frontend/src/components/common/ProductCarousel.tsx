@@ -1,5 +1,6 @@
 import { useRef, useEffect, useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useCart } from '../../context/CartContext'
 import type { Product } from '../../types'
 import './ProductCarousel.css'
 
@@ -9,6 +10,7 @@ const ARS = (n: number) =>
 interface Props { products: Product[] }
 
 export default function ProductCarousel({ products }: Props) {
+  const { addToCart } = useCart()
   const trackRef = useRef<HTMLDivElement>(null)
   const isJumping      = useRef(false)
   const [activeArrow, setActiveArrow] = useState<'left' | 'right' | null>(null)
@@ -108,6 +110,16 @@ export default function ProductCarousel({ products }: Props) {
                   </div>
                 )}
 
+                {/* Small add-to-cart button — always visible on touch, hover on desktop */}
+                {product.inStock && (
+                  <button
+                    onClick={e => { e.stopPropagation(); e.preventDefault(); addToCart(product) }}
+                    className="pc-cart-btn"
+                    aria-label="Agregar al carrito"
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>add_shopping_cart</span>
+                  </button>
+                )}
               </div>
 
               {/* Info */}

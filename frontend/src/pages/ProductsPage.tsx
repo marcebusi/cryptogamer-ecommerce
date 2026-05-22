@@ -6,12 +6,13 @@ import { useDynamicProducts } from '../hooks/useDynamicProducts'
 import { useCategories, parseCategoryChildren } from '../context/CategoriesContext'
 
 type StockFilter = 'all' | 'inStock' | 'outOfStock'
-type SortOrder   = 'default' | 'price-asc' | 'price-desc'
+type SortOrder   = 'default' | 'price-asc' | 'price-desc' | 'newest'
 
 const SORT_OPTIONS: { value: SortOrder; label: string; icon: string }[] = [
-  { value: 'default',    label: 'Relevancia',    icon: 'sort' },
-  { value: 'price-asc',  label: 'Menor precio',  icon: 'arrow_upward' },
-  { value: 'price-desc', label: 'Mayor precio',  icon: 'arrow_downward' },
+  { value: 'default',    label: 'Relevancia',     icon: 'sort' },
+  { value: 'newest',     label: 'Más recientes',  icon: 'new_releases' },
+  { value: 'price-asc',  label: 'Menor precio',   icon: 'arrow_upward' },
+  { value: 'price-desc', label: 'Mayor precio',   icon: 'arrow_downward' },
 ]
 
 const ITEMS_PER_PAGE = 9
@@ -73,6 +74,7 @@ export default function ProductsPage() {
   }).sort((a, b) => {
     if (sortOrder === 'price-asc')  return a.price - b.price
     if (sortOrder === 'price-desc') return b.price - a.price
+    if (sortOrder === 'newest')     return new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
     return 0
   })
 

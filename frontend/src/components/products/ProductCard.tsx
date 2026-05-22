@@ -19,28 +19,28 @@ const accentClasses: Record<AccentKey, {
   primary: {
     border:  'hover:border-primary-container/30',
     shadow:  'hover:shadow-[0_0_30px_rgba(57,255,20,0.12)]',
-    badge:   'bg-primary-container text-on-primary-container shadow-[0_0_12px_#39ff14]',
+    badge:   'bg-primary-container text-on-primary-container pc-badge-glow',
     title:   'group-hover:text-primary-container',
     price:   'text-primary-container',
-    btn:     'bg-primary-container text-on-primary hover:shadow-[0_0_20px_#39ff14]',
+    btn:     'bg-primary-container text-on-primary pc-btn-hover',
     glowDot: 'bg-primary-container/20',
   },
   secondary: {
     border:  'hover:border-secondary-container/40',
     shadow:  'hover:shadow-[0_0_30px_rgba(255,74,141,0.15)]',
-    badge:   'bg-secondary-container text-on-secondary shadow-[0_0_12px_#ff4a8d]',
+    badge:   'bg-secondary-container text-on-secondary pc-badge-glow',
     title:   'group-hover:text-secondary-container',
     price:   'text-secondary-container',
-    btn:     'bg-secondary-container text-on-secondary hover:shadow-[0_0_20px_#ff4a8d]',
+    btn:     'bg-secondary-container text-on-secondary pc-btn-hover',
     glowDot: 'bg-secondary-container/20',
   },
   tertiary: {
     border:  'hover:border-tertiary-container/30',
     shadow:  'hover:shadow-[0_0_30px_rgba(58,244,255,0.12)]',
-    badge:   'bg-tertiary-container text-on-tertiary-container shadow-[0_0_12px_#3af4ff]',
+    badge:   'bg-tertiary-container text-on-tertiary-container pc-badge-glow',
     title:   'group-hover:text-tertiary-container',
     price:   'text-tertiary-container',
-    btn:     'bg-tertiary-container text-on-tertiary-container hover:shadow-[0_0_20px_#3af4ff]',
+    btn:     'bg-tertiary-container text-on-tertiary-container pc-btn-hover',
     glowDot: 'bg-tertiary-container/20',
   },
 }
@@ -80,7 +80,7 @@ export default function ProductCard({ product, accent = 'secondary' }: ProductCa
 
         {/* Discount ribbon */}
         {product.originalPrice && (
-          <div className="absolute top-2 left-2 bg-secondary-container text-on-secondary text-[10px] font-black px-2 py-0.5 rounded-full shadow-[0_0_10px_#ff4a8d]">
+          <div className="absolute top-2 left-2 bg-secondary-container text-on-secondary text-[10px] font-black px-2 py-0.5 rounded-full pc-badge-glow">
             -{Math.round((1 - product.price / product.originalPrice) * 100)}%
           </div>
         )}
