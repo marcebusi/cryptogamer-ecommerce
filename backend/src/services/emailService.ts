@@ -2,14 +2,16 @@ import nodemailer from 'nodemailer'
 import { Resend }  from 'resend'
 
 /* ── Config ──────────────────────────────────────── */
-const FROM             = process.env.EMAIL_FROM ?? process.env.SMTP_FROM ?? "Cryptogamer's <noreply@cryptogamer.ar>"
-const RESEND_KEY       = process.env.RESEND_API_KEY ?? ''
-const CONFIGURED_RESEND = !!RESEND_KEY
-const CONFIGURED_SMTP   = !!(process.env.SMTP_USER && process.env.SMTP_PASS)
-const CONFIGURED        = CONFIGURED_RESEND || CONFIGURED_SMTP
+const FROM              = process.env.EMAIL_FROM ?? "Cryptogamer's <noreply@crypto-gamers.com>"
+const BREVO_KEY         = process.env.BREVO_API_KEY ?? ''
+const RESEND_KEY        = process.env.RESEND_API_KEY ?? ''
+const CONFIGURED_BREVO  = !!BREVO_KEY
+const CONFIGURED_RESEND = !!RESEND_KEY && !CONFIGURED_BREVO   // solo si no hay Brevo
+const CONFIGURED_SMTP   = !!(process.env.SMTP_USER && process.env.SMTP_PASS) && !CONFIGURED_BREVO && !CONFIGURED_RESEND
+const CONFIGURED        = CONFIGURED_BREVO || CONFIGURED_RESEND || CONFIGURED_SMTP
 
-/* ── Resend client (HTTP — works on Hostinger VPS) ── */
-const resend = CONFIGURED_RESEND ? new Resend(RESEND_KEY) : null
+/* ── Resend client (fallback) ────────────────────── */
+const resend = (!!RESEND_KEY && !CONFIGURED_BREVO) ? new Resend(RESEND_KEY) : null
 
 /* ── SMTP fallback (for local dev) ──────────────── */
 const transporter = nodemailer.createTransport({
@@ -24,15 +26,46 @@ const transporter = nodemailer.createTransport({
 })
 
 // Startup diagnostics
-if (CONFIGURED_RESEND) {
-  console.log('✅ [EMAIL] Resend configurado — usando API HTTP (recomendado en VPS)')
+if (CONFIGURED_BREVO) {
+  console.log('✅ [EMAIL] Brevo configurado — usando API HTTP (recomendado en VPS)')
+} else if (CONFIGURED_RESEND) {
+  console.log('✅ [EMAIL] Resend configurado — usando API HTTP')
 } else if (CONFIGURED_SMTP) {
   console.log('✅ [EMAIL] SMTP configurado —', process.env.SMTP_USER)
   transporter.verify()
     .then(() => console.log('✅ [EMAIL] SMTP conectado correctamente'))
     .catch(err  => console.error('❌ [EMAIL] Error SMTP:', err?.message ?? err))
 } else {
-  console.warn('⚠️  [EMAIL] Sin configuración — definí RESEND_API_KEY (recomendado) o SMTP_USER+SMTP_PASS en .env')
+  console.warn('⚠️  [EMAIL] Sin configuración — definí BREVO_API_KEY en .env')
+}
+
+/* ── Brevo HTTP sender ───────────────────────────── */
+async function sendViaBrevo(to: string, subject: string, html: string): Promise<void> {
+  // Parse FROM: "Name <email>" or just "email"
+  const match   = FROM.match(/^(.+?)\s*<([^>]+)>$/)
+  const sender  = match
+    ? { name: match[1].replace(/^['"]|['"]$/g, ''), email: match[2] }
+    : { name: "Cryptogamer's", email: FROM }
+
+  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method:  'POST',
+    headers: {
+      'api-key':      BREVO_KEY,
+      'Content-Type': 'application/json',
+      'Accept':       'application/json',
+    },
+    body: JSON.stringify({
+      sender,
+      to:          [{ email: to }],
+      subject,
+      htmlContent: html,
+    }),
+  })
+
+  if (!res.ok) {
+    const errBody = await res.text()
+    throw new Error(`Brevo error ${res.status}: ${errBody}`)
+  }
 }
 
 /* ── Core sender ─────────────────────────────────── */
@@ -44,12 +77,12 @@ export async function sendEmail(to: string, subject: string, html: string): Prom
 
   console.log(`📧 [EMAIL] Enviando a ${to} — "${subject}"`)
 
-  if (resend) {
-    // Resend: HTTP API, funciona en Hostinger y cualquier VPS
+  if (CONFIGURED_BREVO) {
+    await sendViaBrevo(to, subject, html)
+  } else if (resend) {
     const { error } = await resend.emails.send({ from: FROM, to, subject, html })
     if (error) throw new Error(`Resend error: ${error.message}`)
   } else {
-    // Fallback SMTP (dev local)
     await transporter.sendMail({ from: FROM, to, subject, html })
   }
 
