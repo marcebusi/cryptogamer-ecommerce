@@ -51,7 +51,26 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
     const order = await prisma.order.update({
       where: { id },
       data:  { status },
+      include: { user: { select: { email: true, name: true } } },
     })
+
+    // ── Notify customer by email ─────────────────
+    const emailAddr    = order.customerEmail ?? order.user?.email
+    const customerName = order.customerName  ?? order.user?.name ?? 'Cliente'
+    if (emailAddr) {
+      const orderNumber = `CG-${order.id.slice(-6).toUpperCase()}`
+      const { sendEmail, emailTemplates } = await import('../services/emailService')
+      const { subject, html } = emailTemplates.statusUpdate({
+        orderNumber,
+        customerName,
+        status,
+        trackingCode: order.trackingCode ?? undefined,
+      })
+      sendEmail(emailAddr, subject, html)
+        .then(() => console.log(`[EMAIL] Estado "${status}" notificado a ${emailAddr}`))
+        .catch(err  => console.error('[EMAIL ERROR] statusUpdate:', err?.message ?? err))
+    }
+
     res.json(order)
   } catch {
     res.status(500).json({ message: 'Error al actualizar estado' })

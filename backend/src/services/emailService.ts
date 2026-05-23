@@ -1,29 +1,38 @@
 import nodemailer from 'nodemailer'
+import { Resend }  from 'resend'
 
-/* ── Transport ───────────────────────────────────── */
+/* ── Config ──────────────────────────────────────── */
+const FROM             = process.env.EMAIL_FROM ?? process.env.SMTP_FROM ?? "Cryptogamer's <noreply@cryptogamer.ar>"
+const RESEND_KEY       = process.env.RESEND_API_KEY ?? ''
+const CONFIGURED_RESEND = !!RESEND_KEY
+const CONFIGURED_SMTP   = !!(process.env.SMTP_USER && process.env.SMTP_PASS)
+const CONFIGURED        = CONFIGURED_RESEND || CONFIGURED_SMTP
+
+/* ── Resend client (HTTP — works on Hostinger VPS) ── */
+const resend = CONFIGURED_RESEND ? new Resend(RESEND_KEY) : null
+
+/* ── SMTP fallback (for local dev) ──────────────── */
 const transporter = nodemailer.createTransport({
-  host:   process.env.SMTP_HOST  ?? 'smtp.gmail.com',
+  host:   process.env.SMTP_HOST ?? 'smtp.gmail.com',
   port:   Number(process.env.SMTP_PORT ?? 587),
-  secure: false,   // STARTTLS on port 587
+  secure: Number(process.env.SMTP_PORT) === 465,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
-  tls: {
-    rejectUnauthorized: false,  // allow self-signed certs in dev
-  },
+  tls: { rejectUnauthorized: false },
 })
 
-const FROM       = process.env.SMTP_FROM ?? "Cryptogamer's <noreply@cryptogamer.ar>"
-const CONFIGURED = !!(process.env.SMTP_USER && process.env.SMTP_PASS)
-
-// Verify SMTP connection at startup
-if (CONFIGURED) {
+// Startup diagnostics
+if (CONFIGURED_RESEND) {
+  console.log('✅ [EMAIL] Resend configurado — usando API HTTP (recomendado en VPS)')
+} else if (CONFIGURED_SMTP) {
+  console.log('✅ [EMAIL] SMTP configurado —', process.env.SMTP_USER)
   transporter.verify()
-    .then(() => console.log('✅ [EMAIL] SMTP conectado correctamente —', process.env.SMTP_USER))
-    .catch(err => console.error('❌ [EMAIL] Error al conectar SMTP:', err?.message ?? err))
+    .then(() => console.log('✅ [EMAIL] SMTP conectado correctamente'))
+    .catch(err  => console.error('❌ [EMAIL] Error SMTP:', err?.message ?? err))
 } else {
-  console.warn('⚠️  [EMAIL] SMTP no configurado — revisar SMTP_USER y SMTP_PASS en .env')
+  console.warn('⚠️  [EMAIL] Sin configuración — definí RESEND_API_KEY (recomendado) o SMTP_USER+SMTP_PASS en .env')
 }
 
 /* ── Core sender ─────────────────────────────────── */
@@ -32,8 +41,18 @@ export async function sendEmail(to: string, subject: string, html: string): Prom
     console.log(`📧 [EMAIL — no configurado] Para: ${to} | Asunto: ${subject}`)
     return
   }
+
   console.log(`📧 [EMAIL] Enviando a ${to} — "${subject}"`)
-  await transporter.sendMail({ from: FROM, to, subject, html })
+
+  if (resend) {
+    // Resend: HTTP API, funciona en Hostinger y cualquier VPS
+    const { error } = await resend.emails.send({ from: FROM, to, subject, html })
+    if (error) throw new Error(`Resend error: ${error.message}`)
+  } else {
+    // Fallback SMTP (dev local)
+    await transporter.sendMail({ from: FROM, to, subject, html })
+  }
+
   console.log(`✅ [EMAIL] Enviado correctamente a ${to}`)
 }
 
@@ -402,4 +421,55 @@ export const emailTemplates = {
       <p style="margin:24px 0 0;font-size:13px;color:${T.textDim};text-align:center;">¡Gracias por comunicarte con nosotros!</p>
     `),
   }),
+
+  /* ── Actualización de estado de pedido ──────── */
+  statusUpdate: (params: {
+    orderNumber:   string
+    customerName:  string
+    status:        string
+    trackingCode?: string
+  }) => {
+    const trackingUrl = `${process.env.FRONTEND_URL ?? 'http://localhost:5173'}/seguimiento/${params.orderNumber}`
+
+    const STATUS_INFO: Record<string, { label: string; color: string; icon: string; msg: string }> = {
+      CONFIRMED:  { label: 'Pago confirmado',    color: T.cyan,    icon: '✅', msg: 'Confirmamos la recepción de tu pago. Tu pedido está en cola para ser preparado.' },
+      PROCESSING: { label: 'En preparación',     color: '#f59e0b', icon: '📦', msg: 'Estamos preparando tu pedido. Pronto estará listo para ser enviado.' },
+      SHIPPED:    { label: 'Pedido enviado',      color: T.primary, icon: '🚚', msg: 'Tu pedido ya está en camino. Podés rastrearlo usando el botón de abajo.' },
+      COMPLETED:  { label: 'Pedido entregado',   color: T.primary, icon: '🏠', msg: '¡Tu pedido fue entregado! Gracias por comprar en Cryptogamer\'s.' },
+      CANCELLED:  { label: 'Pedido cancelado',   color: '#ef4444', icon: '❌', msg: 'Lamentamos informarte que tu pedido fue cancelado. Si tenés dudas contactanos.' },
+      PENDING:    { label: 'Pedido recibido',     color: T.purple,  icon: '📬', msg: 'Recibimos tu pedido y está pendiente de confirmación de pago.' },
+    }
+    const info = STATUS_INFO[params.status] ?? {
+      label: params.status, color: T.purple, icon: '📋',
+      msg: 'El estado de tu pedido fue actualizado.',
+    }
+
+    return ({
+      subject: `${info.icon} Tu pedido ${params.orderNumber} — ${info.label} · Cryptogamer's`,
+      html: shell(`
+        <p style="margin:0 0 6px;font-size:12px;color:${T.textMuted};text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">Actualización de pedido</p>
+        <h1 style="margin:0 0 8px;font-size:24px;font-weight:900;color:${T.white};line-height:1.2;">
+          Hola <span style="color:${T.purpleLight};">${params.customerName}</span>,
+        </h1>
+        <p style="margin:0 0 24px;font-size:14px;color:${T.textMuted};">
+          ${badge(params.orderNumber, T.primary)}
+          &nbsp;
+          ${badge(info.label, info.color)}
+        </p>
+
+        ${infoBox(`
+          <p style="margin:0 0 12px;font-size:28px;text-align:center;">${info.icon}</p>
+          <p style="margin:0;font-size:14px;color:${T.textMain};text-align:center;line-height:1.6;">${info.msg}</p>
+          ${params.trackingCode ? `
+            <div style="margin-top:16px;text-align:center;">
+              <p style="margin:0 0 4px;font-size:11px;color:${T.textMuted};text-transform:uppercase;letter-spacing:1px;">Número de seguimiento</p>
+              <p style="margin:0;font-size:18px;font-weight:900;color:${T.primary};letter-spacing:2px;font-family:monospace;">${params.trackingCode}</p>
+            </div>
+          ` : ''}
+        `, info.color)}
+
+        ${ctaButton(trackingUrl, '📦 Ver estado del pedido →', T.purple)}
+      `),
+    })
+  },
 }
