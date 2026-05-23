@@ -1,7 +1,7 @@
 import './TrustBar.css'
 
 const ITEMS = [
-  { icon: 'delivery_truck_speed', title: 'Retiro a domicilio', desc: 'Te llevamos el pedido hasta tu puerta'  },
+  { icon: 'delivery_truck_speed', title: 'Retiro a domicilio', desc: 'Retirá tu pedido en el domicilio del vendedor'  },
   { icon: 'workspace_premium',   title: 'Garantía 30 días',   desc: 'Solo en productos nuevos'               },
   { icon: 'verified_user',       title: 'Pago 100% seguro',   desc: 'Transferencia, efectivo y Crypto'        },
 ]
