@@ -4,6 +4,7 @@ import { normalizeImgUrl } from '../types'
 import { useThemeColors } from '../lib/themeColors'
 import ImageGallery from '../components/product-detail/ImageGallery'
 import ProductInfo from '../components/product-detail/ProductInfo'
+import SpecsGrid from '../components/product-detail/SpecsGrid'
 import RelatedProducts from '../components/product-detail/RelatedProducts'
 import { featuredProduct, allProducts, latestProducts } from '../data/products'
 import { navCategories } from '../data/categories'
@@ -130,7 +131,16 @@ export default function ProductDetailPage() {
         <ProductInfo product={p} />
       </div>
 
-      {/* Specs section removed — shown inline in ProductInfo below the buy button */}
+      {/* Specs section */}
+      {p.specs && p.specs.length > 0 && (
+        <section className="mt-xl">
+          <h2 className="flex items-center gap-2 text-xl font-black text-on-background font-['Plus_Jakarta_Sans'] mb-lg">
+            <span className="text-primary-container font-black">#</span>
+            Especificaciones
+          </h2>
+          <SpecsGrid specs={p.specs} />
+        </section>
+      )}
 
       {/* Related products */}
       <RelatedProducts />
