@@ -90,7 +90,7 @@ export default function ProfilePage() {
       {/* Hero */}
       <section className="profile-hero relative overflow-hidden border-b border-purple-500/20">
         <div className="absolute inset-0 profile-grid pointer-events-none" />
-        <div className="absolute top-0 right-1/4 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="profile-hero-blob absolute top-0 right-1/4 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative max-w-screen-xl mx-auto px-4 md:px-8 py-xl">
           <div className="flex items-center gap-md">
@@ -208,7 +208,7 @@ export default function ProfilePage() {
                   )}
 
                   <button type="submit" disabled={busy}
-                    className="bg-purple-600 text-white px-lg py-3 rounded-xl font-bold text-sm flex items-center gap-xs hover:bg-purple-500 hover:shadow-[0_0_20px_rgba(138,43,226,0.4)] active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
+                    className="profile-save-btn bg-purple-600 text-white px-lg py-3 rounded-xl font-bold text-sm flex items-center gap-xs hover:bg-purple-500 hover:shadow-[0_0_20px_rgba(138,43,226,0.4)] active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
                     {busy
                       ? <><span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>Guardando...</>
                       : <><span className="material-symbols-outlined text-sm">save</span>Guardar cambios</>}
@@ -322,7 +322,7 @@ export default function ProfilePage() {
                     Mostrar contraseñas
                   </label>
                   <button type="submit" disabled={busy}
-                    className="bg-purple-600 text-white px-lg py-3 rounded-xl font-bold text-sm flex items-center gap-xs hover:bg-purple-500 hover:shadow-[0_0_20px_rgba(138,43,226,0.4)] active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
+                    className="profile-save-btn bg-purple-600 text-white px-lg py-3 rounded-xl font-bold text-sm flex items-center gap-xs hover:bg-purple-500 hover:shadow-[0_0_20px_rgba(138,43,226,0.4)] active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
                     {busy
                       ? <><span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>Actualizando...</>
                       : <><span className="material-symbols-outlined text-sm">lock_reset</span>Actualizar contraseña</>}

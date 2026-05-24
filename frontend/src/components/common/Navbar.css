@@ -264,6 +264,12 @@ html.light .search-dropdown {
 html.light .search-dropdown-item:hover { background: rgba(220,38,38,0.05); }
 
 /* ── Logo icon + text light mode ──────────────── */
+html.light .navbar-logo-glow {
+  filter: drop-shadow(0 0 12px rgba(220, 38, 38, 0.5));
+}
+html.light .navbar-logo-glow:hover {
+  filter: drop-shadow(0 0 20px rgba(220, 38, 38, 0.85));
+}
 html.light .navbar-logo-icon {
   background: linear-gradient(135deg, #eb0000, #7f0000);
   box-shadow: 0 0 10px rgba(235,0,0,0.3);
