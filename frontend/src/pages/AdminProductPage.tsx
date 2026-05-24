@@ -625,7 +625,7 @@ export default function AdminProductPage() {
                       <div key={i} className="flex gap-2 items-center">
                         {/* Icon preview */}
                         <div className="flex items-center gap-1 flex-shrink-0">
-                          <div className="w-8 h-8 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                          <div className="spec-icon-preview w-8 h-8 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
                             <span className="material-symbols-outlined text-purple-400 text-base">{s.icon || 'star'}</span>
                           </div>
                           <input type="text" value={s.icon} onChange={e => updateEditSpec(i, 'icon', e.target.value)}
@@ -840,7 +840,7 @@ export default function AdminProductPage() {
                     <label key={c.id} className="cursor-pointer">
                       <input type="radio" name="condition" className="hidden peer"
                         checked={condition === c.id} onChange={() => setCondition(c.id)} />
-                      <div className="p-2.5 text-center rounded-xl border-2 border-white/8 bg-surface-container-low text-on-surface-variant text-xs font-bold peer-checked:border-primary-container peer-checked:bg-primary-container/15 peer-checked:text-primary-container transition-all cursor-pointer">
+                      <div className="condition-option-div p-2.5 text-center rounded-xl border-2 border-white/8 bg-surface-container-low text-on-surface-variant text-xs font-bold peer-checked:border-primary-container peer-checked:bg-primary-container/15 peer-checked:text-primary-container transition-all cursor-pointer">
                         {c.label}
                       </div>
                     </label>
@@ -904,7 +904,7 @@ export default function AdminProductPage() {
                     <div key={i} className="flex gap-2 items-center">
                       {/* Icon preview */}
                       <div className="flex items-center gap-1 flex-shrink-0">
-                        <div className="w-8 h-8 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                        <div className="spec-icon-preview w-8 h-8 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
                           <span className="material-symbols-outlined text-purple-400 text-base">{s.icon || 'star'}</span>
                         </div>
                         <input type="text" value={s.icon} onChange={e => updateSpec(i, 'icon', e.target.value)}

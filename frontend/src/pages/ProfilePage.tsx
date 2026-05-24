@@ -83,7 +83,7 @@ export default function ProfilePage() {
   const initials = (user.name ?? user.email)
     .split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()
 
-  const inp = 'w-full bg-surface-container border border-outline-variant rounded-xl px-sm py-3 text-sm text-on-surface placeholder:text-on-surface-variant/40 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all'
+  const inp = 'w-full bg-surface-container border border-outline-variant rounded-xl px-sm py-3 text-sm text-on-surface placeholder:text-on-surface-variant/40 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all'
 
   return (
     <main className="min-h-screen">
@@ -208,7 +208,7 @@ export default function ProfilePage() {
                   )}
 
                   <button type="submit" disabled={busy}
-                    className="profile-save-btn bg-purple-600 text-white px-lg py-3 rounded-xl font-bold text-sm flex items-center gap-xs hover:bg-purple-500 hover:shadow-[0_0_20px_rgba(138,43,226,0.4)] active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
+                    className="profile-save-btn bg-purple-600 px-lg py-3 rounded-xl font-bold text-sm flex items-center gap-xs hover:bg-purple-500 hover:shadow-[0_0_20px_rgba(138,43,226,0.4)] active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed" style={{ color: '#ffffff' }}>
                     {busy
                       ? <><span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>Guardando...</>
                       : <><span className="material-symbols-outlined text-sm">save</span>Guardar cambios</>}
@@ -322,7 +322,7 @@ export default function ProfilePage() {
                     Mostrar contraseñas
                   </label>
                   <button type="submit" disabled={busy}
-                    className="profile-save-btn bg-purple-600 text-white px-lg py-3 rounded-xl font-bold text-sm flex items-center gap-xs hover:bg-purple-500 hover:shadow-[0_0_20px_rgba(138,43,226,0.4)] active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
+                    className="profile-save-btn bg-purple-600 px-lg py-3 rounded-xl font-bold text-sm flex items-center gap-xs hover:bg-purple-500 hover:shadow-[0_0_20px_rgba(138,43,226,0.4)] active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed" style={{ color: '#ffffff' }}>
                     {busy
                       ? <><span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>Actualizando...</>
                       : <><span className="material-symbols-outlined text-sm">lock_reset</span>Actualizar contraseña</>}

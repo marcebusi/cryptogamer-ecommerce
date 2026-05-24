@@ -30,3 +30,25 @@ html.light .admin-input:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0 1000px #f4f4f6 inset !important;
   -webkit-text-fill-color: #111827 !important;
 }
+
+/* Condition buttons — light mode */
+html.light .condition-option-div {
+  border-color: #e5e7eb !important;
+  background-color: #f9fafb !important;
+  color: #6b7280 !important;
+}
+html.light input[type="radio"].peer:checked ~ .condition-option-div,
+html.light input[type="radio"].peer:checked + .condition-option-div {
+  border-color: #dc2626 !important;
+  background-color: rgba(220,38,38,0.08) !important;
+  color: #dc2626 !important;
+}
+
+/* Spec icon preview — light mode */
+html.light .spec-icon-preview {
+  background-color: rgba(168,85,247,0.1) !important;
+  border-color: rgba(168,85,247,0.25) !important;
+}
+html.light .spec-icon-preview .material-symbols-outlined {
+  color: #7c3aed !important;
+}

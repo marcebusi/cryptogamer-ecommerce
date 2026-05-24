@@ -184,6 +184,15 @@ const DAY_LABELS   = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom']
 const BLOCK_LABELS = ['0-4h','4-8h','8-12h','12-16h','16-20h','20-24h']
 
 function Heatmap({ cells }: { cells: Analytics['heatmap'] }) {
+  const [isLight, setIsLight] = useState(document.documentElement.classList.contains('light'))
+  useEffect(() => {
+    const obs = new MutationObserver(() =>
+      setIsLight(document.documentElement.classList.contains('light'))
+    )
+    obs.observe(document.documentElement, { attributeFilter: ['class'] })
+    return () => obs.disconnect()
+  }, [])
+
   const maxCount = Math.max(...cells.map(c => c.count), 1)
   return (
     <div className="overflow-x-auto">
@@ -191,12 +200,12 @@ function Heatmap({ cells }: { cells: Analytics['heatmap'] }) {
         <div className="grid mb-1" style={{ gridTemplateColumns:'52px repeat(7, 1fr)' }}>
           <div/>
           {DAY_LABELS.map(d => (
-            <div key={d} className="text-center text-[10px] text-white/35 font-semibold uppercase tracking-wide py-1">{d}</div>
+            <div key={d} className="text-center text-[10px] heatmap-label font-semibold uppercase tracking-wide py-1">{d}</div>
           ))}
         </div>
         {BLOCK_LABELS.map((bl, block) => (
           <div key={block} className="grid items-center mb-1" style={{ gridTemplateColumns:'52px repeat(7, 1fr)' }}>
-            <span className="text-[9px] text-white/25 pr-2 text-right">{bl}</span>
+            <span className="text-[9px] heatmap-label pr-2 text-right">{bl}</span>
             {DAY_LABELS.map((_, day) => {
               const cell  = cells.find(c => c.day===day && c.block===block)
               const count = cell?.count ?? 0
@@ -204,15 +213,23 @@ function Heatmap({ cells }: { cells: Analytics['heatmap'] }) {
               return (
                 <div key={day} className="mx-0.5 rounded-md h-8 flex items-center justify-center relative group cursor-default"
                   style={{
-                    background: count===0 ? 'rgba(255,255,255,0.03)' : `rgba(74,222,128,${0.08+ratio*0.75})`,
-                    border:`1px solid ${count===0?'rgba(255,255,255,0.04)':`rgba(74,222,128,${0.15+ratio*0.5})`}`,
+                    background: count===0
+                      ? (isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.03)')
+                      : `rgba(74,222,128,${0.08+ratio*0.75})`,
+                    border:`1px solid ${count===0
+                      ? (isLight ? 'rgba(0,0,0,0.11)' : 'rgba(255,255,255,0.04)')
+                      : `rgba(74,222,128,${0.15+ratio*0.5})`}`,
                   }}>
                   {count > 0 && (
-                    <span className="text-[10px] font-bold" style={{ color:`rgba(255,255,255,${0.3+ratio*0.7})` }}>{count}</span>
+                    <span className="text-[10px] font-bold" style={{
+                      color: isLight
+                        ? `rgba(0,0,0,${0.4+ratio*0.6})`
+                        : `rgba(255,255,255,${0.3+ratio*0.7})`
+                    }}>{count}</span>
                   )}
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-20 whitespace-nowrap">
                     <div className="admin-tooltip-bg border border-white/15 rounded-lg px-2.5 py-1.5 text-[10px] shadow-xl">
-                      <span className="text-white/50">{DAY_LABELS[day]} {bl}</span>
+                      <span className="heatmap-tooltip-muted">{DAY_LABELS[day]} {bl}</span>
                       <span className="font-bold ml-1.5" style={{ color:'#4ade80' }}>{count} orden{count!==1?'es':''}</span>
                     </div>
                   </div>

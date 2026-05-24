@@ -31,8 +31,20 @@ html.light .bento-card-sm {
 html.light .bento-card-main:hover { border-color: rgba(235,0,0,0.3) !important; }
 html.light .bento-card-sm:hover   { border-color: rgba(235,0,0,0.25) !important; }
 
+/* Textos internos siempre blancos (las cards tienen fondo oscuro con imagen) */
+html.light .bento-card-main h3,
+html.light .bento-card-main p,
+html.light .bento-card-sm h3,
+html.light .bento-card-sm span:not(.material-symbols-outlined) {
+  color: #ffffff !important;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+}
+
 /* VER COLECCIÓN link: rojo en light */
-html.light .bento-card-main .text-primary-container { color: #eb0000 !important; }
+html.light .bento-card-main .text-primary-container {
+  color: #eb0000 !important;
+  text-shadow: none;
+}
 
 /* Mobile chips en light */
 html.light .bento-chip {

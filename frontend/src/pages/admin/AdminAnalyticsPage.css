@@ -1,0 +1,74 @@
+/* ── Analytics — Light mode overrides ─────────────────────────────────
+   Strategy: target ALL white-text and white-bg variants inside any
+   .admin-card-bg container using broad attribute selectors, then apply
+   granular overrides for muted tones. Also handles inline-style
+   elements that can't be overridden (those are fixed in JS).
+   ─────────────────────────────────────────────────────────────────── */
+
+/* ── All text-white/* → dark by default (catch-all) ── */
+html.light .admin-card-bg [class*="text-white"] {
+  color: #111827 !important;
+}
+
+/* ── Muted text: lighter grays for opacity variants ── */
+html.light .admin-card-bg .text-white\/80,
+html.light .admin-card-bg .text-white\/75 {
+  color: #1f2937 !important;
+}
+html.light .admin-card-bg .text-white\/70,
+html.light .admin-card-bg .text-white\/60,
+html.light .admin-card-bg .text-white\/55,
+html.light .admin-card-bg .text-white\/50 {
+  color: #374151 !important;
+}
+html.light .admin-card-bg .text-white\/40,
+html.light .admin-card-bg .text-white\/35 {
+  color: #6b7280 !important;
+}
+html.light .admin-card-bg .text-white\/30,
+html.light .admin-card-bg .text-white\/25,
+html.light .admin-card-bg .text-white\/20,
+html.light .admin-card-bg .text-white\/15 {
+  color: #9ca3af !important;
+}
+
+/* ── All bg-white/* overlays → very subtle dark overlay ── */
+html.light .admin-card-bg [class*="bg-white\/"] {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* ── All border-white/* → subtle dark border ── */
+html.light .admin-card-bg [class*="border-white\/"] {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ── Tooltip container ── */
+html.light .admin-tooltip-bg [class*="text-white"] {
+  color: #374151 !important;
+}
+html.light .admin-tooltip-bg .text-white\/50,
+html.light .admin-tooltip-bg .text-white\/40,
+html.light .admin-tooltip-bg .text-white\/30,
+html.light .admin-tooltip-bg .text-white\/25,
+html.light .admin-tooltip-bg .text-white\/15 {
+  color: #6b7280 !important;
+}
+html.light .admin-tooltip-bg [class*="border-white\/"] {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ── Heatmap labels (classes added via JS) ── */
+html.light .heatmap-label {
+  color: #6b7280 !important;
+}
+html.light .heatmap-tooltip-muted {
+  color: #6b7280 !important;
+}
+
+/* ── Page title / subtitle ── */
+html.light .analytics-title {
+  color: #111827 !important;
+}
+html.light .analytics-subtitle {
+  color: #6b7280 !important;
+}
