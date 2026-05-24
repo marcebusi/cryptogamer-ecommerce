@@ -92,6 +92,7 @@ export default function AdminProductPage() {
   const [sortOrder,          setSortOrder]          = useState('0')
   const [isOffer,            setIsOffer]            = useState(false)
   const [isFeatured,         setIsFeatured]         = useState(false)
+  const [sendNewsletter,     setSendNewsletter]     = useState(false)
   const [specs,              setSpecs]              = useState<Spec[]>([{ ...EMPTY_SPEC }])
 
   /* ── Image upload ─────────────────────────── */
@@ -244,6 +245,7 @@ export default function AdminProductPage() {
         sortOrder: parseInt(sortOrder) || 0,
         isOffer,
         isFeatured,
+        sendNewsletter,
         specs: specs.filter(s => s.label && s.value),
       })
       setSuccess(true)
@@ -622,25 +624,28 @@ export default function AdminProductPage() {
                   <label className="block text-xs text-on-surface-variant uppercase tracking-wider mb-1">Especificaciones técnicas</label>
                   <div className="space-y-2">
                     {editSpecs.map((s, i) => (
-                      <div key={i} className="flex gap-2 items-center">
-                        {/* Icon preview */}
-                        <div className="flex items-center gap-1 flex-shrink-0">
+                      <div key={i} className="space-y-1.5 border border-white/8 rounded-xl p-2">
+                        {/* Row 1: icon preview + icon name input */}
+                        <div className="flex gap-2 items-center">
                           <div className="spec-icon-preview w-8 h-8 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
-                            <span className="material-symbols-outlined text-purple-400 text-base">{s.icon || 'star'}</span>
+                            <span className="material-symbols-outlined text-violet-500 text-base">{s.icon || 'star'}</span>
                           </div>
                           <input type="text" value={s.icon} onChange={e => updateEditSpec(i, 'icon', e.target.value)}
-                            placeholder="Ícono (ej: memory)" className={`${inp} w-24`} />
+                            placeholder="Ícono (ej: memory)" className={`${inp} flex-1`} />
+                          {editSpecs.length > 1 && (
+                            <button type="button" onClick={() => removeEditSpec(i)}
+                              className="text-error hover:bg-error/10 p-1.5 rounded-lg transition-colors cursor-pointer flex-shrink-0">
+                              <span className="material-symbols-outlined text-base">delete</span>
+                            </button>
+                          )}
                         </div>
-                        <input type="text" value={s.label} onChange={e => updateEditSpec(i, 'label', e.target.value)}
-                          placeholder="Etiqueta" className={inp} />
-                        <input type="text" value={s.value} onChange={e => updateEditSpec(i, 'value', e.target.value)}
-                          placeholder="Valor" className={inp} />
-                        {editSpecs.length > 1 && (
-                          <button type="button" onClick={() => removeEditSpec(i)}
-                            className="text-error hover:bg-error/10 p-1.5 rounded-lg transition-colors cursor-pointer flex-shrink-0">
-                            <span className="material-symbols-outlined text-base">delete</span>
-                          </button>
-                        )}
+                        {/* Row 2: label + value */}
+                        <div className="flex gap-2">
+                          <input type="text" value={s.label} onChange={e => updateEditSpec(i, 'label', e.target.value)}
+                            placeholder="Etiqueta" className={`${inp} flex-1`} />
+                          <input type="text" value={s.value} onChange={e => updateEditSpec(i, 'value', e.target.value)}
+                            placeholder="Valor" className={`${inp} flex-1`} />
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -651,18 +656,18 @@ export default function AdminProductPage() {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-3 gap-sm items-end">
-                  <div>
+                <div className="flex flex-wrap gap-sm items-end">
+                  <div className="w-24 flex-shrink-0">
                     <label className="block text-xs text-on-surface-variant uppercase tracking-wider mb-1">sortOrder</label>
                     <input type="number" min="0" value={editSortOrder} onChange={e => setEditSortOrder(e.target.value)} className={inp} />
                   </div>
-                  <label className="flex items-center gap-xs cursor-pointer p-3 rounded-xl border border-white/8 hover:bg-white/3 transition-colors">
+                  <label className="flex items-center gap-xs cursor-pointer p-3 rounded-xl border border-white/8 hover:bg-white/3 transition-colors flex-1 min-w-[110px]">
                     <div onClick={() => setEditIsOffer(v => !v)} className={`w-10 h-5 rounded-full relative flex-shrink-0 cursor-pointer transition-colors ${editIsOffer ? 'bg-secondary-container' : 'bg-white/15'}`}>
                       <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${editIsOffer ? 'translate-x-5' : 'translate-x-0.5'}`} />
                     </div>
                     <span className="text-xs font-bold text-on-surface">Oferta</span>
                   </label>
-                  <label className="flex items-center gap-xs cursor-pointer p-3 rounded-xl border border-white/8 hover:bg-white/3 transition-colors">
+                  <label className="flex items-center gap-xs cursor-pointer p-3 rounded-xl border border-white/8 hover:bg-white/3 transition-colors flex-1 min-w-[110px]">
                     <div onClick={() => setEditIsFeatured(v => !v)} className={`w-10 h-5 rounded-full relative flex-shrink-0 cursor-pointer transition-colors ${editIsFeatured ? 'bg-primary-container' : 'bg-white/15'}`}>
                       <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${editIsFeatured ? 'translate-x-5' : 'translate-x-0.5'}`} />
                     </div>
@@ -810,27 +815,42 @@ export default function AdminProductPage() {
                     placeholder="0 = primero" className={inp} />
                   <p className="text-xs text-on-surface-variant/50 mt-1">Menor número aparece antes.</p>
                 </div>
-                <label className="flex items-center gap-sm cursor-pointer p-3 rounded-xl border border-white/8 hover:bg-white/3 transition-colors group">
+                <label className="flex items-center gap-xs cursor-pointer p-3 rounded-xl border border-white/8 hover:bg-white/3 transition-colors group">
                   <div onClick={() => setIsOffer(v => !v)}
                     className={`w-11 h-6 rounded-full transition-colors relative flex-shrink-0 cursor-pointer ${isOffer ? 'bg-secondary-container' : 'bg-white/15'}`}>
                     <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${isOffer ? 'translate-x-5' : 'translate-x-0.5'}`} />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-xs font-bold text-on-surface">Oferta</p>
-                    <p className="text-xs text-on-surface-variant">Aparece en sección Ofertas</p>
+                    <p className="text-xs text-on-surface-variant truncate">Aparece en sección Ofertas</p>
                   </div>
                 </label>
-                <label className="flex items-center gap-sm cursor-pointer p-3 rounded-xl border border-white/8 hover:bg-white/3 transition-colors group">
+                <label className="flex items-center gap-xs cursor-pointer p-3 rounded-xl border border-white/8 hover:bg-white/3 transition-colors group">
                   <div onClick={() => setIsFeatured(v => !v)}
                     className={`w-11 h-6 rounded-full transition-colors relative flex-shrink-0 cursor-pointer ${isFeatured ? 'bg-primary-container' : 'bg-white/15'}`}>
                     <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${isFeatured ? 'translate-x-5' : 'translate-x-0.5'}`} />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-xs font-bold text-on-surface">Destacado</p>
-                    <p className="text-xs text-on-surface-variant">Aparece en Últimas Llegadas</p>
+                    <p className="text-xs text-on-surface-variant truncate">Aparece en Últimas Llegadas</p>
                   </div>
                 </label>
               </div>
+
+              {/* Newsletter toggle */}
+              <label className="flex items-center gap-xs cursor-pointer p-3 rounded-xl border border-white/8 hover:bg-white/3 transition-colors">
+                <div onClick={() => setSendNewsletter(v => !v)}
+                  className={`w-11 h-6 rounded-full transition-colors relative flex-shrink-0 cursor-pointer ${sendNewsletter ? 'bg-purple-600' : 'bg-white/15'}`}>
+                  <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${sendNewsletter ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-on-surface flex items-center gap-1">
+                    <span className="material-symbols-outlined text-sm text-purple-400">mail</span>
+                    Publicar en newsletter
+                  </p>
+                  <p className="text-xs text-on-surface-variant">Envía email a todos los suscriptores</p>
+                </div>
+              </label>
 
               {/* Condition */}
               <div>
@@ -840,7 +860,7 @@ export default function AdminProductPage() {
                     <label key={c.id} className="cursor-pointer">
                       <input type="radio" name="condition" className="hidden peer"
                         checked={condition === c.id} onChange={() => setCondition(c.id)} />
-                      <div className="condition-option-div p-2.5 text-center rounded-xl border-2 border-white/8 bg-surface-container-low text-on-surface-variant text-xs font-bold peer-checked:border-primary-container peer-checked:bg-primary-container/15 peer-checked:text-primary-container transition-all cursor-pointer">
+                      <div className="condition-option-div p-2.5 text-center rounded-xl border-2 border-gray-600/40 bg-surface-container-low text-gray-400 text-xs font-bold peer-checked:border-red-600 peer-checked:bg-red-600/10 peer-checked:text-red-600 transition-all cursor-pointer">
                         {c.label}
                       </div>
                     </label>
@@ -901,25 +921,28 @@ export default function AdminProductPage() {
                 {lbl('Especificaciones técnicas')}
                 <div className="space-y-2">
                   {specs.map((s, i) => (
-                    <div key={i} className="flex gap-2 items-center">
-                      {/* Icon preview */}
-                      <div className="flex items-center gap-1 flex-shrink-0">
+                    <div key={i} className="space-y-1.5 border border-white/8 rounded-xl p-2">
+                      {/* Row 1: icon preview + icon name input + delete */}
+                      <div className="flex gap-2 items-center">
                         <div className="spec-icon-preview w-8 h-8 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
-                          <span className="material-symbols-outlined text-purple-400 text-base">{s.icon || 'star'}</span>
+                          <span className="material-symbols-outlined text-violet-500 text-base">{s.icon || 'star'}</span>
                         </div>
                         <input type="text" value={s.icon} onChange={e => updateSpec(i, 'icon', e.target.value)}
-                          placeholder="Ícono (ej: memory)" className={`${inp} w-28`} />
+                          placeholder="Ícono (ej: memory)" className={`${inp} flex-1`} />
+                        {specs.length > 1 && (
+                          <button type="button" onClick={() => removeSpec(i)}
+                            className="text-error hover:bg-error/10 p-1.5 rounded-lg transition-colors cursor-pointer flex-shrink-0">
+                            <span className="material-symbols-outlined text-base">delete</span>
+                          </button>
+                        )}
                       </div>
-                      <input type="text" value={s.label} onChange={e => updateSpec(i, 'label', e.target.value)}
-                        placeholder="Etiqueta" className={inp} />
-                      <input type="text" value={s.value} onChange={e => updateSpec(i, 'value', e.target.value)}
-                        placeholder="Valor" className={inp} />
-                      {specs.length > 1 && (
-                        <button type="button" onClick={() => removeSpec(i)}
-                          className="text-error hover:bg-error/10 p-1.5 rounded-lg transition-colors cursor-pointer flex-shrink-0">
-                          <span className="material-symbols-outlined text-base">delete</span>
-                        </button>
-                      )}
+                      {/* Row 2: label + value */}
+                      <div className="flex gap-2">
+                        <input type="text" value={s.label} onChange={e => updateSpec(i, 'label', e.target.value)}
+                          placeholder="Etiqueta" className={`${inp} flex-1`} />
+                        <input type="text" value={s.value} onChange={e => updateSpec(i, 'value', e.target.value)}
+                          placeholder="Valor" className={`${inp} flex-1`} />
+                      </div>
                     </div>
                   ))}
                 </div>

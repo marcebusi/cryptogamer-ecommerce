@@ -14,7 +14,8 @@ import orderRoutes     from './routes/orderRoutes'
 import sellerRoutes    from './routes/sellerRoutes'
 import trackingRoutes  from './routes/trackingRoutes'
 import superAdminRoutes from './routes/superAdminRoutes'
-import shippingRoutes  from './routes/shippingRoutes'
+import shippingRoutes      from './routes/shippingRoutes'
+import newsletterRoutes    from './routes/newsletterRoutes'
 
 import {
   authLimiter,
@@ -164,6 +165,9 @@ app.use('/api/superadmin',       adminLimiter, superAdminRoutes)
 
 // Shipping
 app.use('/api/shipping',         shippingRoutes)
+
+// Newsletter (público)
+app.use('/api/newsletter',       newsletterRoutes)
 
 // ════════════════════════════════════════════════════
 //  ERROR HANDLING

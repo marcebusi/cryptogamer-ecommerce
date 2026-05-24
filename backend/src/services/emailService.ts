@@ -505,4 +505,45 @@ export const emailTemplates = {
       `),
     })
   },
+
+  /* ── Newsletter: nuevo producto ─────────────────── */
+  newProduct: (params: {
+    productName:  string
+    productImage: string
+    productPrice: number
+    productSlug:  string
+    description?: string
+  }) => {
+    const siteUrl = process.env.FRONTEND_URL ?? 'http://localhost:5173'
+    const productUrl = `${siteUrl}/products/${params.productSlug}`
+    const price = new Intl.NumberFormat('es-AR', { style:'currency', currency:'ARS', maximumFractionDigits:0 }).format(params.productPrice)
+    return ({
+      subject: `🎮 Nuevo producto disponible: ${params.productName} · Cryptogamer's`,
+      html: shell(`
+        <p style="margin:0 0 6px;font-size:12px;color:${T.textMuted};text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">Nuevo producto</p>
+        <h1 style="margin:0 0 16px;font-size:22px;font-weight:900;color:${T.white};line-height:1.2;">
+          Llegó algo nuevo a <span style="color:${T.primary};">Cryptogamer's</span> 🎮
+        </h1>
+        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;border:1px solid ${T.cardBorder};border-radius:12px;overflow:hidden;background:${T.card};">
+          <tr>
+            <td style="padding:0;">
+              <img src="${params.productImage}" alt="${params.productName}" width="100%"
+                style="display:block;max-height:280px;object-fit:cover;border-radius:12px 12px 0 0;" />
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:20px 24px;">
+              <p style="margin:0 0 6px;font-size:20px;font-weight:800;color:${T.white};">${params.productName}</p>
+              ${params.description ? `<p style="margin:0 0 12px;font-size:13px;color:${T.textMuted};line-height:1.6;">${params.description}</p>` : ''}
+              <p style="margin:0 0 16px;font-size:24px;font-weight:900;color:${T.primary};">${price}</p>
+            </td>
+          </tr>
+        </table>
+        ${ctaButton(productUrl, 'Ver producto →', T.primary)}
+        <p style="margin:20px 0 0;font-size:11px;color:${T.textDim};text-align:center;">
+          Recibís este mail porque te suscribiste al newsletter de Cryptogamer's.
+        </p>
+      `),
+    })
+  },
 }

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
+import { sendEmail, emailTemplates } from '../services/emailService'
 
 const prisma = new PrismaClient()
 
@@ -17,6 +18,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
       badge, badgeColor,
       specs,
       sortOrder, isOffer, isFeatured,
+      sendNewsletter,
     } = req.body
 
     if (!name?.trim() || !price || !categorySlug) {
@@ -61,6 +63,29 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
       },
       include: { specs: true, category: true },
     })
+
+    // Send newsletter if requested
+    if (sendNewsletter) {
+      try {
+        const subscribers = await prisma.newsletterSubscriber.findMany({ select: { email: true } })
+        if (subscribers.length > 0) {
+          const tpl = emailTemplates.newProduct({
+            productName:  product.name,
+            productImage: product.image,
+            productPrice: product.price,
+            productSlug:  product.slug,
+            description:  product.description || undefined,
+          })
+          await Promise.allSettled(
+            subscribers.map(s => sendEmail(s.email, tpl.subject, tpl.html))
+          )
+          console.log(`[newsletter] Enviado a ${subscribers.length} suscriptores`)
+        }
+      } catch (newsletterErr) {
+        console.error('[newsletter] Error al enviar:', newsletterErr)
+        // No falla el endpoint si el mail falla
+      }
+    }
 
     res.status(201).json(product)
   } catch (err) {

@@ -31,24 +31,25 @@ html.light .admin-input:-webkit-autofill:focus {
   -webkit-text-fill-color: #111827 !important;
 }
 
-/* Condition buttons — light mode */
+/* Condition buttons — light mode
+   Classes in TSX now use border-gray-600/40 + text-gray-400 + peer-checked:border-red-600
+   so no CSS variable fights. Only small tweaks needed here. */
 html.light .condition-option-div {
-  border-color: #e5e7eb !important;
   background-color: #f9fafb !important;
+  border-color: #d1d5db !important;
   color: #6b7280 !important;
 }
-html.light input[type="radio"].peer:checked ~ .condition-option-div,
-html.light input[type="radio"].peer:checked + .condition-option-div {
+html.light .condition-option-div.peer-checked\:border-red-600:has(~ input:checked),
+html.light label:has(> input:checked) .condition-option-div {
   border-color: #dc2626 !important;
   background-color: rgba(220,38,38,0.08) !important;
   color: #dc2626 !important;
 }
 
-/* Spec icon preview — light mode */
+/* Spec icon preview — light mode
+   Icon uses text-violet-500 (NOT overridden globally), so it keeps its purple.
+   Only the container background needs a subtle fix. */
 html.light .spec-icon-preview {
-  background-color: rgba(168,85,247,0.1) !important;
-  border-color: rgba(168,85,247,0.25) !important;
-}
-html.light .spec-icon-preview .material-symbols-outlined {
-  color: #7c3aed !important;
+  background-color: rgba(139,92,246,0.1) !important;
+  border-color: rgba(139,92,246,0.25) !important;
 }

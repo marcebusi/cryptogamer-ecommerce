@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { api } from '../../lib/api'
 import './Footer.css'
 
 const shopLinks = [
@@ -12,10 +13,8 @@ const shopLinks = [
 ]
 
 const infoLinks = [
-  { label: 'Sobre nosotros', to: '/'         },
-  { label: 'Ofertas',        to: '/ofertas'  },
-  { label: 'Soporte',        to: '/contacto' },
-  { label: 'Privacidad',     to: '/contacto' },
+  { label: 'Ofertas',  to: '/ofertas'  },
+  { label: 'Soporte',  to: '/contacto' },
 ]
 
 const socials = [
@@ -24,7 +23,24 @@ const socials = [
 ]
 
 export default function Footer() {
-  const [newsletterDone, setNewsletterDone] = useState(false)
+  const [newsletterDone,  setNewsletterDone]  = useState(false)
+  const [newsletterEmail, setNewsletterEmail] = useState('')
+  const [newsletterError, setNewsletterError] = useState('')
+  const [newsletterBusy,  setNewsletterBusy]  = useState(false)
+
+  const handleNewsletter = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setNewsletterError('')
+    setNewsletterBusy(true)
+    try {
+      await api.post('/api/newsletter/subscribe', { email: newsletterEmail })
+      setNewsletterDone(true)
+    } catch {
+      setNewsletterError('No se pudo suscribir. Intentá de nuevo.')
+    } finally {
+      setNewsletterBusy(false)
+    }
+  }
 
   return (
     <footer id="footer" className="bg-slate-950 w-full border-t border-purple-500/20">
@@ -101,23 +117,28 @@ export default function Footer() {
               <p className="text-xs text-primary-container font-semibold">¡Gracias! Te avisamos de las mejores ofertas.</p>
             </div>
           ) : (
-            <form onSubmit={e => { e.preventDefault(); setNewsletterDone(true) }}
-              className="flex gap-xs">
-              <input type="email" placeholder="tu@email.com" required
+            <form onSubmit={handleNewsletter} className="flex gap-xs">
+              <input
+                type="email"
+                placeholder="tu@email.com"
+                required
+                value={newsletterEmail}
+                onChange={e => setNewsletterEmail(e.target.value)}
                 className="bg-surface-container border border-outline-variant
                   text-sm rounded-lg w-full px-3 py-2
                   focus:ring-2 focus:ring-primary-container/40 focus:border-primary-container
                   outline-none text-on-surface placeholder:text-slate-500
                   transition-all duration-200"/>
-              <button type="submit" aria-label="Suscribirse"
+              <button type="submit" disabled={newsletterBusy} aria-label="Suscribirse"
                 className="bg-purple-600 text-white p-2 rounded-lg cursor-pointer flex-shrink-0
                   hover:bg-primary-container hover:text-on-primary
                   hover:shadow-[0_0_16px_rgba(57,255,20,0.35)]
-                  active:scale-90 transition-all duration-200">
-                <span className="material-symbols-outlined text-sm">send</span>
+                  active:scale-90 transition-all duration-200 disabled:opacity-50">
+                <span className="material-symbols-outlined text-sm">{newsletterBusy ? 'hourglass_empty' : 'send'}</span>
               </button>
             </form>
           )}
+          {newsletterError && <p className="text-xs text-red-400 mt-1">{newsletterError}</p>}
         </div>
       </div>
 

@@ -30,6 +30,7 @@ export default function ProfilePage() {
   /* Orders */
   const [orders, setOrders] = useState<any[]>([])
   const [loadingOrders, setLoadingOrders] = useState(false)
+  const [orderSearch, setOrderSearch] = useState('')
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) navigate('/')
@@ -226,17 +227,22 @@ export default function ProfilePage() {
                     <span className="material-symbols-outlined text-purple-400">shopping_bag</span>
                     Mis pedidos
                   </h2>
-                  {/* Search by order number */}
-                  <a href="/seguimiento"
-                    onClick={e => {
-                      e.preventDefault()
-                      const num = prompt('Ingresá el número de orden (ej: CG-R0M3NF):')
-                      if (num?.trim()) window.open(`/seguimiento/${num.trim().toUpperCase()}`, '_blank')
-                    }}
-                    className="flex items-center gap-1.5 px-sm py-xs rounded-xl border border-purple-500/30 text-xs text-purple-300 hover:bg-purple-500/10 transition-colors cursor-pointer">
-                    <span className="material-symbols-outlined text-sm">search</span>
-                    Buscar por N.° de orden
-                  </a>
+                  {/* Inline order search */}
+                  <div className="flex items-center gap-1.5 bg-surface-container border border-white/10 hover:border-purple-500/40 focus-within:border-purple-500/60 focus-within:shadow-[0_0_12px_rgba(168,85,247,0.15)] rounded-xl px-3 py-2 transition-all w-full sm:w-52">
+                    <span className="material-symbols-outlined text-sm text-on-surface-variant flex-shrink-0">search</span>
+                    <input
+                      type="text"
+                      value={orderSearch}
+                      onChange={e => setOrderSearch(e.target.value)}
+                      placeholder="Buscar por N.° de orden"
+                      className="bg-transparent outline-none text-xs text-on-surface placeholder:text-on-surface-variant/50 w-full font-mono"
+                    />
+                    {orderSearch && (
+                      <button onClick={() => setOrderSearch('')} className="flex-shrink-0 text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer">
+                        <span className="material-symbols-outlined text-sm">close</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {loadingOrders ? (
@@ -250,7 +256,24 @@ export default function ProfilePage() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {orders.map((order: any) => {
+                    {orders.filter((order: any) => {
+                      if (!orderSearch.trim()) return true
+                      const num = `CG-${order.id.slice(-6).toUpperCase()}`
+                      return num.includes(orderSearch.trim().toUpperCase())
+                    }).length === 0 && orders.length > 0 ? (
+                      <div className="text-center py-lg text-on-surface-variant">
+                        <span className="material-symbols-outlined text-4xl opacity-20 block mb-xs">search_off</span>
+                        <p className="text-sm">No se encontró ningún pedido con ese número.</p>
+                        <button onClick={() => setOrderSearch('')} className="mt-xs text-xs text-purple-400 hover:text-purple-300 cursor-pointer transition-colors">
+                          Limpiar búsqueda
+                        </button>
+                      </div>
+                    ) : null}
+                    {orders.filter((order: any) => {
+                      if (!orderSearch.trim()) return true
+                      const num = `CG-${order.id.slice(-6).toUpperCase()}`
+                      return num.includes(orderSearch.trim().toUpperCase())
+                    }).map((order: any) => {
                       const orderNum = `CG-${order.id.slice(-6).toUpperCase()}`
                       const statusLabels: Record<string, { label: string; cls: string }> = {
                         PENDING:    { label: 'Pendiente',       cls: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
@@ -266,7 +289,7 @@ export default function ProfilePage() {
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <span className="font-mono text-xs font-bold text-white/70">{orderNum}</span>
+                                <span className={`font-mono text-xs font-bold transition-colors ${orderSearch.trim() ? 'text-purple-300' : 'text-white/70'}`}>{orderNum}</span>
                                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${st.cls}`}>
                                   {st.label}
                                 </span>

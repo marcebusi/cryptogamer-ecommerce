@@ -358,7 +358,7 @@ export function KpiCard({ icon, label, value, sub, color, sparkData, delay=0, tr
           </svg>
         )}
       </div>
-      <p className="text-2xl font-black text-white font-['Plus_Jakarta_Sans'] leading-none">{value}</p>
+      <p className="text-lg sm:text-2xl font-black text-white font-['Plus_Jakarta_Sans'] leading-none break-all">{value}</p>
       {trend !== undefined && !isNaN(trend) && (
         <span className={`text-[10px] font-bold flex items-center gap-0.5 mt-0.5 ${trend>=0?'text-emerald-400':'text-red-400'}`}>
           <span className="material-symbols-outlined text-xs">{trend>=0?'trending_up':'trending_down'}</span>

@@ -354,7 +354,7 @@ export default function ProductsPage() {
         </section>
       </div>
 
-      <div className="mt-xl -mx-4 md:-mx-margin">
+      <div className="mt-xl -mx-4 md:-mx-margin scale-[0.92] sm:scale-100 origin-top">
         <LatestArrivals />
       </div>
     </main>
