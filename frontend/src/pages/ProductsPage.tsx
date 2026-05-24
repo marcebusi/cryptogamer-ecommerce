@@ -230,7 +230,7 @@ export default function ProductsPage() {
                 <div className="flex gap-1">
                   {(['all', 'inStock', 'outOfStock'] as StockFilter[]).map(v => (
                     <button key={v} onClick={() => setStockFilter(v)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all ${stockFilter === v ? 'bg-red-600 text-white' : 'bg-surface-container-high text-on-surface-variant hover:bg-white/5'}`}>
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all ${stockFilter === v ? 'bg-purple-600 text-white' : 'bg-surface-container-high text-on-surface-variant hover:bg-white/5'}`}>
                       {v === 'all' ? 'Todos' : v === 'inStock' ? 'Con stock' : 'Sin stock'}
                     </button>
                   ))}
@@ -243,7 +243,7 @@ export default function ProductsPage() {
                 <div className="flex flex-wrap gap-1">
                   {[{ value: 'new', label: 'Nuevo' }, { value: 'like-new', label: 'Como Nuevo' }, { value: 'excellent', label: 'Excelente' }, { value: 'good', label: 'Bueno' }].map(({ value, label }) => (
                     <button key={value} onClick={() => toggleCondition(value)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all ${selectedConditions.includes(value) ? 'bg-red-600 text-white' : 'bg-surface-container-high text-on-surface-variant hover:bg-white/5'}`}>
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all ${selectedConditions.includes(value) ? 'bg-purple-600 text-white' : 'bg-surface-container-high text-on-surface-variant hover:bg-white/5'}`}>
                       {label}
                     </button>
                   ))}
