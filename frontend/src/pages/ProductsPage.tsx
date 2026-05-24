@@ -176,8 +176,8 @@ export default function ProductsPage() {
                   onClick={() => setSortOpen(p => !p)}
                   className={`flex items-center gap-2 px-3 py-2 border rounded-xl text-sm font-semibold cursor-pointer transition-all whitespace-nowrap
                     ${sortOrder !== 'default'
-                      ? 'border-red-500/50 text-red-500 bg-red-500/10'
-                      : 'border-outline-variant text-on-surface-variant bg-transparent hover:border-red-500/30 hover:text-on-surface'}`}>
+                      ? 'border-purple-500/50 text-purple-400 bg-purple-500/10'
+                      : 'border-outline-variant text-on-surface-variant bg-transparent hover:border-purple-500/30 hover:text-on-surface'}`}>
                   <span className="material-symbols-outlined text-sm">swap_vert</span>
                   <span>Ordenar por{sortOrder !== 'default' ? `: ${activeSortLabel}` : ''}</span>
                   <span className={`material-symbols-outlined text-sm transition-transform duration-200 ${sortOpen ? 'rotate-180' : ''}`}>
@@ -194,15 +194,15 @@ export default function ProductsPage() {
                         onClick={() => { setSortOrder(opt.value); setSortOpen(false) }}
                         className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-all cursor-pointer
                           ${sortOrder === opt.value
-                            ? 'text-red-500 bg-red-500/12 font-semibold'
+                            ? 'text-purple-400 bg-purple-500/12 font-semibold'
                             : 'text-white/55 hover:text-white hover:bg-white/5'}`}>
                         <span className="material-symbols-outlined text-sm flex-shrink-0"
-                          style={{ color: sortOrder === opt.value ? '#dc2626' : undefined }}>
+                          style={{ color: sortOrder === opt.value ? '#a855f7' : undefined }}>
                           {opt.icon}
                         </span>
                         <span className="flex-1 text-left">{opt.label}</span>
                         {sortOrder === opt.value && (
-                          <span className="material-symbols-outlined text-xs text-red-500">check</span>
+                          <span className="material-symbols-outlined text-xs text-purple-400">check</span>
                         )}
                       </button>
                     ))}
