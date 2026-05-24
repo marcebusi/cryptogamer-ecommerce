@@ -64,6 +64,7 @@ export default function ProductCard({ product, accent = 'secondary' }: ProductCa
       {/* ── Image ──────────────────────────────── */}
       <Link to={`/products/${product.id}`} className="block relative overflow-hidden product-img-bg flex-shrink-0" style={{ aspectRatio: '1 / 1' }}>
         {/* Wrapper handles hover-scale; img handles zoom — no conflict */}
+        <div className="scanline-overlay absolute inset-0 opacity-15 pointer-events-none z-10" />
         <div className="w-full h-full group-hover:scale-105 transition-transform duration-700">
           <img
             className="w-full h-full object-cover cursor-pointer"

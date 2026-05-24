@@ -200,7 +200,7 @@ html.light .scanline::after { opacity: 0; }
   background-size: 100% 4px, 3px 100%;
   pointer-events: none;
 }
-html.light .scanline-overlay { opacity: 0; }
+html.light .scanline-overlay { opacity: 0 !important; display: none !important; }
 
 ::selection { background-color: #39ff14; color: #107100; }
 html.light ::selection { background-color: #eb0000; color: #ffffff; }
