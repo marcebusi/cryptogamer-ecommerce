@@ -254,6 +254,8 @@ export default function ProductInfo({ product }: ProductInfoProps) {
           </div>
         </div>
 
+      </div>
+
       {/* ══════════════════════════════════════════════
           ── Vendor Selection Modal ─────────────────── */}
       {modal && (
