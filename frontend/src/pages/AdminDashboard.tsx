@@ -23,6 +23,7 @@ const ALL_CARDS = [
   { to: '/admin/pedidos',                 icon: 'receipt_long', title: 'Pedidos',             desc: 'Historial completo de órdenes recibidas con estado y detalle.',                 color: 'secondary', sectionKey: 'orders'    },
   { to: '/admin/analytics',               icon: 'bar_chart',    title: 'Analytics',           desc: 'Productos más vendidos, ranking de vendedores, ingresos y más.',                color: 'tertiary',  sectionKey: 'analytics' },
   { to: '/admin/analytics-avanzado',      icon: 'electric_bolt',title: 'Analytics Avanzado',  desc: 'KPIs, heatmap, inventario muerto, WhatsApp, alertas y métricas profundas.',     color: 'secondary', sectionKey: 'analytics' },
+  { to: '/admin/usuarios',               icon: 'manage_accounts', title: 'Usuarios',           desc: 'Gestioná cuentas de usuario, asigná roles de admin o eliminá usuarios.',       color: 'tertiary',  sectionKey: null        },
 ]
 
 const colorMap = {

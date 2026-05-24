@@ -45,6 +45,7 @@ import AdminSellersPage           from './pages/admin/AdminSellersPage'
 import AdminAnalyticsPage         from './pages/admin/AdminAnalyticsPage'
 import AdminAnalyticsAdvancedPage from './pages/admin/AdminAnalyticsAdvancedPage'
 import AdminOrdersPage            from './pages/admin/AdminOrdersPage'
+import AdminUsersPage             from './pages/admin/AdminUsersPage'
 import ResetPasswordPage      from './pages/ResetPasswordPage'
 import OrderTrackingPage      from './pages/OrderTrackingPage'
 import NotFoundPage           from './pages/NotFoundPage'
@@ -79,6 +80,7 @@ function App() {
                 <Route path="/admin/analytics"           element={<AdminAnalyticsPage />} />
                 <Route path="/admin/analytics-avanzado" element={<AdminAnalyticsAdvancedPage />} />
                 <Route path="/admin/pedidos"             element={<AdminOrdersPage />} />
+                <Route path="/admin/usuarios"            element={<AdminUsersPage />} />
                 <Route path="/reset-password"       element={<ResetPasswordPage />} />
                 <Route path="/seguimiento/:orderNumber" element={<OrderTrackingPage />} />
                 <Route path="/superadmin"           element={<SuperAdminPage />} />

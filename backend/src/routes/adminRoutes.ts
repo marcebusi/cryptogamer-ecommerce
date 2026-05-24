@@ -12,6 +12,7 @@ import {
 } from '../controllers/sellerController'
 import { getContactMessages } from '../controllers/contactController'
 import { getAnalytics } from '../controllers/analyticsController'
+import { getUsers, updateUserRole, deleteUser } from '../controllers/adminUserController'
 
 const router = Router()
 
@@ -45,5 +46,10 @@ router.get('/contact-messages',   getContactMessages)
 
 /* ── Analytics ────────────────────────────────────── */
 router.get('/analytics',          getAnalytics)
+
+/* ── Users ────────────────────────────────────────── */
+router.get('/users',              getUsers)
+router.patch('/users/:id/role',   updateUserRole)
+router.delete('/users/:id',       deleteUser)
 
 export default router

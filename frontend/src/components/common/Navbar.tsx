@@ -426,26 +426,26 @@ export default function Navbar() {
         </div>
 
         {/* Quick nav links */}
-        <div className="px-4 py-3 flex-shrink-0 border-b border-white/8 flex gap-2">
+        <div className="px-4 py-3 flex-shrink-0 border-b border-white/8 grid grid-cols-3 gap-2">
           <NavLink
             to="/products"
             onClick={() => setMobileOpen(false)}
-            className="drawer-nav-chip flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-full text-sm font-semibold transition-all cursor-pointer">
-            <span className="material-symbols-outlined text-sm">grid_view</span>
+            className="drawer-nav-chip flex flex-col items-center justify-center gap-1 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer">
+            <span className="material-symbols-outlined text-lg leading-none">grid_view</span>
             Productos
           </NavLink>
           <NavLink
             to="/ofertas"
             onClick={() => setMobileOpen(false)}
-            className="drawer-nav-chip flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-full text-sm font-semibold transition-all cursor-pointer">
-            <i className="fa-solid fa-bolt text-yellow-400 text-xs" />
+            className="drawer-nav-chip flex flex-col items-center justify-center gap-1 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer">
+            <i className="fa-solid fa-bolt text-yellow-400 text-base leading-none" />
             Ofertas
           </NavLink>
           <NavLink
             to="/contacto"
             onClick={() => setMobileOpen(false)}
-            className="drawer-nav-chip flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-full text-sm font-semibold transition-all cursor-pointer">
-            <span className="material-symbols-outlined text-sm">mail</span>
+            className="drawer-nav-chip flex flex-col items-center justify-center gap-1 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer">
+            <span className="material-symbols-outlined text-lg leading-none">mail</span>
             Contacto
           </NavLink>
         </div>

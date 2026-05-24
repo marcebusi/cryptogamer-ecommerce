@@ -142,7 +142,7 @@ export default function ContactPage() {
                       <p className="text-xs text-on-surface-variant uppercase tracking-widest font-semibold mb-0.5">
                         {c.title}
                       </p>
-                      <p className={`font-bold text-on-surface ${c.color}`}>{c.value}</p>
+                      <p className={`font-bold text-on-surface ${c.color} break-all`}>{c.value}</p>
                       <p className="text-xs text-on-surface-variant mt-0.5">{c.sub}</p>
                     </div>
                   </>
