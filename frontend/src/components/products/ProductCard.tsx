@@ -76,7 +76,7 @@ export default function ProductCard({ product, accent = 'secondary' }: ProductCa
             }}
           />
         </div>
-        <div className="scanline-overlay absolute inset-0 opacity-15 pointer-events-none" />
+
 
         {/* Discount ribbon */}
         {product.originalPrice && (
