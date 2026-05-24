@@ -161,7 +161,7 @@ export default function ProductsPage() {
               <p className="text-on-surface-variant text-sm">
                 {subtitle}
                 {!isLoading && filtered.length > 0 && (
-                  <span className="ml-2 text-red-500 font-semibold">
+                  <span className="ml-2 text-purple-400 font-semibold">
                     {filtered.length} {filtered.length === 1 ? 'producto' : 'productos'}
                   </span>
                 )}
