@@ -31,9 +31,10 @@ export const updateUserRole = async (req: AuthRequest, res: Response): Promise<v
     const { id } = req.params
     const { role } = req.body
 
-    const ALLOWED_ROLES = ['CUSTOMER', 'ADMIN']
+    const isSuperAdmin = req.userRole === 'SUPERADMIN'
+    const ALLOWED_ROLES = isSuperAdmin ? ['CUSTOMER', 'ADMIN', 'MANAGER'] : ['CUSTOMER', 'ADMIN']
     if (!ALLOWED_ROLES.includes(role)) {
-      res.status(400).json({ message: 'Rol inválido. Valores permitidos: CUSTOMER, ADMIN.' })
+      res.status(400).json({ message: `Rol inválido. Solo un superadmin puede asignar el rol MANAGER.` })
       return
     }
 
@@ -52,6 +53,12 @@ export const updateUserRole = async (req: AuthRequest, res: Response): Promise<v
     // No puede modificar a un SUPERADMIN
     if (target.role === 'SUPERADMIN') {
       res.status(403).json({ message: 'No podés modificar un superadministrador.' })
+      return
+    }
+
+    // MANAGER no puede modificar a otro MANAGER
+    if (target.role === 'MANAGER' && !isSuperAdmin) {
+      res.status(403).json({ message: 'No podés modificar a otro manager.' })
       return
     }
 
@@ -87,6 +94,12 @@ export const deleteUser = async (req: AuthRequest, res: Response): Promise<void>
     // No puede borrar a un SUPERADMIN
     if (target.role === 'SUPERADMIN') {
       res.status(403).json({ message: 'No podés eliminar un superadministrador.' })
+      return
+    }
+
+    // MANAGER no puede borrar a otro MANAGER
+    if (target.role === 'MANAGER' && req.userRole !== 'SUPERADMIN') {
+      res.status(403).json({ message: 'No podés eliminar a otro manager.' })
       return
     }
 

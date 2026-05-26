@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { api } from '../../lib/api'
 
+
 interface UserRow {
   id: string
   name: string | null
@@ -13,13 +14,14 @@ interface UserRow {
 }
 
 const ROLE_LABELS: Record<string, { label: string; cls: string }> = {
-  CUSTOMER:   { label: 'Cliente',         cls: 'bg-slate-500/20 text-slate-300 border-slate-500/30'   },
-  ADMIN:      { label: 'Admin',           cls: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
-  SUPERADMIN: { label: 'Superadmin',      cls: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' },
+  CUSTOMER:   { label: 'Cliente',   cls: 'bg-slate-500/20 text-slate-300 border-slate-500/30'   },
+  ADMIN:      { label: 'Admin',     cls: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
+  MANAGER:    { label: 'Manager',   cls: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30'       },
+  SUPERADMIN: { label: 'Superadmin',cls: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' },
 }
 
 export default function AdminUsersPage() {
-  const { isAdmin, isLoading, user: me } = useAuth()
+  const { isAdmin, isManager, isSuperAdmin, isLoading, user: me } = useAuth()
   const navigate = useNavigate()
 
   const [users,   setUsers]   = useState<UserRow[]>([])
@@ -30,8 +32,8 @@ export default function AdminUsersPage() {
   const [confirmDelete, setConfirmDelete] = useState<UserRow | null>(null)
 
   useEffect(() => {
-    if (!isLoading && !isAdmin) navigate('/')
-  }, [isLoading, isAdmin, navigate])
+    if (!isLoading && !isManager) navigate('/')
+  }, [isLoading, isManager, navigate])
 
   useEffect(() => {
     api.get<UserRow[]>('/api/admin/users')
@@ -165,8 +167,9 @@ export default function AdminUsersPage() {
               <tbody>
                 {filtered.map((u, i) => {
                   const isSelf    = u.id === me?.id
-                  const isSuperAdmin = u.role === 'SUPERADMIN'
-                  const isLocked  = isSelf || isSuperAdmin
+                  const isTargetSuperAdmin = u.role === 'SUPERADMIN'
+                  const isTargetManager    = u.role === 'MANAGER'
+                  const isLocked  = isSelf || isTargetSuperAdmin || (isTargetManager && !isSuperAdmin)
                   const st        = ROLE_LABELS[u.role] ?? { label: u.role, cls: 'bg-white/10 text-on-surface-variant border-white/10' }
                   return (
                     <tr key={u.id} className={`border-b border-white/5 last:border-0 transition-colors ${busy === u.id ? 'opacity-50' : 'hover:bg-white/[0.02]'}`}>
@@ -198,6 +201,7 @@ export default function AdminUsersPage() {
                           >
                             <option value="CUSTOMER">Cliente</option>
                             <option value="ADMIN">Admin</option>
+                            {isSuperAdmin && <option value="MANAGER">Manager</option>}
                           </select>
                         )}
                       </td>
@@ -229,9 +233,10 @@ export default function AdminUsersPage() {
           {/* Mobile cards */}
           <div className="md:hidden space-y-3">
             {filtered.map(u => {
-              const isSelf       = u.id === me?.id
-              const isSuperAdmin = u.role === 'SUPERADMIN'
-              const isLocked     = isSelf || isSuperAdmin
+              const isSelf             = u.id === me?.id
+              const isTargetSuperAdmin = u.role === 'SUPERADMIN'
+              const isTargetManager    = u.role === 'MANAGER'
+              const isLocked           = isSelf || isTargetSuperAdmin || (isTargetManager && !isSuperAdmin)
               const st           = ROLE_LABELS[u.role] ?? { label: u.role, cls: 'bg-white/10 text-on-surface-variant border-white/10' }
               return (
                 <div key={u.id} className={`bg-surface-container border border-white/8 rounded-xl p-4 transition-opacity ${busy === u.id ? 'opacity-50' : ''}`}>

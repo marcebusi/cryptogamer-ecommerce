@@ -33,7 +33,7 @@ const colorMap = {
 }
 
 export default function AdminDashboard() {
-  const { isAdmin, isLoading } = useAuth()
+  const { isAdmin, isManager, isLoading } = useAuth()
   const navigate = useNavigate()
   const [enabledSections, setEnabledSections] = useState<string[] | null>(null)
   const [billingStatus,   setBillingStatus]   = useState<BillingStatus | null>(null)
@@ -57,9 +57,11 @@ export default function AdminDashboard() {
   if (isLoading) return null
 
   // Show core cards always + optional cards only if section is enabled
-  const visibleCards = ALL_CARDS.filter(
-    c => c.sectionKey === null || enabledSections?.includes(c.sectionKey)
-  )
+  // Users card only for MANAGER and SUPERADMIN
+  const visibleCards = ALL_CARDS.filter(c => {
+    if (c.to === '/admin/usuarios' && !isManager) return false
+    return c.sectionKey === null || enabledSections?.includes(c.sectionKey)
+  })
 
   return (
     <main className="max-w-screen-xl mx-auto px-4 md:px-8 py-lg">

@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { authenticate, requireAdmin } from '../middleware/auth'
+import { authenticate, requireAdmin, requireManager } from '../middleware/auth'
 import {
   createProduct, updateProduct, deleteProduct, listProducts,
 } from '../controllers/adminProductController'
@@ -47,9 +47,9 @@ router.get('/contact-messages',   getContactMessages)
 /* ── Analytics ────────────────────────────────────── */
 router.get('/analytics',          getAnalytics)
 
-/* ── Users ────────────────────────────────────────── */
-router.get('/users',              getUsers)
-router.patch('/users/:id/role',   updateUserRole)
-router.delete('/users/:id',       deleteUser)
+/* ── Users (requiere MANAGER o SUPERADMIN) ────────── */
+router.get('/users',              requireManager, getUsers)
+router.patch('/users/:id/role',   requireManager, updateUserRole)
+router.delete('/users/:id',       requireManager, deleteUser)
 
 export default router
