@@ -59,6 +59,14 @@ const SECTION_DEFS = [
     bg:    'bg-cyan-500/10 border-cyan-500/20',
   },
   {
+    key:   'analytics-advanced',
+    icon:  'electric_bolt',
+    title: 'Analytics Avanzado',
+    desc:  'KPIs, heatmap, inventario muerto, WhatsApp, alertas y métricas profundas.',
+    color: 'text-purple-400',
+    bg:    'bg-purple-500/10 border-purple-500/20',
+  },
+  {
     key:   'contact',
     icon:  'mail',
     title: 'Mensajes de contacto',
@@ -76,7 +84,7 @@ export default function SuperAdminPage() {
   const [tab, setTab] = useState<Tab>('sections')
 
   const [config,     setConfig]     = useState<StoreConfig | null>(null)
-  const [enabled,    setEnabled]    = useState<string[]>(['orders', 'analytics', 'sellers', 'contact'])
+  const [enabled,    setEnabled]    = useState<string[]>(['orders', 'analytics', 'analytics-advanced', 'sellers', 'contact'])
   const [payForm,    setPayForm]    = useState({ subscriptionActive: true, subscriptionExpiresAt: '', planName: 'PRO', notes: '' })
   const [loading,    setLoading]    = useState(true)
   const [saving,     setSaving]     = useState(false)
