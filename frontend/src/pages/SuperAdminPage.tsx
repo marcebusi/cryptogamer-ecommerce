@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../lib/api'
 import toast from 'react-hot-toast'
 
-type Tab = 'sections' | 'payment' | 'billing'
+type Tab = 'sections' | 'users' | 'payment' | 'billing'
 
 interface StoreConfig {
   id: string
@@ -240,11 +240,12 @@ export default function SuperAdminPage() {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-xs border-b border-white/10">
+          <div className="flex gap-xs border-b border-white/10 flex-wrap">
             {([
-              { key: 'sections', icon: 'toggle_on',      label: 'Secciones'    },
-              { key: 'payment',  icon: 'credit_card',    label: 'Suscripción'  },
-              { key: 'billing',  icon: 'receipt_long',   label: 'Facturación'  },
+              { key: 'sections', icon: 'toggle_on',        label: 'Secciones'    },
+              { key: 'users',    icon: 'manage_accounts',   label: 'Usuarios'     },
+              { key: 'payment',  icon: 'credit_card',       label: 'Suscripción'  },
+              { key: 'billing',  icon: 'receipt_long',      label: 'Facturación'  },
             ] as { key: Tab; icon: string; label: string }[]).map(t => (
               <button
                 key={t.key}
@@ -312,6 +313,29 @@ export default function SuperAdminPage() {
                 ? <><span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>Guardando...</>
                 : <><span className="material-symbols-outlined text-sm">save</span>Guardar secciones</>}
             </button>
+          </div>
+        )}
+
+        {/* ── USERS ─────────────────────────────────── */}
+        {tab === 'users' && (
+          <div className="max-w-xl space-y-md">
+            <div>
+              <h2 className="font-bold text-on-surface font-['Plus_Jakarta_Sans'] mb-xs">Gestión de usuarios</h2>
+              <p className="text-sm text-on-surface-variant">Asigná roles (incluyendo Manager) o eliminá cuentas.</p>
+            </div>
+            <Link
+              to="/admin/usuarios"
+              className="flex items-center gap-md p-sm rounded-2xl border bg-purple-500/10 border-purple-500/20 hover:bg-purple-500/15 transition-all cursor-pointer group"
+            >
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 bg-purple-500/20 border border-purple-500/30">
+                <span className="material-symbols-outlined text-xl text-purple-400">manage_accounts</span>
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold text-on-surface text-sm">Ir a Gestión de Usuarios</p>
+                <p className="text-xs text-on-surface-variant">Ver, editar roles y eliminar cuentas de usuario.</p>
+              </div>
+              <span className="material-symbols-outlined text-on-surface-variant group-hover:text-on-surface transition-colors">arrow_forward</span>
+            </Link>
           </div>
         )}
 
