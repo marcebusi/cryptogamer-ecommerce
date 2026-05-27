@@ -4,7 +4,27 @@ import { useAuth } from '../context/AuthContext'
 import { api } from '../lib/api'
 import toast from 'react-hot-toast'
 
-type Tab = 'sections' | 'users' | 'payment' | 'billing'
+type Tab = 'panel' | 'sections' | 'users' | 'payment' | 'billing'
+
+/* ── Admin panel quick-access cards ─────────────────── */
+const ADMIN_CARDS = [
+  { to: '/admin/productos',                icon: 'add_box',          title: 'Agregar Producto',    desc: 'Publicá un nuevo producto en el catálogo.',                         color: 'primary'   },
+  { to: '/admin/productos?manage=true',    icon: 'inventory_2',      title: 'Gestionar Catálogo',  desc: 'Editá, reordenás o eliminás productos existentes.',                 color: 'secondary' },
+  { to: '/admin/categorias',               icon: 'category',         title: 'Categorías',          desc: 'Creá y administrá categorías y subcategorías.',                     color: 'primary'   },
+  { to: '/admin/productos?filter=offers',  icon: 'local_offer',      title: 'Gestionar Ofertas',   desc: 'Controlá qué productos aparecen en la sección de Ofertas.',         color: 'secondary' },
+  { to: '/admin/productos?filter=featured',icon: 'stars',            title: 'Últimas Llegadas',    desc: 'Elegí qué productos destacar en la Home.',                          color: 'tertiary'  },
+  { to: '/admin/vendedores',               icon: 'group',            title: 'Vendedores',          desc: 'Administrá los socios con sus datos de pago.',                      color: 'tertiary'  },
+  { to: '/admin/pedidos',                  icon: 'receipt_long',     title: 'Pedidos',             desc: 'Historial completo de órdenes con estado y detalle.',               color: 'secondary' },
+  { to: '/admin/analytics',                icon: 'bar_chart',        title: 'Analytics',           desc: 'Productos más vendidos, ranking de vendedores e ingresos.',         color: 'tertiary'  },
+  { to: '/admin/analytics-avanzado',       icon: 'electric_bolt',    title: 'Analytics Avanzado',  desc: 'KPIs, heatmap, inventario muerto, WhatsApp y métricas profundas.',  color: 'secondary' },
+  { to: '/admin/usuarios',                 icon: 'manage_accounts',  title: 'Usuarios',            desc: 'Gestioná cuentas, asigná roles y eliminá usuarios.',                color: 'tertiary'  },
+]
+
+const adminColorMap = {
+  primary:   { bg: 'bg-primary-container/15',   border: 'border-primary-container/25',   icon: 'text-primary-container'   },
+  secondary: { bg: 'bg-secondary-container/15', border: 'border-secondary-container/25', icon: 'text-secondary-container' },
+  tertiary:  { bg: 'bg-tertiary-container/15',  border: 'border-tertiary-container/25',  icon: 'text-tertiary-container'  },
+}
 
 interface StoreConfig {
   id: string
@@ -81,7 +101,7 @@ const PLANS = ['BASIC', 'PRO', 'ENTERPRISE']
 export default function SuperAdminPage() {
   const { isSuperAdmin, isLoading, user: me } = useAuth()
   const navigate = useNavigate()
-  const [tab, setTab] = useState<Tab>('sections')
+  const [tab, setTab] = useState<Tab>('panel')
 
   const [config,     setConfig]     = useState<StoreConfig | null>(null)
   const [enabled,    setEnabled]    = useState<string[]>(['orders', 'analytics', 'analytics-advanced', 'sellers', 'contact'])
@@ -242,7 +262,8 @@ export default function SuperAdminPage() {
           {/* Tabs */}
           <div className="flex gap-xs border-b border-white/10 flex-wrap">
             {([
-              { key: 'sections', icon: 'toggle_on',        label: 'Secciones'    },
+              { key: 'panel',    icon: 'dashboard',         label: 'Panel Admin'  },
+              { key: 'sections', icon: 'toggle_on',         label: 'Secciones'    },
               { key: 'users',    icon: 'manage_accounts',   label: 'Usuarios'     },
               { key: 'payment',  icon: 'credit_card',       label: 'Suscripción'  },
               { key: 'billing',  icon: 'receipt_long',      label: 'Facturación'  },
@@ -265,6 +286,41 @@ export default function SuperAdminPage() {
       </section>
 
       <div className="max-w-screen-lg mx-auto px-4 md:px-8 py-lg">
+
+        {/* ── PANEL ADMIN ───────────────────────────── */}
+        {tab === 'panel' && (
+          <div>
+            <div className="mb-lg">
+              <h2 className="font-bold text-on-surface font-['Plus_Jakarta_Sans'] mb-xs">Accesos rápidos</h2>
+              <p className="text-sm text-on-surface-variant">Navegá directamente a cualquier sección del panel de administración.</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-gutter">
+              {ADMIN_CARDS.map(card => {
+                const c = adminColorMap[card.color as keyof typeof adminColorMap]
+                return (
+                  <Link
+                    key={card.to}
+                    to={card.to}
+                    className={`group relative rounded-2xl border ${c.border} bg-surface-container p-lg flex flex-col gap-sm hover:-translate-y-1 transition-all duration-200 cursor-pointer overflow-hidden`}
+                  >
+                    <div className={`absolute top-0 right-0 w-24 h-24 ${c.bg} rounded-full blur-2xl pointer-events-none`} />
+                    <div className={`w-12 h-12 rounded-xl ${c.bg} border ${c.border} flex items-center justify-center`}>
+                      <span className={`material-symbols-outlined ${c.icon}`}>{card.icon}</span>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-on-surface text-lg font-['Plus_Jakarta_Sans'] mb-1">{card.title}</h3>
+                      <p className="text-sm text-on-surface-variant leading-relaxed">{card.desc}</p>
+                    </div>
+                    <div className={`mt-auto flex items-center gap-1 text-xs font-semibold ${c.icon}`}>
+                      Ir ahora
+                      <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         {/* ── SECTIONS ──────────────────────────────── */}
         {tab === 'sections' && (
