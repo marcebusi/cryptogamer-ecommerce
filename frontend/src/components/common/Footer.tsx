@@ -54,7 +54,7 @@ export default function Footer() {
             Cryptogamer
           </Link>
           <p className="text-slate-500 text-sm max-w-xs leading-relaxed">
-            La mejor selección de consolas, accesorios y juegos de toda Argentina. Envíos a todo el país.
+            La mejor selección de consolas, accesorios y juegos de toda Argentina.
           </p>
           <div className="flex gap-xs">
             {socials.map(s => (
